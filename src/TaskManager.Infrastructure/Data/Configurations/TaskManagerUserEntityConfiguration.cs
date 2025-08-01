@@ -13,5 +13,17 @@ public class TaskManagerUserEntityConfiguration : IEntityTypeConfiguration<TaskM
             .WithOne(e => e.ProjectLead)
             .HasForeignKey(e => e.LeadUserId)
             .IsRequired();
+
+        builder
+            .HasMany(e => e.CreatedTasks)
+            .WithOne(e => e.CreatedByUser)
+            .HasForeignKey(e => e.CreatedByUserId)
+            .IsRequired();
+
+        builder
+            .HasMany(e => e.AssignedTasks)
+            .WithOne(e => e.Assignee)
+            .HasForeignKey(e => e.AssigneeUserId)
+            .IsRequired(false);
     }
 }
