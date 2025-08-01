@@ -15,12 +15,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\TaskManager.Core\TaskManager.Core.csproj" />
+        <ProjectReference Include="..\TaskManager.Core\TaskManager.Core.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Data\Configurations\" />
-      <Folder Include="Data\Migrations\" />
+        <Folder Include="Data\Migrations\"/>
     </ItemGroup>
 
 </Project>

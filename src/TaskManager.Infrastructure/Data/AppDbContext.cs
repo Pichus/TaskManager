@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.TaskAggregate;
+using TaskManager.Infrastructure.Data.Configurations;
 using TaskManager.Infrastructure.Identity;
 
 namespace TaskManager.Infrastructure.Data;
@@ -12,7 +13,12 @@ public class AppDbContext : IdentityDbContext<TaskManagerUser>
         : base(options)
     {
     }
-    
+
     public DbSet<TaskEntity> Tasks { get; set; }
     public DbSet<ProjectEntity> Projects { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(TaskEntityConfiguration).Assembly);
+    }
 }
