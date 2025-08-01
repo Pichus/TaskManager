@@ -14,11 +14,17 @@ public static class InfrastructureServiceExtensions
         string environmentName)
     {
         if (environmentName == "Development")
+        {
             RegisterDevelopmentOnlyDependencies(services, configuration);
+        }
         else if (environmentName == "Testing")
+        {
             RegisterTestingOnlyDependencies(services);
+        }
         else
+        {
             RegisterProductionOnlyDependencies(services, configuration);
+        }
 
         RegisterEFRepositories(services);
 
