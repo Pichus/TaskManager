@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using TaskManager.Core.ProjectAggregate;
 
-namespace TaskManager.Infrastructure.Identity;
+namespace TaskManager.Core.UserAggregate;
 
 public class TaskManagerUser : IdentityUser
 {

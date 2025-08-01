@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.TaskAggregate;
+using TaskManager.Core.UserAggregate;
 using TaskManager.Infrastructure.Data.Configurations;
-using TaskManager.Infrastructure.Identity;
 
 namespace TaskManager.Infrastructure.Data;
 
