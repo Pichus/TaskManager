@@ -9,7 +9,7 @@ public class TaskManagerUserEntityConfiguration : IEntityTypeConfiguration<TaskM
     public void Configure(EntityTypeBuilder<TaskManagerUser> builder)
     {
         builder
-            .HasMany(e => e.Projects)
+            .HasMany(e => e.LedProjects)
             .WithOne(e => e.ProjectLead)
             .HasForeignKey(e => e.LeadUserId)
             .IsRequired();
