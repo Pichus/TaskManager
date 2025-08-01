@@ -15,7 +15,7 @@ public class TaskEntity : EntityBase, IAggregateRoot
 
     public ProjectEntity Project { get; set; }
     public TaskManagerUser CreatedByUser { get; set; }
-    public TaskManagerUser AssigneeUser { get; set; }
+    public TaskManagerUser Assignee { get; set; }
 
     public bool IsOverdue => Status != TaskStatus.Complete && DueDate < DateTime.UtcNow;
 }
