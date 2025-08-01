@@ -1,5 +1,6 @@
 services:
   app:
+    container_name: TaskManager.Api
     build:
       context: .
       dockerfile: src/TaskManager.Api/Dockerfile
@@ -10,6 +11,7 @@ services:
 
   db:
     image: postgres:17.5-alpine
+    container_name: TaskManager.Database
     environment:
       POSTGRES_DB: database
       POSTGRES_USER: username
