@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using TaskManager.Infrastructure.Data;
 
 namespace TaskManager.Infrastructure;
@@ -11,7 +10,7 @@ public static class InfrastructureServiceExtensions
     public static IServiceCollection AddInfrastructureServices(
         this IServiceCollection services,
         IConfiguration configuration,
-        ILogger logger,
+        // ILogger logger,
         string environmentName)
     {
         if (environmentName == "Development")
@@ -23,7 +22,7 @@ public static class InfrastructureServiceExtensions
 
         RegisterEFRepositories(services);
 
-        logger.LogInformation("{Project} services registered", "Infrastructure");
+        // logger.LogInformation("{Project} services registered", "Infrastructure");
 
         return services;
     }
@@ -43,7 +42,6 @@ public static class InfrastructureServiceExtensions
 
     private static void RegisterTestingOnlyDependencies(IServiceCollection services)
     {
-
     }
 
     private static void RegisterProductionOnlyDependencies(IServiceCollection services, IConfiguration configuration)

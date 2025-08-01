@@ -1,8 +1,12 @@
+using TaskManager.Infrastructure;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
 builder.Services.AddOpenApiDocument();
+
+builder.Services.AddInfrastructureServices(builder.Configuration, builder.Environment.EnvironmentName);
 
 var app = builder.Build();
 

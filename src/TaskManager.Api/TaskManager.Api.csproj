@@ -10,13 +10,23 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6"/>
-        <PackageReference Include="NSwag.AspNetCore" Version="14.4.0" />
+        <PackageReference Include="NSwag.AspNetCore" Version="14.4.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
+        <Content Include="..\.dockerignore">
+            <Link>.dockerignore</Link>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Identity\"/>
+        <Folder Include="Projects\"/>
+        <Folder Include="Tasks\"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\TaskManager.Infrastructure\TaskManager.Infrastructure.csproj"/>
     </ItemGroup>
 
 </Project>
