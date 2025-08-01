@@ -13,5 +13,9 @@ public class ProjectEntityConfiguration : IEntityTypeConfiguration<ProjectEntity
             .WithOne(e => e.Project)
             .HasForeignKey(e => e.ProjectId)
             .IsRequired();
+
+        builder
+            .HasMany(e => e.Members)
+            .WithMany(e => e.Projects);
     }
 }
