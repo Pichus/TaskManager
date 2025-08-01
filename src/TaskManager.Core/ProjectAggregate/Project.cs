@@ -6,5 +6,5 @@ public class Project : EntityBase, IAggregateRoot
     
     public List<Task> Tasks { get; set; }
     public string LeadUserId { get; set; }
-    public List<long> MemberUserIds { get; set; }
+    public List<string> MemberUserIds { get; set; }
 }

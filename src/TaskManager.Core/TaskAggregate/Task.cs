@@ -8,8 +8,8 @@ public class Task : EntityBase, IAggregateRoot
     public string Description { get; set; }
     public TaskStatus Status { get; set; }
     public DateTime DueDate { get; set; }
-    public long CreatedByUserId { get; set; }
-    public long AssigneeUserId { get; set; }
+    public string CreatedByUserId { get; set; }
+    public string AssigneeUserId { get; set; }
     public long ProjectId { get; set; }
     
     public Project Project { get; set; }
