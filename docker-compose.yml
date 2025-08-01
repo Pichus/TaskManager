@@ -1,23 +1,23 @@
 services:
   app:
-    container_name: TaskManager.Api
+    container_name: taskmanager.api
     build:
       context: .
       dockerfile: src/TaskManager.Api/Dockerfile
     ports:
-      - "8000:8000"
+      - "8080:8080"
     depends_on:
       - db
 
   db:
     image: postgres:17.5-alpine
-    container_name: TaskManager.Database
+    container_name: taskmanager.database
     environment:
       POSTGRES_DB: database
       POSTGRES_USER: username
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - "5431:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
