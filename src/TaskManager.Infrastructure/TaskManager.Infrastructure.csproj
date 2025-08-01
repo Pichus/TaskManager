@@ -18,4 +18,9 @@
       <ProjectReference Include="..\TaskManager.Core\TaskManager.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Data\Configurations\" />
+      <Folder Include="Data\Migrations\" />
+    </ItemGroup>
+
 </Project>

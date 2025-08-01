@@ -5,5 +5,5 @@ namespace TaskManager.Infrastructure.Identity;
 
 public class TaskManagerUser : IdentityUser
 {
-    public List<Project> Projects { get; set; }
+    public List<ProjectEntity> Projects { get; set; }
 }

@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using TaskManager.Core.ProjectAggregate;
+using TaskManager.Core.TaskAggregate;
 using TaskManager.Infrastructure.Identity;
 
 namespace TaskManager.Infrastructure.Data;
@@ -11,6 +13,6 @@ public class AppDbContext : IdentityDbContext<TaskManagerUser>
     {
     }
     
-    public DbSet<Task> Tasks { get; set; }
-    public DbSet<Task> Projects { get; set; }
+    public DbSet<TaskEntity> Tasks { get; set; }
+    public DbSet<ProjectEntity> Projects { get; set; }
 }
