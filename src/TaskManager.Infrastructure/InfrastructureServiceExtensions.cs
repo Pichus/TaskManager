@@ -2,8 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity;
-using TaskManager.Core.UserAggregate;
 using TaskManager.Infrastructure.Data;
+using TaskManager.Infrastructure.Identity.User;
 
 namespace TaskManager.Infrastructure;
 

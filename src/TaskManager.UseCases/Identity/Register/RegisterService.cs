@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Identity;
-using TaskManager.Core.UserAggregate;
+using TaskManager.Infrastructure.Identity.User;
 
 namespace TaskManager.UseCases.Identity.Register;
 

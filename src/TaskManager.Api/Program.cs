@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using NSwag;
 using NSwag.Generation.Processors.Security;
-using TaskManager.Core.UserAggregate;
 using TaskManager.Extensions;
 using TaskManager.Infrastructure;
 using TaskManager.UseCases;

@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TaskManager.Core.UserAggregate;
 using TaskManager.UseCases.Identity.Login;
 using TaskManager.UseCases.Identity.Register;
 

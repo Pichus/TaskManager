@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TaskManager.Core.UserAggregate;
+using TaskManager.Infrastructure.Identity.User;
 
 namespace TaskManager.Infrastructure.Data.Configurations;
 

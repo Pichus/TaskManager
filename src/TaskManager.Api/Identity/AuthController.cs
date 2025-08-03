@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using TaskManager.Core.UserAggregate;
 using TaskManager.UseCases.Identity.Login;
 using TaskManager.UseCases.Identity.Register;
 
