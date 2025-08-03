@@ -32,9 +32,9 @@ public class AuthController : ControllerBase
     {
         var result = await _loginService.LoginAsync(request);
 
-        if (!result.Succeeded)
+        if (!result.Success)
         {
-            return BadRequest(request);
+            return BadRequest(result.ErrorMessage);
         }
 
         return Ok();
