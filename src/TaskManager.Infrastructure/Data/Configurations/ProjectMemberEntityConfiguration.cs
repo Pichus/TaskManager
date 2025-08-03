@@ -14,11 +14,13 @@ public class ProjectMemberEntityConfiguration : IEntityTypeConfiguration<Project
         builder
             .HasOne(e => e.Project)
             .WithMany(e => e.Members)
-            .HasForeignKey(e => e.ProjectId);
+            .HasForeignKey(e => e.ProjectId)
+            .IsRequired();
 
         builder
             .HasOne<TaskManagerUser>()
             .WithMany()
-            .HasForeignKey(e => e.MemberId);
+            .HasForeignKey(e => e.MemberId)
+            .IsRequired();
     }
 }

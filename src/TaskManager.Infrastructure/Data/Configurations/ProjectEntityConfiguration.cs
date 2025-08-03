@@ -12,7 +12,8 @@ public class ProjectEntityConfiguration : IEntityTypeConfiguration<ProjectEntity
         builder
             .HasOne<TaskManagerUser>()
             .WithMany(e => e.LedProjects)
-            .HasForeignKey(e => e.LeadUserId);
+            .HasForeignKey(e => e.LeadUserId)
+            .IsRequired();
         
         builder
             .HasMany(e => e.Tasks)
