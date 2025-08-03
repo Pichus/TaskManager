@@ -13,9 +13,10 @@ public class AuthController : ControllerBase
     private readonly IRegisterService _registerService;
     private readonly ILoginService _loginService;
 
-    public AuthController(IRegisterService registerService)
+    public AuthController(IRegisterService registerService, ILoginService loginService)
     {
         _registerService = registerService;
+        _loginService = loginService;
     }
 
     [HttpPost("register")]
@@ -27,8 +28,16 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task Login()
+    public async Task<ActionResult> Login(LoginRequest request)
     {
+        var result = await _loginService.LoginAsync(request);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(request);
+        }
+
+        return Ok();
     }
 
     [HttpPost("refresh-token")]
