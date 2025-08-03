@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Identity;
+using TaskManager.Core.UserAggregate;
 using TaskManager.Infrastructure.Data;
 
 namespace TaskManager.Infrastructure;
@@ -38,6 +40,9 @@ public static class InfrastructureServiceExtensions
         var connectionString = configuration.GetConnectionString("Postgres");
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(connectionString));
+        
+        services.AddDefaultIdentity<TaskManagerUser>()
+            .AddEntityFrameworkStores<AppDbContext>();
     }
 
 

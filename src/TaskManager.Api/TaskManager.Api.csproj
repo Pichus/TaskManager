@@ -9,11 +9,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.7" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.7"/>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.7">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="NSwag.AspNetCore" Version="14.4.0"/>
     </ItemGroup>
@@ -25,13 +25,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Identity\"/>
         <Folder Include="Projects\"/>
         <Folder Include="Tasks\"/>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\TaskManager.Infrastructure\TaskManager.Infrastructure.csproj"/>
+        <ProjectReference Include="..\TaskManager.UseCases\TaskManager.UseCases.csproj"/>
     </ItemGroup>
 
 </Project>

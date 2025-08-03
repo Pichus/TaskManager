@@ -1,13 +1,19 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using NSwag;
 using NSwag.Generation.Processors.Security;
+using TaskManager.Core.UserAggregate;
 using TaskManager.Extensions;
 using TaskManager.Infrastructure;
+using TaskManager.UseCases;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
+
+builder.Services.AddInfrastructureServices(config, builder.Environment.EnvironmentName);
+builder.Services.AddUseCasesServices(config, builder.Environment.EnvironmentName);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(jwtOptions =>
@@ -28,7 +34,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddOpenApiDocument(document =>
 {
-    document.AddSecurity("Bearer", Enumerable.Empty<string>(), new OpenApiSecurityScheme
+    document.AddSecurity("Bearer", [], new OpenApiSecurityScheme
     {
         Type = OpenApiSecuritySchemeType.Http,
         Scheme = JwtBearerDefaults.AuthenticationScheme,
@@ -39,8 +45,6 @@ builder.Services.AddOpenApiDocument(document =>
     document.OperationProcessors.Add(
         new AspNetCoreOperationSecurityScopeProcessor("Bearer"));
 });
-
-builder.Services.AddInfrastructureServices(builder.Configuration, builder.Environment.EnvironmentName);
 
 var app = builder.Build();
 
