@@ -9,12 +9,6 @@ public class TaskManagerUserEntityConfiguration : IEntityTypeConfiguration<TaskM
     public void Configure(EntityTypeBuilder<TaskManagerUser> builder)
     {
         builder
-            .HasMany(e => e.LedProjects)
-            .WithOne(e => e.ProjectLead)
-            .HasForeignKey(e => e.LeadUserId)
-            .IsRequired();
-
-        builder
             .HasMany(e => e.CreatedTasks)
             .WithOne(e => e.CreatedByUser)
             .HasForeignKey(e => e.CreatedByUserId)
