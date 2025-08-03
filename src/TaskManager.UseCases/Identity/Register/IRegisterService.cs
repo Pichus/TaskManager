@@ -4,5 +4,5 @@ namespace TaskManager.UseCases.Identity.Register;
 
 public interface IRegisterService
 {
-    Task<IdentityResult> Register(RegisterRequest request);
+    Task<IdentityResult> RegisterAsync(RegisterRequest request);
 }

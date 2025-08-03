@@ -12,7 +12,7 @@ public class RegisterService : IRegisterService
         _userManager = userManager;
     }
 
-    public async Task<IdentityResult> Register(RegisterRequest request)
+    public async Task<IdentityResult> RegisterAsync(RegisterRequest request)
     {
         var newUser = new TaskManagerUser
         {
