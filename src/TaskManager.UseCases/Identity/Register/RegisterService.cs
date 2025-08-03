@@ -17,6 +17,7 @@ public class RegisterService : IRegisterService
         var newUser = new TaskManagerUser
         {
             UserName = request.UserName,
+            Email = request.Email
         };
 
         var createUserResult = await _userManager.CreateAsync(newUser);
