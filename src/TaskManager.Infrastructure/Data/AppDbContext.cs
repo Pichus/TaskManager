@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.TaskAggregate;
 using TaskManager.Infrastructure.Data.Configurations;
+using TaskManager.Infrastructure.Identity.RefreshToken;
 using TaskManager.Infrastructure.Identity.User;
 
 namespace TaskManager.Infrastructure.Data;
@@ -16,6 +17,7 @@ public class AppDbContext : IdentityDbContext<TaskManagerUser>
 
     public DbSet<TaskEntity> Tasks { get; set; }
     public DbSet<ProjectEntity> Projects { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
