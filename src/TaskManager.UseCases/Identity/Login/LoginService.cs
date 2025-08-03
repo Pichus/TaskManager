@@ -5,18 +5,32 @@ namespace TaskManager.UseCases.Identity.Login;
 
 public class LoginService : ILoginService
 {
-    private readonly SignInManager<TaskManagerUser> _signInManager;
+    private readonly UserManager<TaskManagerUser> _userManager;
 
-    public LoginService(SignInManager<TaskManagerUser> signInManager)
+    public LoginService(UserManager<TaskManagerUser> userManager)
     {
-        _signInManager = signInManager;
+        _userManager = userManager;
     }
 
-    public async Task<SignInResult> LoginAsync(LoginRequest request)
+    public async Task<LoginResult> LoginAsync(LoginRequest request)
     {
-        var loginResult = await _signInManager.PasswordSignInAsync(
-            request.UserName, request.Password, false, false);
+        var user = await _userManager.FindByEmailAsync(request.Email);
 
-        return loginResult;
+        if (user is null || await _userManager.CheckPasswordAsync(user, request.Password))
+        {
+            return new LoginResult
+            {
+                Success = false,
+                ErrorMessage = "Wrong email or password"
+            };
+        }
+
+        // todo jwt and refresh token stuff
+        return new LoginResult
+        {
+            Success = true,
+            JwtToken = "todo",
+            RefreshToken = "todo"
+        };
     }
 }
