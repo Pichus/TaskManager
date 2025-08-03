@@ -1,5 +1,4 @@
 using TaskManager.Core.ProjectAggregate;
-using TaskManager.Core.UserAggregate;
 
 namespace TaskManager.Core.TaskAggregate;
 
@@ -14,8 +13,6 @@ public class TaskEntity : EntityBase, IAggregateRoot
     public long ProjectId { get; set; }
 
     public ProjectEntity Project { get; set; }
-    public TaskManagerUser CreatedByUser { get; set; }
-    public TaskManagerUser Assignee { get; set; }
 
     public bool IsOverdue => Status != TaskStatus.Complete && DueDate < DateTime.UtcNow;
 }
