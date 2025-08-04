@@ -6,8 +6,8 @@ namespace TaskManager.Infrastructure.Identity.User;
 
 public class TaskManagerUser : IdentityUser
 {
-    public IEnumerable<ProjectEntity> LedProjects { get; set; }
-    public IEnumerable<TaskEntity> CreatedTasks { get; set; }
-    public IEnumerable<TaskEntity> AssignedTasks { get; set; }
-    public IEnumerable<ProjectInvite> Invites { get; set; }
+    public ICollection<ProjectEntity> LedProjects { get; set; }
+    public ICollection<ProjectEntity>eatedTasks { get; set; }
+    public ICollection<ProjectEntity>signedTasks { get; set; }
+    public ICollection<ProjectEntity> Invites { get; set; }
 }
