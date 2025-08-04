@@ -9,9 +9,10 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     private readonly IConfiguration _configuration;
     private readonly AppDbContext _databaseContext;
 
-    public RefreshTokenRepository(AppDbContext databaseContext)
+    public RefreshTokenRepository(AppDbContext databaseContext, IConfiguration configuration)
     {
         _databaseContext = databaseContext;
+        _configuration = configuration;
     }
 
     public async Task<RefreshToken?> GetRefreshTokenByTokenStringAsync(string tokenString)
