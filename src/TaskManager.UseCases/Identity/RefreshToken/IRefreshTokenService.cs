@@ -1,6 +1,6 @@
 namespace TaskManager.UseCases.Identity.RefreshToken;
 
-public class IRefreshTokenService
+public interface IRefreshTokenService
 {
-    
+    Task<RefreshTokenResult> RefreshTokenAsync(string refreshTokenString);
 }

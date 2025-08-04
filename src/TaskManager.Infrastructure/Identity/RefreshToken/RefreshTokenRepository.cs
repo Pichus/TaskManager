@@ -37,6 +37,13 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         return true;
     }
 
+    public async Task RevokeRefreshTokenAsync(RefreshToken refreshToken)
+    {
+        refreshToken.RevokedAt = DateTime.UtcNow;
+
+        await _databaseContext.SaveChangesAsync();
+    }
+
     public async Task CreateRefreshTokenAsync(CreateRefreshTokenDto createRefreshTokenDto)
     {
         var refreshToken = new RefreshToken

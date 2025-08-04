@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TaskManager.UseCases.Identity.Login;
+using TaskManager.UseCases.Identity.RefreshToken;
 using TaskManager.UseCases.Identity.Register;
 
 namespace TaskManager.UseCases;
@@ -14,17 +15,11 @@ public static class UseCasesServiceExtension
         string environmentName)
     {
         if (environmentName == "Development")
-        {
             RegisterDevelopmentOnlyDependencies(services, configuration);
-        }
         else if (environmentName == "Testing")
-        {
             RegisterTestingOnlyDependencies(services);
-        }
         else
-        {
             RegisterProductionOnlyDependencies(services, configuration);
-        }
 
         return services;
     }
@@ -48,5 +43,6 @@ public static class UseCasesServiceExtension
     {
         services.AddScoped<IRegisterService, RegisterService>();
         services.AddScoped<ILoginService, LoginService>();
+        services.AddScoped<IRefreshTokenService, RefreshTokenService>();
     }
 }
