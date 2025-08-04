@@ -25,7 +25,7 @@ public class ProjectInviteEntityConfiguration : IEntityTypeConfiguration<Project
             .IsRequired();
 
         builder
-            .Property(e => e.InviteStatus)
+            .Property(e => e.Status)
             .HasConversion<string>();
     }
 }
