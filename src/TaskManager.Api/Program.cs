@@ -1,6 +1,5 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using NSwag;
 using NSwag.Generation.Processors.Security;
@@ -10,6 +9,8 @@ using TaskManager.UseCases;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
+
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddInfrastructureServices(config, builder.Environment.EnvironmentName);
 builder.Services.AddUseCasesServices(config, builder.Environment.EnvironmentName);

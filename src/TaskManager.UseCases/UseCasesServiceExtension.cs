@@ -3,6 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using TaskManager.UseCases.Identity.Login;
 using TaskManager.UseCases.Identity.RefreshToken;
 using TaskManager.UseCases.Identity.Register;
+using TaskManager.UseCases.Profile.Invites;
+using TaskManager.UseCases.Profile.ProfileDetails;
+using TaskManager.UseCases.Projects;
 
 namespace TaskManager.UseCases;
 
@@ -44,5 +47,10 @@ public static class UseCasesServiceExtension
         services.AddScoped<IRegisterService, RegisterService>();
         services.AddScoped<ILoginService, LoginService>();
         services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+
+        services.AddScoped<IProjectService, ProjectService>();
+
+        services.AddScoped<IInviteService, InviteService>();
+        services.AddScoped<IProfileDetailsService, ProfileDetailsService>();
     }
 }

@@ -1,10 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TaskManager.Core.ProjectAggregate;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.AccessToken;
+using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.Infrastructure.Identity.RefreshToken;
 using TaskManager.Infrastructure.Identity.User;
+using TaskManager.Infrastructure.Projects;
 
 namespace TaskManager.Infrastructure;
 
@@ -24,7 +27,7 @@ public static class InfrastructureServiceExtensions
             RegisterProductionOnlyDependencies(services, configuration);
 
         RegisterEFRepositories(services);
-        RegisterJwtServices(services);
+        RegisterServices(services);
 
         // logger.LogInformation("{Project} services registered", "Infrastructure");
 
@@ -59,11 +62,14 @@ public static class InfrastructureServiceExtensions
     private static void RegisterEFRepositories(IServiceCollection services)
     {
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IProjectRepository, ProjectRepository>();
     }
 
-    private static void RegisterJwtServices(IServiceCollection services)
+    private static void RegisterServices(IServiceCollection services)
     {
         services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
         services.AddScoped<IAccessTokenProvider, AccessTokenProvider>();
+
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
     }
 }
