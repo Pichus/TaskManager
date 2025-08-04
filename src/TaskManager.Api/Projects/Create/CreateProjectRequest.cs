@@ -1,4 +1,4 @@
-namespace TaskManager.Projects.CreateProject;
+namespace TaskManager.Projects.Create;
 
 public class CreateProjectRequest
 {

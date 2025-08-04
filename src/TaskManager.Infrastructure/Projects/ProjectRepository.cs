@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Infrastructure.Data;
 
@@ -20,6 +21,11 @@ public class ProjectRepository : IProjectRepository
     public async Task<ProjectEntity?> FindByIdAsync(long id)
     {
         return await _context.Projects.FindAsync(id);
+    }
+
+    public async Task<IEnumerable<ProjectEntity>> GetAllByUserIdAsync(string userId)
+    {
+        return await _context.Projects.Where(project => project.LeadUserId == userId).ToListAsync();
     }
 
     public Task GetPendingInvitesByProjectId(long projectId)

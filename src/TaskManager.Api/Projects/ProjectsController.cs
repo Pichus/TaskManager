@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TaskManager.Projects.CreateProject;
+using TaskManager.Projects.Create;
+using TaskManager.Projects.Get;
 using TaskManager.UseCases.Projects;
+using TaskManager.UseCases.Projects.Create;
 
 namespace TaskManager.Projects;
 
@@ -18,19 +20,40 @@ public class ProjectsController : ControllerBase
     }
 
     [HttpGet]
-    public IEnumerable<string> Get()
+    public async Task<IEnumerable<GetProjectResponse>> GetAll()
     {
-        return ["hello", "hiii"];
+        var userProjects = await _projectService.GetAllByUserAsync();
+
+        var userProjectsResponse = userProjects.Select(project => new GetProjectResponse
+        {
+            Title = project.Title,
+            LeadUserId = project.LeadUserId
+        });
+        
+        return userProjectsResponse;
     }
 
     [HttpGet("{id}")]
-    public string Get(int id)
+    public async Task<ActionResult<GetProjectResponse>> Get(int id)
     {
-        return "hello world";
+        var getProjectResult = await _projectService.GetByIdAsync(id);
+
+        if (!getProjectResult.Success)
+        {
+            return BadRequest(getProjectResult.ErrorMessage);
+        }
+
+        var response = new GetProjectResponse
+        {
+            Title = getProjectResult.Title,
+            LeadUserId = getProjectResult.LeadUserId
+        };
+
+        return response;
     }
 
     [HttpPost]
-    public async Task<ActionResult<CreateProjectResponse>> Post(CreateProjectRequest request)
+    public async Task<ActionResult<CreateProjectResponse>> Create(CreateProjectRequest request)
     {
         var createProjectResult = await _projectService.CreateAsync(new CreateProjectDto
         {

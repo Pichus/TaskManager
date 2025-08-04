@@ -1,6 +1,6 @@
 using TaskManager.UseCases.Shared;
 
-namespace TaskManager.UseCases.Projects;
+namespace TaskManager.UseCases.Projects.Create;
 
 public class CreateProjectResult : ResultBase
 {

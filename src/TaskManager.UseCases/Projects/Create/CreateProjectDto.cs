@@ -1,4 +1,4 @@
-namespace TaskManager.UseCases.Projects;
+namespace TaskManager.UseCases.Projects.Create;
 
 public class CreateProjectDto
 {

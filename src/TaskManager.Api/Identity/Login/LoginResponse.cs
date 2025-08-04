@@ -1,4 +1,4 @@
-namespace TaskManager.Identity;
+namespace TaskManager.Identity.Login;
 
 public class LoginResponse
 {
