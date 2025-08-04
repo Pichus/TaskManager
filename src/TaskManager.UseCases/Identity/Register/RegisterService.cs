@@ -12,16 +12,32 @@ public class RegisterService : IRegisterService
         _userManager = userManager;
     }
 
-    public async Task<IdentityResult> RegisterAsync(RegisterRequest request)
+    public async Task<RegisterResult> RegisterAsync(RegisterDto dto)
     {
         var newUser = new TaskManagerUser
         {
-            UserName = request.UserName,
-            Email = request.Email
+            UserName = dto.UserName,
+            Email = dto.Email
         };
 
         var createUserResult = await _userManager.CreateAsync(newUser);
 
-        return createUserResult;
+        var registerResult = new RegisterResult();
+
+        if (!createUserResult.Succeeded)
+        {
+            registerResult.Success = false;
+            registerResult.ErrorMessage = createUserResult.Errors.First().Description;
+            return registerResult;
+        }
+
+        registerResult.CreatedUser = new UserDto
+        {
+            Id = newUser.Id,
+            UserName = newUser.UserName,
+            Email = newUser.Email
+        };
+        
+        return registerResult;
     }
 }

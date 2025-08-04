@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TaskManager.UseCases.Identity.Login;
+namespace TaskManager.Identity;
 
 public class LoginRequest
 {

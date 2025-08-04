@@ -21,11 +21,11 @@ public class LoginService : ILoginService
         _refreshTokenGenerator = refreshTokenGenerator;
     }
 
-    public async Task<LoginResult> LoginAsync(LoginRequest request)
+    public async Task<LoginResult> LoginAsync(LoginDto dto)
     {
-        var user = await _userManager.FindByEmailAsync(request.Email);
+        var user = await _userManager.FindByEmailAsync(dto.Email);
 
-        if (user is null || await _userManager.CheckPasswordAsync(user, request.Password))
+        if (user is null || await _userManager.CheckPasswordAsync(user, dto.Password))
             return new LoginResult
             {
                 Success = false,
@@ -40,8 +40,7 @@ public class LoginService : ILoginService
 
         return new LoginResult
         {
-            Success = true,
-            JwtToken = jwtToken,
+            AccessToken = jwtToken,
             RefreshToken = refreshTokenString
         };
     }
