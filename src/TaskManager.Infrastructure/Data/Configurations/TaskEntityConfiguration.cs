@@ -20,5 +20,9 @@ public class TaskEntityConfiguration : IEntityTypeConfiguration<TaskEntity>
             .WithMany(e => e.CreatedTasks)
             .HasForeignKey(e => e.CreatedByUserId)
             .IsRequired();
+
+        builder
+            .Property(e => e.Status)
+            .HasConversion<string>();
     }
 }
