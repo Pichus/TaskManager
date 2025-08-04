@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Identity;
 using TaskManager.Infrastructure.Data;
+using TaskManager.Infrastructure.Identity.AccessToken;
+using TaskManager.Infrastructure.Identity.RefreshToken;
 using TaskManager.Infrastructure.Identity.User;
 
 namespace TaskManager.Infrastructure;
@@ -16,19 +17,14 @@ public static class InfrastructureServiceExtensions
         string environmentName)
     {
         if (environmentName == "Development")
-        {
             RegisterDevelopmentOnlyDependencies(services, configuration);
-        }
         else if (environmentName == "Testing")
-        {
             RegisterTestingOnlyDependencies(services);
-        }
         else
-        {
             RegisterProductionOnlyDependencies(services, configuration);
-        }
 
         RegisterEFRepositories(services);
+        RegisterJwtServices(services);
 
         // logger.LogInformation("{Project} services registered", "Infrastructure");
 
@@ -40,7 +36,7 @@ public static class InfrastructureServiceExtensions
         var connectionString = configuration.GetConnectionString("Postgres");
         services.AddDbContext<AppDbContext>(options =>
             options.UseNpgsql(connectionString));
-        
+
         services.AddDefaultIdentity<TaskManagerUser>()
             .AddEntityFrameworkStores<AppDbContext>();
     }
@@ -62,5 +58,12 @@ public static class InfrastructureServiceExtensions
 
     private static void RegisterEFRepositories(IServiceCollection services)
     {
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+    }
+
+    private static void RegisterJwtServices(IServiceCollection services)
+    {
+        services.AddScoped<IRefreshTokenGenerator, RefreshTokenGenerator>();
+        services.AddScoped<IAccessTokenProvider, AccessTokenProvider>();
     }
 }
