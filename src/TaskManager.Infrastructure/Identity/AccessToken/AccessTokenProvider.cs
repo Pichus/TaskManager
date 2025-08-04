@@ -18,7 +18,7 @@ public class AccessTokenProvider : IAccessTokenProvider
 
     public string CreateToken(TaskManagerUser user)
     {
-        var secretKey = _configuration["Jwt:Ley"]!;
+        var secretKey = _configuration["JwtSettings:Key"];
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha512);
@@ -32,10 +32,9 @@ public class AccessTokenProvider : IAccessTokenProvider
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
-            Audience = _configuration["Jwt:Audience"],
-            Expires = DateTime.UtcNow.AddMinutes(_configuration.GetValue<int>("Jwt:AccessTokenExpirationInMinutes")),
-            Issuer = _configuration["Jwt:Issuer"],
-            IssuedAt = null,
+            Audience = _configuration["JwtSettings:Audience"],
+            Expires = DateTime.UtcNow.AddMinutes(_configuration.GetValue<int>("JwtSettings:AccessTokenExpirationInMinutes")),
+            Issuer = _configuration["JwtSettings:Issuer"],
             SigningCredentials = credentials,
             Subject = new ClaimsIdentity(claims)
         };
