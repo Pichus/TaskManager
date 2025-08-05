@@ -29,7 +29,7 @@ public class IdentityController : ControllerBase
     {
         var result = await _registerService.RegisterAsync(RegisterRequestToRegisterDto(request));
 
-        if (!result.Success) return BadRequest(result.ErrorMessage);
+        if (!result.Success) return BadRequest(result.Error.Message);
 
         return CreatedAtAction(nameof(Register), result.CreatedUser);
     }
@@ -39,7 +39,9 @@ public class IdentityController : ControllerBase
     {
         var result = await _loginService.LoginAsync(LoginRequestToLoginDto(request));
 
-        if (!result.Success) return BadRequest(result.ErrorMessage);
+        if (!result.Success)
+            if (result.Error.Code == LoginErrors.WrongEmailOrPassword.Code)
+                return BadRequest(result.Error.Message);
 
         var response = new LoginResponse
         {
@@ -55,7 +57,19 @@ public class IdentityController : ControllerBase
     {
         var refreshTokenResult = await _refreshTokenService.RefreshTokenAsync(request.RefreshTokenString);
 
-        if (!refreshTokenResult.Success) return BadRequest(refreshTokenResult.ErrorMessage);
+        if (!refreshTokenResult.Success)
+        {
+            var errorCode = refreshTokenResult.Error.Code;
+            var errorMessage = refreshTokenResult.Error.Message;
+
+            if (errorCode == RefreshTokenErrors.RefreshTokenExpired.Code ||
+                errorCode == RefreshTokenErrors.RefreshTokenRevoked.Code)
+                return BadRequest(errorMessage);
+
+            if (errorCode == RefreshTokenErrors.RefreshTokenNotFound.Code ||
+                errorCode == RefreshTokenErrors.RefreshTokenUserNotFound().Code)
+                return NotFound(errorMessage);
+        }
 
         var response = new RefreshTokenResponse
         {

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using TaskManager.Infrastructure.Identity.User;
+using TaskManager.UseCases.Shared;
 
 namespace TaskManager.UseCases.Identity.Register;
 
@@ -27,7 +28,8 @@ public class RegisterService : IRegisterService
         if (!createUserResult.Succeeded)
         {
             registerResult.Success = false;
-            registerResult.ErrorMessage = createUserResult.Errors.First().Description;
+            registerResult.Error = new Error(createUserResult.Errors.First().Code,
+                createUserResult.Errors.First().Description);
             return registerResult;
         }
 
@@ -37,7 +39,7 @@ public class RegisterService : IRegisterService
             UserName = newUser.UserName,
             Email = newUser.Email
         };
-        
+
         return registerResult;
     }
 }

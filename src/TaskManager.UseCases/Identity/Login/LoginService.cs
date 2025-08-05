@@ -29,7 +29,7 @@ public class LoginService : ILoginService
             return new LoginResult
             {
                 Success = false,
-                ErrorMessage = "Wrong email or password"
+                Error = LoginErrors.WrongEmailOrPassword
             };
 
         var jwtToken = _accessTokenProvider.CreateToken(user);

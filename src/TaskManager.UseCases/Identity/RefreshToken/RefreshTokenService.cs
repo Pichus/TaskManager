@@ -30,21 +30,21 @@ public class RefreshTokenService : IRefreshTokenService
             return new RefreshTokenResult
             {
                 Success = false,
-                ErrorMessage = "Refresh token not found"
+                Error = RefreshTokenErrors.RefreshTokenNotFound
             };
 
         if (oldRefreshToken.IsRevoked)
             return new RefreshTokenResult
             {
                 Success = false,
-                ErrorMessage = "The provided refresh token has already been revoked"
+                Error = RefreshTokenErrors.RefreshTokenRevoked
             };
 
         if (oldRefreshToken.IsExpired)
             return new RefreshTokenResult
             {
                 Success = false,
-                ErrorMessage = "The provided refresh token has expired"
+                Error = RefreshTokenErrors.RefreshTokenExpired
             };
 
         var user = await _userManager.FindByIdAsync(oldRefreshToken.UserId);
@@ -53,9 +53,9 @@ public class RefreshTokenService : IRefreshTokenService
             return new RefreshTokenResult
             {
                 Success = false,
-                ErrorMessage = $"User with id {oldRefreshToken.UserId} does not exist"
+                Error = RefreshTokenErrors.RefreshTokenUserNotFound(oldRefreshToken.UserId)
             };
-        
+
         await _refreshTokenRepository.RevokeRefreshTokenAsync(oldRefreshToken);
 
         var newRefreshTokenString = await CreateAndSaveNewRefreshTokenAsync(user.Id);

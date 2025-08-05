@@ -2,7 +2,7 @@ using TaskManager.UseCases.Shared;
 
 namespace TaskManager.UseCases.Projects.Create;
 
-public class CreateProjectResult : ResultBase
+public class CreateProjectResult : Result
 {
     public long ProjectId { get; set; }
     public string Title { get; set; }

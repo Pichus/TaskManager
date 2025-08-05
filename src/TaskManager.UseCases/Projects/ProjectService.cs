@@ -61,14 +61,14 @@ public class ProjectService : IProjectService
             return new GetProjectResult
             {
                 Success = false,
-                ErrorMessage = $"Project with id {projectId} does not exist"
+                Error = GetProjectErrors.NotFound(projectId)
             };
 
         if (project.LeadUserId != _currentUserService.UserId)
             return new GetProjectResult
             {
                 Success = false,
-                ErrorMessage = "You are not the project lead"
+                Error = GetProjectErrors.AccessDenied
             };
 
         return new GetProjectResult

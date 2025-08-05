@@ -4,6 +4,7 @@ using TaskManager.Projects.Create;
 using TaskManager.Projects.Get;
 using TaskManager.UseCases.Projects;
 using TaskManager.UseCases.Projects.Create;
+using TaskManager.UseCases.Projects.Get;
 
 namespace TaskManager.Projects;
 
@@ -40,7 +41,18 @@ public class ProjectsController : ControllerBase
 
         if (!getProjectResult.Success)
         {
-            return BadRequest(getProjectResult.ErrorMessage);
+            var errorCode = getProjectResult.Error.Code;
+            var errorMessage = getProjectResult.Error.Message;
+            
+            if (errorCode == GetProjectErrors.NotFound().Code)
+            {
+                return NotFound(errorMessage);
+            }
+
+            if (errorCode == GetProjectErrors.AccessDenied.Code)
+            {
+                return Forbid(errorMessage);
+            }
         }
 
         var response = new GetProjectResponse
