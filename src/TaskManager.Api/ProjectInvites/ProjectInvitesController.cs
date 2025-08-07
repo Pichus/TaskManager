@@ -4,11 +4,12 @@ using TaskManager.Core.ProjectInviteAggregate;
 using TaskManager.ProjectInvites.Create;
 using TaskManager.UseCases.Invites;
 using TaskManager.UseCases.Invites.Create;
+using TaskManager.UseCases.Invites.Delete;
 
 namespace TaskManager.ProjectInvites;
 
 [Authorize]
-[Route("api/projects/{id}/invites")]
+[Route("api/projects/{projectId}/invites")]
 [ApiController]
 public class ProjectInvitesController : ControllerBase
 {
@@ -40,6 +41,26 @@ public class ProjectInvitesController : ControllerBase
         var response = InviteToInviteResponse(createInviteResult.Value);
 
         return response;
+    }
+
+    [HttpDelete("{inviteId}")]
+    public async Task<ActionResult> DeleteInvite([FromRoute] long inviteId)
+    {
+        var deleteInviteResult = await _inviteService.DeleteAsync(inviteId);
+        
+        if (deleteInviteResult.IsFailure)
+        {
+            var errorCode = deleteInviteResult.Error.Code;
+            var errorMessage = deleteInviteResult.Error.Message;
+
+            if (errorCode == DeleteInviteErrors.InviteNotFound.Code)
+                return NotFound(errorMessage);
+
+            if (errorCode == DeleteInviteErrors.AccessDenied.Code)
+                return Forbid();
+        }
+
+        return Ok();
     }
 
     private CreateInviteDto CreateInviteRequestToDto(long projectId, CreateInviteRequest request)

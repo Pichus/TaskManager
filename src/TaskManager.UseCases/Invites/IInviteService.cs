@@ -7,4 +7,5 @@ namespace TaskManager.UseCases.Invites;
 public interface IInviteService
 {
     Task<Result<ProjectInvite>> CreateAsync(CreateInviteDto createInviteDto);
+    Task<Result> DeleteAsync(long inviteId);
 }

@@ -5,6 +5,7 @@ using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.Infrastructure.Identity.User;
 using TaskManager.UseCases.Invites.Create;
+using TaskManager.UseCases.Invites.Delete;
 using TaskManager.UseCases.Shared;
 
 namespace TaskManager.UseCases.Invites;
@@ -61,5 +62,27 @@ public class InviteService : IInviteService
         await _dbContext.SaveChangesAsync();
 
         return Result<ProjectInvite>.Success(invite);
+    }
+
+    public async Task<Result> DeleteAsync(long inviteId)
+    {
+        var invite = await _projectInviteRepository.FindByIdAsync(inviteId);
+
+        if (invite is null)
+        {
+            return Result.Failure(DeleteInviteErrors.InviteNotFound);
+        }
+
+        var currentUserId = _currentUserService.UserId;
+
+        if (currentUserId != invite.InvitedByUserId)
+        {
+            return Result.Failure(DeleteInviteErrors.AccessDenied);
+        }
+        
+        _projectInviteRepository.Delete(invite);
+        await _dbContext.SaveChangesAsync();
+        
+        return Result.Success();
     }
 }

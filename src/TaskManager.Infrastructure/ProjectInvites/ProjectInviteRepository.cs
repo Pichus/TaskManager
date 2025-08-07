@@ -19,9 +19,19 @@ public class ProjectInviteRepository : IProjectInviteRepository
         _context.Add(invite);
     }
 
+    public async Task<ProjectInvite?> FindByIdAsync(long id)
+    {
+        return await _context.ProjectInvites.FindAsync(id);
+    }
+
     public async Task<bool> AnyAsync(Expression<Func<ProjectInvite, bool>> predicate)
     {
         return await _context.ProjectInvites
             .AnyAsync(predicate);
+    }
+
+    public void Delete(ProjectInvite invite)
+    {
+        _context.ProjectInvites.Remove(invite);
     }
 }
