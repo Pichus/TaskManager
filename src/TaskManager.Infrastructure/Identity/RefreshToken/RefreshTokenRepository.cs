@@ -6,13 +6,11 @@ namespace TaskManager.Infrastructure.Identity.RefreshToken;
 
 public class RefreshTokenRepository : IRefreshTokenRepository
 {
-    private readonly IConfiguration _configuration;
     private readonly AppDbContext _databaseContext;
 
-    public RefreshTokenRepository(AppDbContext databaseContext, IConfiguration configuration)
+    public RefreshTokenRepository(AppDbContext databaseContext)
     {
         _databaseContext = databaseContext;
-        _configuration = configuration;
     }
 
     public async Task<RefreshToken?> GetRefreshTokenByTokenStringAsync(string tokenString)
@@ -24,38 +22,13 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         return result;
     }
 
-    public async Task<bool> RevokeRefreshTokenAsync(string tokenString)
+    public void RevokeRefreshToken(RefreshToken token)
     {
-        var token = await GetRefreshTokenByTokenStringAsync(tokenString);
-
-        if (token is null) return false;
-
         token.RevokedAt = DateTime.UtcNow;
-
-        await _databaseContext.SaveChangesAsync();
-
-        return true;
     }
 
-    public async Task RevokeRefreshTokenAsync(RefreshToken refreshToken)
+    public void CreateRefreshToken(RefreshToken token)
     {
-        refreshToken.RevokedAt = DateTime.UtcNow;
-
-        await _databaseContext.SaveChangesAsync();
-    }
-
-    public async Task CreateRefreshTokenAsync(CreateRefreshTokenDto createRefreshTokenDto)
-    {
-        var refreshToken = new RefreshToken
-        {
-            CreatedAt = DateTime.UtcNow,
-            Token = createRefreshTokenDto.TokenString,
-            ExpiresAt = DateTime.UtcNow.AddDays(
-                _configuration.GetValue<int>("JwtSettings:RefreshTokenExpirationInDays")),
-            UserId = createRefreshTokenDto.UserId
-        };
-
-        _databaseContext.RefreshTokens.Add(refreshToken);
-        await _databaseContext.SaveChangesAsync();
+        _databaseContext.RefreshTokens.Add(token);
     }
 }

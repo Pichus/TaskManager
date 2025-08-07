@@ -2,8 +2,7 @@ namespace TaskManager.Infrastructure.Identity.RefreshToken;
 
 public interface IRefreshTokenRepository
 {
-    Task CreateRefreshTokenAsync(CreateRefreshTokenDto createRefreshTokenDto);
+    void CreateRefreshToken(RefreshToken token);
     Task<RefreshToken?> GetRefreshTokenByTokenStringAsync(string tokenString);
-    Task<bool> RevokeRefreshTokenAsync(string tokenString);
-    Task RevokeRefreshTokenAsync(RefreshToken refreshToken);
+    void RevokeRefreshToken(RefreshToken token);
 }

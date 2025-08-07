@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
+using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.AccessToken;
 using TaskManager.Infrastructure.Identity.RefreshToken;
 using TaskManager.Infrastructure.Identity.User;
@@ -13,15 +15,19 @@ public class RefreshTokenService : IRefreshTokenService
     private readonly IRefreshTokenGenerator _refreshTokenGenerator;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly UserManager<TaskManagerUser> _userManager;
+    private readonly AppDbContext _dbContext;
+    private readonly IConfiguration _configuration;
 
     public RefreshTokenService(IRefreshTokenRepository refreshTokenRepository,
         IRefreshTokenGenerator refreshTokenGenerator, IAccessTokenProvider accessTokenProvider,
-        UserManager<TaskManagerUser> userManager)
+        UserManager<TaskManagerUser> userManager, AppDbContext dbContext, IConfiguration configuration)
     {
         _refreshTokenRepository = refreshTokenRepository;
         _refreshTokenGenerator = refreshTokenGenerator;
         _accessTokenProvider = accessTokenProvider;
         _userManager = userManager;
+        _dbContext = dbContext;
+        _configuration = configuration;
     }
 
     public async Task<Result<AccessAndRefreshTokenPair>> RefreshTokenAsync(string refreshTokenString)
@@ -43,7 +49,8 @@ public class RefreshTokenService : IRefreshTokenService
             return Result<AccessAndRefreshTokenPair>.Failure(
                 RefreshTokenErrors.RefreshTokenUserNotFound(oldRefreshToken.UserId));
 
-        await _refreshTokenRepository.RevokeRefreshTokenAsync(oldRefreshToken);
+        _refreshTokenRepository.RevokeRefreshToken(oldRefreshToken);
+        await _dbContext.SaveChangesAsync();
 
         var newRefreshTokenString = await CreateAndSaveNewRefreshTokenAsync(user.Id);
 
@@ -58,13 +65,17 @@ public class RefreshTokenService : IRefreshTokenService
     {
         var newRefreshTokenString = _refreshTokenGenerator.GenerateToken();
 
-        var newRefreshTokenDto = new CreateRefreshTokenDto
+        var refreshToken = new Infrastructure.Identity.RefreshToken.RefreshToken
         {
-            TokenString = newRefreshTokenString,
+            CreatedAt = DateTime.UtcNow,
+            Token = newRefreshTokenString,
+            ExpiresAt = DateTime.UtcNow.AddDays(
+                _configuration.GetValue<int>("JwtSettings:RefreshTokenExpirationInDays")),
             UserId = userId
         };
 
-        await _refreshTokenRepository.CreateRefreshTokenAsync(newRefreshTokenDto);
+        _refreshTokenRepository.CreateRefreshToken(refreshToken);
+        await _dbContext.SaveChangesAsync();
 
         return newRefreshTokenString;
     }
