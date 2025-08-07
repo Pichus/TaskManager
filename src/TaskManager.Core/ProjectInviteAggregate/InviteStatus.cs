@@ -1,4 +1,4 @@
-namespace TaskManager.Core.ProjectAggregate;
+namespace TaskManager.Core.ProjectInviteAggregate;
 
 public enum InviteStatus
 {

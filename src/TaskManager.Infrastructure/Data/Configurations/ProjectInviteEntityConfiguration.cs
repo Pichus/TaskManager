@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TaskManager.Core.ProjectAggregate;
+using TaskManager.Core.ProjectInviteAggregate;
 using TaskManager.Infrastructure.Identity.User;
 
 namespace TaskManager.Infrastructure.Data.Configurations;
@@ -10,7 +11,10 @@ public class ProjectInviteEntityConfiguration : IEntityTypeConfiguration<Project
     public void Configure(EntityTypeBuilder<ProjectInvite> builder)
     {
         builder
-            .HasKey(e => new { e.ProjectId, e.InvitedUserId });
+            .HasKey(e => e.Id);
+        
+        builder
+            .HasAlternateKey(e => new { e.ProjectId, e.InvitedUserId });
 
         builder
             .HasOne(e => e.Project)
