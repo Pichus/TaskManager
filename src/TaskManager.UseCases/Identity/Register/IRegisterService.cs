@@ -1,6 +1,9 @@
+using TaskManager.Infrastructure.Identity.User;
+using TaskManager.UseCases.Shared;
+
 namespace TaskManager.UseCases.Identity.Register;
 
 public interface IRegisterService
 {
-    Task<RegisterResult> RegisterAsync(RegisterDto dto);
+    Task<Result<TaskManagerUser>> RegisterAsync(RegisterDto dto);
 }

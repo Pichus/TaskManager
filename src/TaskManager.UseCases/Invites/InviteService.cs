@@ -5,6 +5,7 @@ using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.Infrastructure.Identity.User;
 using TaskManager.UseCases.Invites.Create;
+using TaskManager.UseCases.Shared;
 
 namespace TaskManager.UseCases.Invites;
 
@@ -26,38 +27,26 @@ public class InviteService : IInviteService
         _userManager = userManager;
     }
 
-    public async Task<CreateInviteResult> CreateAsync(CreateInviteDto createInviteDto)
+    public async Task<Result<ProjectInvite>> CreateAsync(CreateInviteDto createInviteDto)
     {
         var invitedByUserId = _currentUserService.UserId;
 
         var invitedUser = await _userManager.FindByIdAsync(createInviteDto.InvitedUserId);
 
         if (invitedUser is null)
-            return new CreateInviteResult
-            {
-                Success = false,
-                Error = CreateInviteErrors.InvitedUserNotFound
-            };
+            return Result<ProjectInvite>.Failure(CreateInviteErrors.InvitedUserNotFound);
 
         var project = await _projectRepository.FindByIdAsync(createInviteDto.ProjectId);
 
         if (project is null)
-            return new CreateInviteResult
-            {
-                Success = false,
-                Error = CreateInviteErrors.ProjectNotFound
-            };
+            return Result<ProjectInvite>.Failure(CreateInviteErrors.ProjectNotFound);
 
         var inviteExists = await _projectInviteRepository
             .AnyAsync(projectInvite => projectInvite.InvitedUserId == invitedUser.Id
                                        && projectInvite.ProjectId == project.Id);
 
         if (inviteExists)
-            return new CreateInviteResult
-            {
-                Success = false,
-                Error = CreateInviteErrors.UserAlreadyInvited
-            };
+            return Result<ProjectInvite>.Failure(CreateInviteErrors.UserAlreadyInvited);
 
         var invite = new ProjectInvite
         {
@@ -71,9 +60,6 @@ public class InviteService : IInviteService
         _projectInviteRepository.Create(invite);
         await _dbContext.SaveChangesAsync();
 
-        return new CreateInviteResult
-        {
-            Invite = invite
-        };
+        return Result<ProjectInvite>.Success(invite);
     }
 }

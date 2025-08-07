@@ -25,7 +25,7 @@ public class ProjectInvitesController : ControllerBase
     {
         var createInviteResult = await _inviteService.CreateAsync(CreateInviteRequestToDto(projectId, request));
 
-        if (!createInviteResult.Success)
+        if (createInviteResult.IsFailure)
         {
             var errorCode = createInviteResult.Error.Code;
             var errorMessage = createInviteResult.Error.Message;
@@ -37,7 +37,7 @@ public class ProjectInvitesController : ControllerBase
             if (errorCode == CreateInviteErrors.UserAlreadyInvited.Code) return BadRequest(errorMessage);
         }
 
-        var response = InviteToInviteResponse(createInviteResult.Invite);
+        var response = InviteToInviteResponse(createInviteResult.Value);
 
         return response;
     }

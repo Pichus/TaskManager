@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using TaskManager.Infrastructure.Identity.AccessToken;
 using TaskManager.Infrastructure.Identity.RefreshToken;
 using TaskManager.Infrastructure.Identity.User;
+using TaskManager.UseCases.Identity.Shared;
+using TaskManager.UseCases.Shared;
 
 namespace TaskManager.UseCases.Identity.Login;
 
@@ -21,16 +23,12 @@ public class LoginService : ILoginService
         _refreshTokenGenerator = refreshTokenGenerator;
     }
 
-    public async Task<LoginResult> LoginAsync(LoginDto dto)
+    public async Task<Result<AccessAndRefreshTokenPair>> LoginAsync(LoginDto dto)
     {
         var user = await _userManager.FindByEmailAsync(dto.Email);
 
         if (user is null || await _userManager.CheckPasswordAsync(user, dto.Password))
-            return new LoginResult
-            {
-                Success = false,
-                Error = LoginErrors.WrongEmailOrPassword
-            };
+            return Result<AccessAndRefreshTokenPair>.Failure(LoginErrors.WrongEmailOrPassword);
 
         var jwtToken = _accessTokenProvider.CreateToken(user);
 
@@ -38,11 +36,9 @@ public class LoginService : ILoginService
 
         await SaveRefreshToken(refreshTokenString, user.Id);
 
-        return new LoginResult
-        {
-            AccessToken = jwtToken,
-            RefreshToken = refreshTokenString
-        };
+        var accessAndRefreshTokenPair = new AccessAndRefreshTokenPair(jwtToken, refreshTokenString);
+        
+        return Result<AccessAndRefreshTokenPair>.Success(accessAndRefreshTokenPair);
     }
 
     private async Task SaveRefreshToken(string refreshTokenString, string userId)

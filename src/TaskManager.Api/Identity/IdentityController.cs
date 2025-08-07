@@ -2,9 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 using TaskManager.Identity.Login;
 using TaskManager.Identity.RefreshToken;
 using TaskManager.Identity.Register;
+using TaskManager.Infrastructure.Identity.User;
 using TaskManager.UseCases.Identity.Login;
 using TaskManager.UseCases.Identity.RefreshToken;
 using TaskManager.UseCases.Identity.Register;
+using TaskManager.UseCases.Identity.Shared;
+using TaskManager.UseCases.Shared;
 
 namespace TaskManager.Identity;
 
@@ -29,9 +32,11 @@ public class IdentityController : ControllerBase
     {
         var result = await _registerService.RegisterAsync(RegisterRequestToRegisterDto(request));
 
-        if (!result.Success) return BadRequest(result.Error.Message);
+        if (result.IsFailure) return BadRequest(result.Error.Message);
 
-        return CreatedAtAction(nameof(Register), result.CreatedUser);
+        var response = UserToRegisterResponse(result.Value);
+
+        return CreatedAtAction(nameof(Register), response);
     }
 
     [HttpPost("login")]
@@ -39,15 +44,11 @@ public class IdentityController : ControllerBase
     {
         var result = await _loginService.LoginAsync(LoginRequestToLoginDto(request));
 
-        if (!result.Success)
+        if (result.IsFailure)
             if (result.Error.Code == LoginErrors.WrongEmailOrPassword.Code)
                 return BadRequest(result.Error.Message);
 
-        var response = new LoginResponse
-        {
-            AccessToken = result.AccessToken!,
-            RefreshToken = result.RefreshToken!
-        };
+        var response = AccessAndRefreshTokenToLoginResponse(result.Value);
 
         return Ok(response);
     }
@@ -57,7 +58,7 @@ public class IdentityController : ControllerBase
     {
         var refreshTokenResult = await _refreshTokenService.RefreshTokenAsync(request.RefreshTokenString);
 
-        if (!refreshTokenResult.Success)
+        if (refreshTokenResult.IsFailure)
         {
             var errorCode = refreshTokenResult.Error.Code;
             var errorMessage = refreshTokenResult.Error.Message;
@@ -71,35 +72,55 @@ public class IdentityController : ControllerBase
                 return NotFound(errorMessage);
         }
 
-        var response = new RefreshTokenResponse
-        {
-            AccessToken = refreshTokenResult.AccessToken,
-            RefreshToken = refreshTokenResult.RefreshToken
-        };
+        var response = AccessAndRefreshTokenToRefreshTokenResponse(refreshTokenResult.Value);
 
-        return response;
+        return Ok(response);
     }
 
     private LoginDto LoginRequestToLoginDto(LoginRequest request)
     {
-        var dto = new LoginDto
+        return new LoginDto
         {
             Email = request.Email,
             Password = request.Password
         };
-
-        return dto;
     }
 
     private RegisterDto RegisterRequestToRegisterDto(RegisterRequest request)
     {
-        var dto = new RegisterDto
+        return new RegisterDto
         {
             UserName = request.UserName,
             Email = request.Email,
             Password = request.Password
         };
+    }
 
-        return dto;
+    private RegisterResponse UserToRegisterResponse(TaskManagerUser user)
+    {
+        return new RegisterResponse
+        {
+            Id = user.Id,
+            UserName = user.UserName,
+            Email = user.Email
+        };
+    }
+    
+    private RefreshTokenResponse AccessAndRefreshTokenToRefreshTokenResponse(AccessAndRefreshTokenPair refreshTokenResult)
+    {
+        return new RefreshTokenResponse
+        {
+            AccessToken = refreshTokenResult.AccessToken,
+            RefreshToken = refreshTokenResult.RefreshToken
+        };
+    }
+    
+    private LoginResponse AccessAndRefreshTokenToLoginResponse(AccessAndRefreshTokenPair refreshTokenResult)
+    {
+        return new LoginResponse()
+        {
+            AccessToken = refreshTokenResult.AccessToken,
+            RefreshToken = refreshTokenResult.RefreshToken
+        };
     }
 }

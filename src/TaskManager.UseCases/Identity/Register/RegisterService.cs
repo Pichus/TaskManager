@@ -13,7 +13,7 @@ public class RegisterService : IRegisterService
         _userManager = userManager;
     }
 
-    public async Task<RegisterResult> RegisterAsync(RegisterDto dto)
+    public async Task<Result<TaskManagerUser>> RegisterAsync(RegisterDto dto)
     {
         var newUser = new TaskManagerUser
         {
@@ -23,23 +23,13 @@ public class RegisterService : IRegisterService
 
         var createUserResult = await _userManager.CreateAsync(newUser);
 
-        var registerResult = new RegisterResult();
-
         if (!createUserResult.Succeeded)
         {
-            registerResult.Success = false;
-            registerResult.Error = new Error(createUserResult.Errors.First().Code,
+            var error = new Error(createUserResult.Errors.First().Code,
                 createUserResult.Errors.First().Description);
-            return registerResult;
+            return Result<TaskManagerUser>.Failure(error);
         }
 
-        registerResult.CreatedUser = new UserDto
-        {
-            Id = newUser.Id,
-            UserName = newUser.UserName,
-            Email = newUser.Email
-        };
-
-        return registerResult;
+        return Result<TaskManagerUser>.Success(newUser);
     }
 }

@@ -23,7 +23,7 @@ public class ProjectService : IProjectService
         _currentUserService = currentUserService;
     }
 
-    public async Task<CreateProjectResult> CreateAsync(CreateProjectDto createProjectDto)
+    public async Task<Result<ProjectEntity>> CreateAsync(CreateProjectDto createProjectDto)
     {
         var project = new ProjectEntity
         {
@@ -35,10 +35,7 @@ public class ProjectService : IProjectService
         _projectRepository.Create(project);
         await _context.SaveChangesAsync();
 
-        return new CreateProjectResult
-        {
-            Project = project
-        };
+        return Result<ProjectEntity>.Success(project);
     }
 
     public async Task<IEnumerable<ProjectEntity>> GetAllByUserAsync()
@@ -48,63 +45,37 @@ public class ProjectService : IProjectService
         return projects;
     }
 
-    public async Task<GetProjectResult> GetByIdAsync(long projectId)
+    public async Task<Result<ProjectEntity>> GetByIdAsync(long projectId)
     {
         var project = await _projectRepository.FindByIdAsync(projectId);
 
         if (project is null)
-            return new GetProjectResult
-            {
-                Success = false,
-                Error = GetProjectErrors.NotFound(projectId)
-            };
+            return Result<ProjectEntity>.Failure(GetProjectErrors.NotFound(projectId));
 
         if (project.LeadUserId != _currentUserService.UserId)
-            return new GetProjectResult
-            {
-                Success = false,
-                Error = GetProjectErrors.AccessDenied
-            };
+            return Result<ProjectEntity>.Failure(GetProjectErrors.AccessDenied);
 
-        return new GetProjectResult
-        {
-            Project = project
-        };
+        return Result<ProjectEntity>.Success(project);
     }
 
-    public async Task<UpdateProjectResult> UpdateAsync(UpdateProjectDto updateProjectDto)
+    public async Task<Result<ProjectEntity>> UpdateAsync(UpdateProjectDto updateProjectDto)
     {
         var project = await _projectRepository.FindByIdAsync(updateProjectDto.ProjectId);
 
         if (project is null)
-        {
-            return new UpdateProjectResult
-            {
-                Success = false,
-                Error = UpdateProjectErrors.NotFound(updateProjectDto.ProjectId),
-            };
-        }
+            return Result<ProjectEntity>.Failure(UpdateProjectErrors.NotFound(updateProjectDto.ProjectId));
 
         var currentUserId = _currentUserService.UserId;
 
         if (project.LeadUserId != currentUserId)
-        {
-            return new UpdateProjectResult
-            {
-                Success = false,
-                Error = UpdateProjectErrors.AccessDenied,
-            };
-        }
+            return Result<ProjectEntity>.Failure(UpdateProjectErrors.AccessDenied);
 
         project.Title = updateProjectDto.ProjectTitle;
-        
+
         _projectRepository.Update(project);
         await _context.SaveChangesAsync();
 
-        return new UpdateProjectResult
-        {
-            Project = project
-        };
+        return Result<ProjectEntity>.Success(project);
     }
 
     public async Task<Result> DeleteAsync(long id)
@@ -112,28 +83,16 @@ public class ProjectService : IProjectService
         var project = await _projectRepository.FindByIdAsync(id);
 
         if (project is null)
-        {
-            return new Result
-            {
-                Success = false,
-                Error = DeleteProjectErrors.NotFound(id)
-            };
-        }
+            return Result.Failure(DeleteProjectErrors.NotFound(id));
 
         var currentUserId = _currentUserService.UserId;
-        
+
         if (project.LeadUserId != currentUserId)
-        {
-            return new Result
-            {
-                Success = false,
-                Error = DeleteProjectErrors.AccessDenied
-            };
-        }
-        
+            return Result.Failure(DeleteProjectErrors.AccessDenied);
+
         _projectRepository.Remove(project);
         await _context.SaveChangesAsync();
 
-        return new Result();
+        return Result.Success();
     }
 }

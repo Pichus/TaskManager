@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Identity;
 using TaskManager.Infrastructure.Identity.AccessToken;
 using TaskManager.Infrastructure.Identity.RefreshToken;
 using TaskManager.Infrastructure.Identity.User;
+using TaskManager.UseCases.Identity.Shared;
+using TaskManager.UseCases.Shared;
 
 namespace TaskManager.UseCases.Identity.RefreshToken;
 
@@ -22,39 +24,24 @@ public class RefreshTokenService : IRefreshTokenService
         _userManager = userManager;
     }
 
-    public async Task<RefreshTokenResult> RefreshTokenAsync(string refreshTokenString)
+    public async Task<Result<AccessAndRefreshTokenPair>> RefreshTokenAsync(string refreshTokenString)
     {
         var oldRefreshToken = await _refreshTokenRepository.GetRefreshTokenByTokenStringAsync(refreshTokenString);
 
         if (oldRefreshToken is null)
-            return new RefreshTokenResult
-            {
-                Success = false,
-                Error = RefreshTokenErrors.RefreshTokenNotFound
-            };
+            return Result<AccessAndRefreshTokenPair>.Failure(RefreshTokenErrors.RefreshTokenNotFound);
 
         if (oldRefreshToken.IsRevoked)
-            return new RefreshTokenResult
-            {
-                Success = false,
-                Error = RefreshTokenErrors.RefreshTokenRevoked
-            };
+            return Result<AccessAndRefreshTokenPair>.Failure(RefreshTokenErrors.RefreshTokenRevoked);
 
         if (oldRefreshToken.IsExpired)
-            return new RefreshTokenResult
-            {
-                Success = false,
-                Error = RefreshTokenErrors.RefreshTokenExpired
-            };
+            return Result<AccessAndRefreshTokenPair>.Failure(RefreshTokenErrors.RefreshTokenExpired);
 
         var user = await _userManager.FindByIdAsync(oldRefreshToken.UserId);
 
         if (user is null)
-            return new RefreshTokenResult
-            {
-                Success = false,
-                Error = RefreshTokenErrors.RefreshTokenUserNotFound(oldRefreshToken.UserId)
-            };
+            return Result<AccessAndRefreshTokenPair>.Failure(
+                RefreshTokenErrors.RefreshTokenUserNotFound(oldRefreshToken.UserId));
 
         await _refreshTokenRepository.RevokeRefreshTokenAsync(oldRefreshToken);
 
@@ -62,11 +49,9 @@ public class RefreshTokenService : IRefreshTokenService
 
         var accessToken = _accessTokenProvider.CreateToken(user);
 
-        return new RefreshTokenResult
-        {
-            AccessToken = accessToken,
-            RefreshToken = newRefreshTokenString
-        };
+        var accessAndRefreshTokenPair = new AccessAndRefreshTokenPair(accessToken, newRefreshTokenString);
+        
+        return Result<AccessAndRefreshTokenPair>.Success(accessAndRefreshTokenPair);
     }
 
     private async Task<string> CreateAndSaveNewRefreshTokenAsync(string userId)

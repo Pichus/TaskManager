@@ -29,12 +29,7 @@ public class ProjectsController : ControllerBase
     {
         var userProjects = await _projectService.GetAllByUserAsync();
 
-        var userProjectsResponse = userProjects.Select(project => new GetProjectResponse
-        {
-            Id = project.Id,
-            Title = project.Title,
-            LeadUserId = project.LeadUserId
-        });
+        var userProjectsResponse = userProjects.Select(ProjectToGetProjectResponse);
 
         return Ok(userProjectsResponse);
     }
@@ -44,7 +39,7 @@ public class ProjectsController : ControllerBase
     {
         var getProjectResult = await _projectService.GetByIdAsync(id);
 
-        if (!getProjectResult.Success)
+        if (getProjectResult.IsFailure)
         {
             var errorCode = getProjectResult.Error.Code;
             var errorMessage = getProjectResult.Error.Message;
@@ -54,12 +49,9 @@ public class ProjectsController : ControllerBase
             if (errorCode == GetProjectErrors.AccessDenied.Code) return Forbid();
         }
 
-        var response = new GetProjectResponse
-        {
-            Id = getProjectResult.Project.Id,
-            Title = getProjectResult.Project.Title,
-            LeadUserId = getProjectResult.Project.LeadUserId
-        };
+        var project = getProjectResult.Value;
+
+        var response = ProjectToGetProjectResponse(project);
 
         return Ok(response);
     }
@@ -67,18 +59,10 @@ public class ProjectsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<CreateProjectResponse>> Create(CreateProjectRequest request)
     {
-        var createProjectResult = await _projectService.CreateAsync(new CreateProjectDto
-        {
-            Title = request.Title
-        });
+        var createProjectResult = await _projectService.CreateAsync(CreateProjectRequestToDto(request));
 
-        var response = new CreateProjectResponse
-        {
-            ProjectId = createProjectResult.Project.Id,
-            Title = createProjectResult.Project.Title,
-            LeadUserId = createProjectResult.Project.LeadUserId
-        };
-        
+        var response = ProjectToCreateProjectResponse(createProjectResult.Value);
+
         return CreatedAtAction(nameof(Create), response);
     }
 
@@ -88,7 +72,7 @@ public class ProjectsController : ControllerBase
     {
         var updateProjectResult = await _projectService.UpdateAsync(UpdateProjectRequestToDto(id, request));
 
-        if (!updateProjectResult.Success)
+        if (updateProjectResult.IsFailure)
         {
             var errorCode = updateProjectResult.Error.Code;
             var errorMessage = updateProjectResult.Error.Message;
@@ -98,7 +82,7 @@ public class ProjectsController : ControllerBase
             if (errorCode == UpdateProjectErrors.AccessDenied.Code) return Forbid();
         }
 
-        var response = ProjectToProjectResponse(updateProjectResult.Project);
+        var response = ProjectToUpdateProjectResponse(updateProjectResult.Value);
 
         return Ok(response);
     }
@@ -107,8 +91,8 @@ public class ProjectsController : ControllerBase
     public async Task<ActionResult> Delete(long id)
     {
         var deleteProjectResult = await _projectService.DeleteAsync(id);
-        
-        if (!deleteProjectResult.Success)
+
+        if (deleteProjectResult.IsFailure)
         {
             var errorCode = deleteProjectResult.Error.Code;
             var errorMessage = deleteProjectResult.Error.Message;
@@ -123,24 +107,48 @@ public class ProjectsController : ControllerBase
 
     private UpdateProjectDto UpdateProjectRequestToDto(long projectId, UpdateProjectRequest request)
     {
-        var dto = new UpdateProjectDto
+        return new UpdateProjectDto
         {
             ProjectId = projectId,
             ProjectTitle = request.Title
         };
-
-        return dto;
     }
-    
-    private UpdateProjectResponse ProjectToProjectResponse(ProjectEntity project)
+
+    private UpdateProjectResponse ProjectToUpdateProjectResponse(ProjectEntity project)
     {
-        var response = new UpdateProjectResponse
+        return new UpdateProjectResponse
         {
             Id = project.Id,
             Title = project.Title,
             LeadUserId = project.LeadUserId
         };
+    }
 
-        return response;
+    private GetProjectResponse ProjectToGetProjectResponse(ProjectEntity project)
+    {
+        return new GetProjectResponse
+        {
+            Id = project.Id,
+            Title = project.Title,
+            LeadUserId = project.LeadUserId
+        };
+    }
+
+    private CreateProjectResponse ProjectToCreateProjectResponse(ProjectEntity project)
+    {
+        return new CreateProjectResponse
+        {
+            ProjectId = project.Id,
+            Title = project.Title,
+            LeadUserId = project.LeadUserId
+        };
+    }
+
+    private CreateProjectDto CreateProjectRequestToDto(CreateProjectRequest request)
+    {
+        return new CreateProjectDto
+        {
+            Title = request.Title
+        };
     }
 }
