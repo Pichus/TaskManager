@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Core.ProjectAggregate;
+using TaskManager.Core.ProjectInviteAggregate;
 using TaskManager.Core.TaskAggregate;
 using TaskManager.Infrastructure.Data.Configurations;
 using TaskManager.Infrastructure.Identity.RefreshToken;
@@ -18,6 +19,7 @@ public class AppDbContext : IdentityDbContext<TaskManagerUser>
     public DbSet<TaskEntity> Tasks { get; set; }
     public DbSet<ProjectEntity> Projects { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<ProjectInvite> ProjectInvites { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
