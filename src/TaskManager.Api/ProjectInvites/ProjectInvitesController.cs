@@ -20,9 +20,9 @@ public class ProjectInvitesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<CreateInviteResponse>> CreateInvite(CreateInviteRequest request)
+    public async Task<ActionResult<CreateInviteResponse>> CreateInvite(long projectId, CreateInviteRequest request)
     {
-        var createInviteResult = await _inviteService.CreateAsync(CreateInviteRequestToDto(request));
+        var createInviteResult = await _inviteService.CreateAsync(CreateInviteRequestToDto(projectId, request));
 
         if (!createInviteResult.Success)
         {
@@ -41,11 +41,11 @@ public class ProjectInvitesController : ControllerBase
         return response;
     }
 
-    private CreateInviteDto CreateInviteRequestToDto(CreateInviteRequest request)
+    private CreateInviteDto CreateInviteRequestToDto(long projectId, CreateInviteRequest request)
     {
         var dto = new CreateInviteDto
         {
-            ProjectId = request.ProjectId,
+            ProjectId = projectId,
             InvitedUserId = request.InvitedUserId
         };
 
