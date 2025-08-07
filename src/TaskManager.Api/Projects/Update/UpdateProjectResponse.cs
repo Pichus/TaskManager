@@ -1,6 +1,6 @@
-namespace TaskManager.Projects.Get;
+namespace TaskManager.Projects.Update;
 
-public class GetProjectResponse
+public class UpdateProjectResponse
 {
     public long Id { get; set; }
     public string Title { get; set; }

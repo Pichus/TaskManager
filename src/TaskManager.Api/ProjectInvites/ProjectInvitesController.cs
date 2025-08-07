@@ -20,7 +20,8 @@ public class ProjectInvitesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<CreateInviteResponse>> CreateInvite(long projectId, CreateInviteRequest request)
+    public async Task<ActionResult<CreateInviteResponse>> CreateInvite([FromRoute] long projectId,
+        [FromBody] CreateInviteRequest request)
     {
         var createInviteResult = await _inviteService.CreateAsync(CreateInviteRequestToDto(projectId, request));
 

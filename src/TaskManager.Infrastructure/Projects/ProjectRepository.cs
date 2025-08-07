@@ -28,8 +28,13 @@ public class ProjectRepository : IProjectRepository
         return await _context.Projects.Where(project => project.LeadUserId == userId).ToListAsync();
     }
 
-    public Task GetPendingInvitesByProjectId(long projectId)
+    public void Update(ProjectEntity project)
     {
-        throw new NotImplementedException();
+        _context.Update(project);
+    }
+
+    public void Remove(ProjectEntity project)
+    {
+        _context.Projects.Remove(project);
     }
 }
