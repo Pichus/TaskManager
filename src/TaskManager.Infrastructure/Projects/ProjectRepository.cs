@@ -23,6 +23,13 @@ public class ProjectRepository : IProjectRepository
         return await _context.Projects.FindAsync(id);
     }
 
+    public async Task<ProjectEntity?> FindByIdAsyncWithProjectMembersIncludedAsync(long id)
+    {
+        return await _context.Projects
+            .Include(project => project.Members)
+            .FirstOrDefaultAsync(project => project.Id == id);
+    }
+
     public async Task<IEnumerable<ProjectEntity>> GetAllByUserIdAsync(string userId)
     {
         return await _context.Projects.Where(project => project.LeadUserId == userId).ToListAsync();

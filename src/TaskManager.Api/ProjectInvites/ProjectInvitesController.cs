@@ -20,6 +20,12 @@ public class ProjectInvitesController : ControllerBase
         _inviteService = inviteService;
     }
 
+    [HttpGet("{inviteId}")]
+    public async Task<ActionResult> Get([FromRoute] long inviteId)
+    {
+        return Ok(inviteId);
+    }
+
     [HttpPost]
     public async Task<ActionResult<CreateInviteResponse>> CreateInvite([FromRoute] long projectId,
         [FromBody] CreateInviteRequest request)
@@ -35,7 +41,12 @@ public class ProjectInvitesController : ControllerBase
                 errorCode == CreateInviteErrors.ProjectNotFound.Code)
                 return NotFound(errorMessage);
 
-            if (errorCode == CreateInviteErrors.UserAlreadyInvited.Code) return BadRequest(errorMessage);
+            if (errorCode == CreateInviteErrors.UserAlreadyInvited.Code ||
+                errorCode == CreateInviteErrors.InvitedUserAlreadyAMember.Code)
+                return BadRequest(errorMessage);
+
+            if (errorCode == CreateInviteErrors.AccessDenied.Code)
+                return BadRequest(errorMessage);
         }
 
         var response = InviteToInviteResponse(createInviteResult.Value);
@@ -47,7 +58,7 @@ public class ProjectInvitesController : ControllerBase
     public async Task<ActionResult> DeleteInvite([FromRoute] long inviteId)
     {
         var deleteInviteResult = await _inviteService.DeleteAsync(inviteId);
-        
+
         if (deleteInviteResult.IsFailure)
         {
             var errorCode = deleteInviteResult.Error.Code;

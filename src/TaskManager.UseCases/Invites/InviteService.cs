@@ -30,17 +30,20 @@ public class InviteService : IInviteService
 
     public async Task<Result<ProjectInvite>> CreateAsync(CreateInviteDto createInviteDto)
     {
+        var project = await _projectRepository.FindByIdAsyncWithProjectMembersIncludedAsync(createInviteDto.ProjectId);
+
+        if (project is null)
+            return Result<ProjectInvite>.Failure(CreateInviteErrors.ProjectNotFound);
+
         var invitedByUserId = _currentUserService.UserId;
+
+        if (invitedByUserId != project.LeadUserId)
+            return Result<ProjectInvite>.Failure(CreateInviteErrors.AccessDenied);
 
         var invitedUser = await _userManager.FindByIdAsync(createInviteDto.InvitedUserId);
 
         if (invitedUser is null)
             return Result<ProjectInvite>.Failure(CreateInviteErrors.InvitedUserNotFound);
-
-        var project = await _projectRepository.FindByIdAsync(createInviteDto.ProjectId);
-
-        if (project is null)
-            return Result<ProjectInvite>.Failure(CreateInviteErrors.ProjectNotFound);
 
         var inviteExists = await _projectInviteRepository
             .AnyAsync(projectInvite => projectInvite.InvitedUserId == invitedUser.Id
@@ -48,6 +51,11 @@ public class InviteService : IInviteService
 
         if (inviteExists)
             return Result<ProjectInvite>.Failure(CreateInviteErrors.UserAlreadyInvited);
+
+        var isInvitedUserProjectMember = project.Members.Any(member => member.MemberId == invitedUser.Id);
+
+        if (isInvitedUserProjectMember)
+            return Result<ProjectInvite>.Failure(CreateInviteErrors.InvitedUserAlreadyAMember);
 
         var invite = new ProjectInvite
         {
@@ -68,21 +76,15 @@ public class InviteService : IInviteService
     {
         var invite = await _projectInviteRepository.FindByIdAsync(inviteId);
 
-        if (invite is null)
-        {
-            return Result.Failure(DeleteInviteErrors.InviteNotFound);
-        }
+        if (invite is null) return Result.Failure(DeleteInviteErrors.InviteNotFound);
 
         var currentUserId = _currentUserService.UserId;
 
-        if (currentUserId != invite.InvitedByUserId)
-        {
-            return Result.Failure(DeleteInviteErrors.AccessDenied);
-        }
-        
+        if (currentUserId != invite.InvitedByUserId) return Result.Failure(DeleteInviteErrors.AccessDenied);
+
         _projectInviteRepository.Delete(invite);
         await _dbContext.SaveChangesAsync();
-        
+
         return Result.Success();
     }
 }
