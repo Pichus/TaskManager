@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using TaskManager.Core.ProjectAggregate;
+using TaskManager.Core.ProjectInviteAggregate;
 using TaskManager.Core.TaskAggregate;
 
 namespace TaskManager.Infrastructure.Identity.User;

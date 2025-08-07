@@ -15,6 +15,7 @@ public class ProjectsController : ControllerBase
 {
     private readonly IProjectService _projectService;
 
+
     public ProjectsController(IProjectService projectService)
     {
         _projectService = projectService;
@@ -30,7 +31,7 @@ public class ProjectsController : ControllerBase
             Title = project.Title,
             LeadUserId = project.LeadUserId
         });
-        
+
         return userProjectsResponse;
     }
 
@@ -43,16 +44,10 @@ public class ProjectsController : ControllerBase
         {
             var errorCode = getProjectResult.Error.Code;
             var errorMessage = getProjectResult.Error.Message;
-            
-            if (errorCode == GetProjectErrors.NotFound().Code)
-            {
-                return NotFound(errorMessage);
-            }
 
-            if (errorCode == GetProjectErrors.AccessDenied.Code)
-            {
-                return Forbid(errorMessage);
-            }
+            if (errorCode == GetProjectErrors.NotFound().Code) return NotFound(errorMessage);
+
+            if (errorCode == GetProjectErrors.AccessDenied.Code) return Forbid(errorMessage);
         }
 
         var response = new GetProjectResponse
