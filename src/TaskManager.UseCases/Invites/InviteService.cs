@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.ProjectInviteAggregate;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.Infrastructure.Identity.User;
+using TaskManager.UseCases.Invites.Accept;
 using TaskManager.UseCases.Invites.Create;
 using TaskManager.UseCases.Invites.Delete;
 using TaskManager.UseCases.Shared;
@@ -86,5 +88,48 @@ public class InviteService : IInviteService
         await _dbContext.SaveChangesAsync();
 
         return Result.Success();
+    }
+
+    public async Task<Result<IEnumerable<ProjectInvite>>> GetPendingInvitesForCurrentUser()
+    {
+        var currentUserId = _currentUserService.UserId;
+
+        var pendingInvites = await _projectInviteRepository
+            .GetPendingInvitesByInvitedUserIdAsync(currentUserId)
+            .ToListAsync();
+
+        return Result<IEnumerable<ProjectInvite>>.Success(pendingInvites);
+    }
+
+    public async Task<Result> AcceptInviteAsync(long inviteId)
+    {
+        var currentUserId = _currentUserService.UserId;
+
+        var invite = await _projectInviteRepository.FindByIdAsync(inviteId);
+
+        if (invite is null) return Result.Failure(AcceptInviteErrors.InviteNotFound);
+
+        if (invite.Status == InviteStatus.Accepted) return Result.Failure(AcceptInviteErrors.InviteAlreadyAccepted);
+
+        if (invite.Status == InviteStatus.Rejected) return Result.Failure(AcceptInviteErrors.InviteAlreadyRejected);
+
+        if (invite.InvitedUserId != currentUserId) return Result.Failure(AcceptInviteErrors.AccessDenied);
+
+        var isInvitedUserProjectMember =
+            await _projectRepository.IsUserProjectMemberAsync(currentUserId, invite.ProjectId);
+
+        if (isInvitedUserProjectMember) return Result.Failure(AcceptInviteErrors.InvitedUserAlreadyAMember);
+
+        var project = await _projectRepository.FindByIdAsync(invite.ProjectId);
+
+        _projectRepository.AddMember(project, currentUserId);
+        await _dbContext.SaveChangesAsync();
+
+        return Result.Success();
+    }
+
+    public Task<Result> DeclineInviteAsync(long inviteId)
+    {
+        throw new NotImplementedException();
     }
 }

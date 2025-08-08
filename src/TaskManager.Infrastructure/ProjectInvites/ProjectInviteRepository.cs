@@ -34,4 +34,10 @@ public class ProjectInviteRepository : IProjectInviteRepository
     {
         _context.ProjectInvites.Remove(invite);
     }
+
+    public IQueryable<ProjectInvite> GetPendingInvitesByInvitedUserIdAsync(string userId)
+    {
+        return _context.ProjectInvites.Where(invite =>
+            invite.InvitedUserId == userId && invite.Status == InviteStatus.Pending);
+    }
 }

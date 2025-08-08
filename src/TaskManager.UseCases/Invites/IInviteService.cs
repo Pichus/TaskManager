@@ -8,4 +8,7 @@ public interface IInviteService
 {
     Task<Result<ProjectInvite>> CreateAsync(CreateInviteDto createInviteDto);
     Task<Result> DeleteAsync(long inviteId);
+    Task<Result<IEnumerable<ProjectInvite>>> GetPendingInvitesForCurrentUser();
+    Task<Result> AcceptInviteAsync(long inviteId);
+    Task<Result> DeclineInviteAsync(long inviteId);
 }

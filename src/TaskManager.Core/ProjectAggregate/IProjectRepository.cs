@@ -8,4 +8,6 @@ public interface IProjectRepository
     Task<IEnumerable<ProjectEntity>> GetAllByUserIdAsync(string userId);
     void Update(ProjectEntity project);
     void Remove(ProjectEntity project);
+    Task<bool> IsUserProjectMemberAsync(string currentUserId, long projectId);
+    void AddMember(ProjectEntity project, string memberId);
 }

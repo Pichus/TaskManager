@@ -44,4 +44,19 @@ public class ProjectRepository : IProjectRepository
     {
         _context.Projects.Remove(project);
     }
+
+    public async Task<bool> IsUserProjectMemberAsync(string currentUserId, long projectId)
+    {
+        return await _context.ProjectMembers.AnyAsync(projectMember =>
+            projectMember.MemberId == currentUserId && projectMember.ProjectId == projectId);
+    }
+
+    public void AddMember(ProjectEntity project, string memberId)
+    {
+        _context.ProjectMembers.Add(new ProjectMember
+        {
+            ProjectId = project.Id,
+            MemberId = memberId,
+        });
+    }
 }
