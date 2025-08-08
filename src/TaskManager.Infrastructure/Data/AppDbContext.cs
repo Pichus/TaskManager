@@ -20,6 +20,7 @@ public class AppDbContext : IdentityDbContext<TaskManagerUser>
     public DbSet<ProjectEntity> Projects { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<ProjectInvite> ProjectInvites { get; set; }
+    public DbSet<ProjectMember> ProjectMembers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
