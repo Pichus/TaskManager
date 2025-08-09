@@ -18,4 +18,10 @@ public static class AcceptInviteErrors
 
     public static readonly Error InvitedUserAlreadyAMember = new("Invites.Accept.InvitedUserAlreadyAMember",
         "You are already a project member");
+
+    public static readonly Error ProjectNotFound = new("Invites.Accept.ProjectNotFound",
+        "The project you were invited to join was not found");
+    
+    public static readonly Error Unauthenticated = new("Invites.Accept.Unauthenticated",
+        "Unauthenticated");
 }

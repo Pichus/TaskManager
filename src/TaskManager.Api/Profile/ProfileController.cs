@@ -18,14 +18,11 @@ public class ProfileController : ControllerBase
 {
     private readonly IInviteService _inviteService;
     private readonly IProfileDetailsService _profileDetailsService;
-    private readonly UserManager<TaskManagerUser> _userManager;
 
-    public ProfileController(IInviteService inviteService, IProfileDetailsService profileDetailsService,
-        UserManager<TaskManagerUser> userManager)
+    public ProfileController(IInviteService inviteService, IProfileDetailsService profileDetailsService)
     {
         _inviteService = inviteService;
         _profileDetailsService = profileDetailsService;
-        _userManager = userManager;
     }
 
     [HttpGet]
@@ -74,7 +71,11 @@ public class ProfileController : ControllerBase
             var errorCode = result.Error.Code;
             var errorMessage = result.Error.Message;
 
-            if (errorCode == AcceptInviteErrors.InviteNotFound.Code)
+            if (errorCode == AcceptInviteErrors.Unauthenticated.Code)
+                return Unauthorized();
+            
+            if (errorCode == AcceptInviteErrors.InviteNotFound.Code ||
+                errorCode == AcceptInviteErrors.ProjectNotFound.Code)
                 return NotFound(errorMessage);
 
             if (errorCode == AcceptInviteErrors.InviteAlreadyAccepted.Code ||

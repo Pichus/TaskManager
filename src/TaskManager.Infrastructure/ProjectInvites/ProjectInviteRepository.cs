@@ -40,4 +40,9 @@ public class ProjectInviteRepository : IProjectInviteRepository
         return _context.ProjectInvites.Where(invite =>
             invite.InvitedUserId == userId && invite.Status == InviteStatus.Pending);
     }
+
+    public void Update(ProjectInvite invite)
+    {
+        _context.Update(invite);
+    }
 }

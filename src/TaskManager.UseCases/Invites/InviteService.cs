@@ -105,6 +105,11 @@ public class InviteService : IInviteService
     {
         var currentUserId = _currentUserService.UserId;
 
+        if (currentUserId is null)
+        {
+            return Result.Failure(AcceptInviteErrors.Unauthenticated);
+        }
+
         var invite = await _projectInviteRepository.FindByIdAsync(inviteId);
 
         if (invite is null) return Result.Failure(AcceptInviteErrors.InviteNotFound);
@@ -122,7 +127,11 @@ public class InviteService : IInviteService
 
         var project = await _projectRepository.FindByIdAsync(invite.ProjectId);
 
+        if (project is null) return Result.Failure(AcceptInviteErrors.ProjectNotFound);
+
         _projectRepository.AddMember(project, currentUserId);
+        invite.Status = InviteStatus.Accepted;
+        _projectInviteRepository.Update(invite);
         await _dbContext.SaveChangesAsync();
 
         return Result.Success();

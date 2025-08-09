@@ -10,4 +10,5 @@ public interface IProjectInviteRepository
     Task<bool> AnyAsync(Expression<Func<ProjectInvite, bool>> predicate);
     void Delete(ProjectInvite invite);
     IQueryable<ProjectInvite> GetPendingInvitesByInvitedUserIdAsync(string userId);
+    void Update(ProjectInvite invite);
 }
