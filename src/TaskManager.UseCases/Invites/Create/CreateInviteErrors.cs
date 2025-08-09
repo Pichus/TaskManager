@@ -12,10 +12,13 @@ public static class CreateInviteErrors
 
     public static readonly Error ProjectNotFound = new("Invites.Create.ProjectNotFound",
         "Project not found");
-    
+
     public static readonly Error AccessDenied = new("Invites.Create.AccessDenied",
         "You have to be a project leader to invite users");
-    
+
     public static readonly Error InvitedUserAlreadyAMember = new("Invites.Create.InvitedUserAlreadyAMember",
         "Invited user is already a project member");
+
+    public static readonly Error Unauthenticated = new("Invites.Create.Unauthenticated",
+        "Unauthenticated");
 }

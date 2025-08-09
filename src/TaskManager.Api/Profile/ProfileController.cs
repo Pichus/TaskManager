@@ -7,7 +7,10 @@ using TaskManager.Profile.GetInvite;
 using TaskManager.Profile.GetProfileDetails;
 using TaskManager.UseCases.Invites;
 using TaskManager.UseCases.Invites.Accept;
+using TaskManager.UseCases.Invites.Decline;
+using TaskManager.UseCases.Invites.Get;
 using TaskManager.UseCases.Profile.ProfileDetails;
+using TaskManager.UseCases.Profile.ProfileDetails.Get;
 
 namespace TaskManager.Profile;
 
@@ -35,7 +38,8 @@ public class ProfileController : ControllerBase
             var errorCode = result.Error.Code;
             var errorMessage = result.Error.Message;
 
-            return BadRequest(errorMessage);
+            if (errorCode == GetCurrentUserProfileDetailsErrors.Unauthenticated.Code)
+                return Unauthorized();
         }
 
         var response = UserToGetProfileDetailsResponse(result.Value);
@@ -53,7 +57,8 @@ public class ProfileController : ControllerBase
             var errorCode = result.Error.Code;
             var errorMessage = result.Error.Message;
 
-            return BadRequest(errorMessage);
+            if (errorCode == GetInviteErrors.Unauthenticated.Code)
+                return Unauthorized();
         }
 
         var response = InvitesToGetInviteResponses(result.Value);
@@ -100,16 +105,21 @@ public class ProfileController : ControllerBase
             var errorCode = result.Error.Code;
             var errorMessage = result.Error.Message;
 
-            return BadRequest(errorMessage);
+            if (errorCode == DeclineInviteErrors.Unauthenticated.Code)
+                return Unauthorized();
+            
+            if (errorCode == DeclineInviteErrors.InviteNotFound.Code ||
+                errorCode == DeclineInviteErrors.ProjectNotFound.Code)
+                return NotFound(errorMessage);
+            
+            if (errorCode == DeclineInviteErrors.InviteAlreadyAccepted.Code ||
+                errorCode == DeclineInviteErrors.InviteAlreadyRejected.Code)
+                return BadRequest(errorMessage);
+            
+            if (errorCode == DeclineInviteErrors.AccessDenied.Code)
+                return Forbid(errorMessage);
         }
 
-        var response = "";
-        return Ok(response);
-    }
-
-    [HttpGet("invites/history")]
-    public async Task<IActionResult> GetInviteHistory()
-    {
         return Ok();
     }
 

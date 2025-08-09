@@ -20,12 +20,6 @@ public class ProjectInvitesController : ControllerBase
         _inviteService = inviteService;
     }
 
-    [HttpGet("{inviteId}")]
-    public async Task<ActionResult> Get([FromRoute] long inviteId)
-    {
-        return Ok(inviteId);
-    }
-
     [HttpPost]
     public async Task<ActionResult<CreateInviteResponse>> CreateInvite([FromRoute] long projectId,
         [FromBody] CreateInviteRequest request)
@@ -37,6 +31,11 @@ public class ProjectInvitesController : ControllerBase
             var errorCode = createInviteResult.Error.Code;
             var errorMessage = createInviteResult.Error.Message;
 
+            if (errorCode == CreateInviteErrors.Unauthenticated.Code)
+            {
+                return Unauthorized();
+            }
+            
             if (errorCode == CreateInviteErrors.InvitedUserNotFound.Code ||
                 errorCode == CreateInviteErrors.ProjectNotFound.Code)
                 return NotFound(errorMessage);
@@ -64,6 +63,9 @@ public class ProjectInvitesController : ControllerBase
             var errorCode = deleteInviteResult.Error.Code;
             var errorMessage = deleteInviteResult.Error.Message;
 
+            if (errorCode == DeleteInviteErrors.Unauthenticated.Code)
+                return Unauthorized();
+            
             if (errorCode == DeleteInviteErrors.InviteNotFound.Code)
                 return NotFound(errorMessage);
 

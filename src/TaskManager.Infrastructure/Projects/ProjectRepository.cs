@@ -23,7 +23,7 @@ public class ProjectRepository : IProjectRepository
         return await _context.Projects.FindAsync(id);
     }
 
-    public async Task<ProjectEntity?> FindByIdAsyncWithProjectMembersIncludedAsync(long id)
+    public async Task<ProjectEntity?> FindByIdWithProjectMembersIncludedAsync(long id)
     {
         return await _context.Projects
             .Include(project => project.Members)
@@ -56,7 +56,7 @@ public class ProjectRepository : IProjectRepository
         _context.ProjectMembers.Add(new ProjectMember
         {
             ProjectId = project.Id,
-            MemberId = memberId,
+            MemberId = memberId
         });
     }
 }
