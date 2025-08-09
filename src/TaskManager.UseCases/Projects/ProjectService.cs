@@ -1,9 +1,12 @@
+using Microsoft.AspNetCore.Identity;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
+using TaskManager.Infrastructure.Identity.User;
 using TaskManager.UseCases.Projects.Create;
 using TaskManager.UseCases.Projects.Delete;
 using TaskManager.UseCases.Projects.Get;
+using TaskManager.UseCases.Projects.GetMembers;
 using TaskManager.UseCases.Projects.Update;
 using TaskManager.UseCases.Shared;
 
@@ -14,13 +17,15 @@ public class ProjectService : IProjectService
     private readonly AppDbContext _context;
     private readonly ICurrentUserService _currentUserService;
     private readonly IProjectRepository _projectRepository;
+    private readonly UserManager<TaskManagerUser> _userManager;
 
     public ProjectService(IProjectRepository projectRepository, AppDbContext context,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService, UserManager<TaskManagerUser> userManager)
     {
         _projectRepository = projectRepository;
         _context = context;
         _currentUserService = currentUserService;
+        _userManager = userManager;
     }
 
     public async Task<Result<ProjectEntity>> CreateAsync(CreateProjectDto createProjectDto)
@@ -33,15 +38,15 @@ public class ProjectService : IProjectService
         };
 
         _projectRepository.Create(project);
-        
+
         await _context.SaveChangesAsync();
-        
+
         project.Members.Add(new ProjectMember
         {
             ProjectId = project.Id,
             MemberId = project.LeadUserId
         });
-        
+
         await _context.SaveChangesAsync();
 
         return Result<ProjectEntity>.Success(project);
@@ -103,5 +108,27 @@ public class ProjectService : IProjectService
         await _context.SaveChangesAsync();
 
         return Result.Success();
+    }
+
+    public async Task<Result<IEnumerable<string>>> GetProjectMembersAsync(long projectId)
+    {
+        var currentUserId = _currentUserService.UserId;
+
+        if (currentUserId is null)
+            return Result<IEnumerable<string>>.Failure(GetProjectMembersErrors.Unauthenticated);
+
+        var project = await _projectRepository.FindByIdWithProjectMembersIncludedAsync(projectId);
+
+        if (project is null)
+            return Result<IEnumerable<string>>.Failure(GetProjectMembersErrors.ProjectNotFound);
+
+        var currentUserMemberOfThisProject = project.Members.Any(member => member.MemberId == currentUserId);
+
+        if (!currentUserMemberOfThisProject)
+            return Result<IEnumerable<string>>.Failure(GetProjectMembersErrors.AccessDenied);
+
+        var memberIds = project.Members.Select(member => member.MemberId);
+
+        return Result<IEnumerable<string>>.Success(memberIds);
     }
 }

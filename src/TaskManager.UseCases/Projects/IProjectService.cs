@@ -1,4 +1,5 @@
 using TaskManager.Core.ProjectAggregate;
+using TaskManager.Infrastructure.Identity.User;
 using TaskManager.UseCases.Projects.Create;
 using TaskManager.UseCases.Projects.Update;
 using TaskManager.UseCases.Shared;
@@ -12,4 +13,5 @@ public interface IProjectService
     Task<Result<ProjectEntity>> GetByIdAsync(long projectId);
     Task<Result<ProjectEntity>> UpdateAsync(UpdateProjectDto updateProjectDto);
     Task<Result> DeleteAsync(long id);
+    Task<Result<IEnumerable<string>>> GetProjectMembersAsync(long projectId);
 }

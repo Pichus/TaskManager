@@ -8,6 +8,7 @@ using TaskManager.UseCases.Projects;
 using TaskManager.UseCases.Projects.Create;
 using TaskManager.UseCases.Projects.Delete;
 using TaskManager.UseCases.Projects.Get;
+using TaskManager.UseCases.Projects.GetMembers;
 using TaskManager.UseCases.Projects.Update;
 
 namespace TaskManager.Projects;
@@ -34,10 +35,10 @@ public class ProjectsController : ControllerBase
         return Ok(userProjectsResponse);
     }
 
-    [HttpGet("{id:long}")]
-    public async Task<ActionResult<GetProjectResponse>> Get(long id)
+    [HttpGet("{projectId:long}")]
+    public async Task<ActionResult<GetProjectResponse>> Get(long projectId)
     {
-        var getProjectResult = await _projectService.GetByIdAsync(id);
+        var getProjectResult = await _projectService.GetByIdAsync(projectId);
 
         if (getProjectResult.IsFailure)
         {
@@ -56,6 +57,26 @@ public class ProjectsController : ControllerBase
         return Ok(response);
     }
 
+    [HttpGet("{projectId:long}/members")]
+    public async Task<ActionResult<IEnumerable<string>>> GetMembers(long projectId)
+    {
+        var result = await _projectService.GetProjectMembersAsync(projectId);
+
+        if (result.IsFailure)
+        {
+            var errorCode = result.Error.Code;
+            var errorMessage = result.Error.Message;
+
+            if (errorCode == GetProjectMembersErrors.Unauthenticated.Code) return Unauthorized();
+            
+            if (errorCode == GetProjectMembersErrors.ProjectNotFound.Code) return NotFound(errorMessage);
+
+            if (errorCode == GetProjectMembersErrors.AccessDenied.Code) return Forbid();
+        }
+
+        return Ok(result.Value);
+    }
+
     [HttpPost]
     public async Task<ActionResult<CreateProjectResponse>> Create(CreateProjectRequest request)
     {
@@ -66,11 +87,11 @@ public class ProjectsController : ControllerBase
         return CreatedAtAction(nameof(Create), response);
     }
 
-    [HttpPut("{id:long}")]
-    public async Task<ActionResult<UpdateProjectResponse>> Put([FromRoute] long id,
+    [HttpPut("{projectId:long}")]
+    public async Task<ActionResult<UpdateProjectResponse>> Put([FromRoute] long projectId,
         [FromBody] UpdateProjectRequest request)
     {
-        var updateProjectResult = await _projectService.UpdateAsync(UpdateProjectRequestToDto(id, request));
+        var updateProjectResult = await _projectService.UpdateAsync(UpdateProjectRequestToDto(projectId, request));
 
         if (updateProjectResult.IsFailure)
         {
@@ -87,10 +108,10 @@ public class ProjectsController : ControllerBase
         return Ok(response);
     }
 
-    [HttpDelete("{id:long}")]
-    public async Task<ActionResult> Delete(long id)
+    [HttpDelete("{projectId:long}")]
+    public async Task<ActionResult> Delete(long projectId)
     {
-        var deleteProjectResult = await _projectService.DeleteAsync(id);
+        var deleteProjectResult = await _projectService.DeleteAsync(projectId);
 
         if (deleteProjectResult.IsFailure)
         {
