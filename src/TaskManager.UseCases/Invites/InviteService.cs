@@ -10,6 +10,7 @@ using TaskManager.UseCases.Invites.Create;
 using TaskManager.UseCases.Invites.Decline;
 using TaskManager.UseCases.Invites.Delete;
 using TaskManager.UseCases.Invites.Get;
+using TaskManager.UseCases.Invites.GetPendingForProject;
 using TaskManager.UseCases.Shared;
 
 namespace TaskManager.UseCases.Invites;
@@ -177,5 +178,33 @@ public class InviteService : IInviteService
         await _dbContext.SaveChangesAsync();
 
         return Result.Success();
+    }
+
+    public async Task<Result<IEnumerable<ProjectInvite>>> GetPendingProjectInvitesAsync(long projectId)
+    {
+        var currentUserId = _currentUserService.UserId;
+
+        if (currentUserId is null)
+        {
+            return Result<IEnumerable<ProjectInvite>>.Failure(GetPendingInvitesForProjectErrors.Unauthenticated);
+        }
+        
+        var project = await _projectRepository.FindByIdWithInvitesIncludedAsync(projectId);
+
+        if (project is null)
+        {
+            return Result<IEnumerable<ProjectInvite>>.Failure(GetPendingInvitesForProjectErrors.ProjectNotFound);
+        }
+
+        var currentUser = await _userManager.FindByIdAsync(currentUserId);
+
+        if (currentUser is null)
+        {
+            return Result<IEnumerable<ProjectInvite>>.Failure(GetPendingInvitesForProjectErrors.Unauthenticated);
+        }
+
+        var invites = project.Invites;
+        
+        return Result<IEnumerable<ProjectInvite>>.Success(invites);
     }
 }

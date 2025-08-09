@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManager.Core.ProjectInviteAggregate;
 using TaskManager.ProjectInvites.Create;
+using TaskManager.ProjectInvites.Get;
 using TaskManager.UseCases.Invites;
 using TaskManager.UseCases.Invites.Create;
 using TaskManager.UseCases.Invites.Delete;
+using TaskManager.UseCases.Invites.GetPendingForProject;
 
 namespace TaskManager.ProjectInvites;
 
@@ -20,6 +22,30 @@ public class ProjectInvitesController : ControllerBase
         _inviteService = inviteService;
     }
 
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<GetInviteResponse>>> GetInvites([FromRoute] long projectId)
+    {
+        var result = await _inviteService.GetPendingProjectInvitesAsync(projectId);
+
+        if (result.IsFailure)
+        {
+            var errorCode = result.Error.Code;
+            var errorMessage = result.Error.Message;
+
+            if (errorCode == GetPendingInvitesForProjectErrors.Unauthenticated.Code)
+            {
+                return Unauthorized();
+            }
+            
+            if (errorCode == GetPendingInvitesForProjectErrors.ProjectNotFound.Code)
+                return NotFound(errorMessage);
+        }
+
+        var response = InvitesToInviteResponses(result.Value);
+
+        return Ok(response);
+    }
+    
     [HttpPost]
     public async Task<ActionResult<CreateInviteResponse>> CreateInvite([FromRoute] long projectId,
         [FromBody] CreateInviteRequest request)
@@ -48,7 +74,7 @@ public class ProjectInvitesController : ControllerBase
                 return BadRequest(errorMessage);
         }
 
-        var response = InviteToInviteResponse(createInviteResult.Value);
+        var response = InviteToCreateInviteResponse(createInviteResult.Value);
 
         return response;
     }
@@ -87,7 +113,7 @@ public class ProjectInvitesController : ControllerBase
         return dto;
     }
 
-    private CreateInviteResponse InviteToInviteResponse(ProjectInvite invite)
+    private CreateInviteResponse InviteToCreateInviteResponse(ProjectInvite invite)
     {
         var response = new CreateInviteResponse
         {
@@ -98,5 +124,17 @@ public class ProjectInvitesController : ControllerBase
         };
 
         return response;
+    }
+
+    public IEnumerable<GetInviteResponse> InvitesToInviteResponses(IEnumerable<ProjectInvite> invites)
+    {
+        return invites.Select(invite => new GetInviteResponse
+        {
+            InviteId = invite.Id,
+            ProjectId = invite.ProjectId,
+            InvitedUserId = invite.InvitedUserId,
+            InvitedByUserId = invite.InvitedByUserId,
+            InviteStatus = invite.Status.ToString()
+        });
     }
 }

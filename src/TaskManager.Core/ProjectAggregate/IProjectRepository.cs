@@ -5,6 +5,7 @@ public interface IProjectRepository
     void Create(ProjectEntity project);
     Task<ProjectEntity?> FindByIdAsync(long id);
     Task<ProjectEntity?> FindByIdWithProjectMembersIncludedAsync(long id);
+    Task<ProjectEntity?> FindByIdWithInvitesIncludedAsync(long id);
     Task<IEnumerable<ProjectEntity>> GetAllByUserIdAsync(string userId);
     void Update(ProjectEntity project);
     void Remove(ProjectEntity project);
