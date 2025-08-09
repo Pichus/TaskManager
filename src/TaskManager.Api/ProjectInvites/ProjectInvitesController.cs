@@ -11,7 +11,7 @@ using TaskManager.UseCases.Invites.GetPendingForProject;
 namespace TaskManager.ProjectInvites;
 
 [Authorize]
-[Route("api/projects/{projectId}/invites")]
+[Route("api/projects/{projectId:long}/invites")]
 [ApiController]
 public class ProjectInvitesController : ControllerBase
 {
@@ -51,12 +51,12 @@ public class ProjectInvitesController : ControllerBase
         [FromBody] CreateInviteRequest request)
     {
         var createInviteResult = await _inviteService.CreateAsync(CreateInviteRequestToDto(projectId, request));
-
+    
         if (createInviteResult.IsFailure)
         {
             var errorCode = createInviteResult.Error.Code;
             var errorMessage = createInviteResult.Error.Message;
-
+    
             if (errorCode == CreateInviteErrors.Unauthenticated.Code)
             {
                 return Unauthorized();
@@ -65,21 +65,21 @@ public class ProjectInvitesController : ControllerBase
             if (errorCode == CreateInviteErrors.InvitedUserNotFound.Code ||
                 errorCode == CreateInviteErrors.ProjectNotFound.Code)
                 return NotFound(errorMessage);
-
+    
             if (errorCode == CreateInviteErrors.UserAlreadyInvited.Code ||
                 errorCode == CreateInviteErrors.InvitedUserAlreadyAMember.Code)
                 return BadRequest(errorMessage);
-
+    
             if (errorCode == CreateInviteErrors.AccessDenied.Code)
                 return BadRequest(errorMessage);
         }
-
+    
         var response = InviteToCreateInviteResponse(createInviteResult.Value);
-
-        return response;
+    
+        return Ok(response);
     }
 
-    [HttpDelete("{inviteId}")]
+    [HttpDelete("{inviteId:long}")]
     public async Task<ActionResult> DeleteInvite([FromRoute] long inviteId)
     {
         var deleteInviteResult = await _inviteService.DeleteAsync(inviteId);
@@ -126,7 +126,7 @@ public class ProjectInvitesController : ControllerBase
         return response;
     }
 
-    public IEnumerable<GetInviteResponse> InvitesToInviteResponses(IEnumerable<ProjectInvite> invites)
+    private IEnumerable<GetInviteResponse> InvitesToInviteResponses(IEnumerable<ProjectInvite> invites)
     {
         return invites.Select(invite => new GetInviteResponse
         {

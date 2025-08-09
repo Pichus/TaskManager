@@ -66,8 +66,8 @@ public class ProfileController : ControllerBase
         return Ok(response);
     }
 
-    [HttpPost("invites/{inviteId}/accept")]
-    public async Task<IActionResult> AcceptInvite(long inviteId)
+    [HttpPut("invites/{inviteId:long}/accept")]
+    public async Task<ActionResult> AcceptInvite(long inviteId)
     {
         var result = await _inviteService.AcceptInviteAsync(inviteId);
 
@@ -95,8 +95,8 @@ public class ProfileController : ControllerBase
         return Ok();
     }
 
-    [HttpPost("invites/{inviteId}/decline")]
-    public async Task<IActionResult> DeclineInvite(long inviteId)
+    [HttpPut("invites/{inviteId:long}/decline")]
+    public async Task<ActionResult> DeclineInvite(long inviteId)
     {
         var result = await _inviteService.DeclineInviteAsync(inviteId);
 

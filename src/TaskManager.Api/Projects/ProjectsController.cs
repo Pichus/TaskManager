@@ -34,7 +34,7 @@ public class ProjectsController : ControllerBase
         return Ok(userProjectsResponse);
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:long}")]
     public async Task<ActionResult<GetProjectResponse>> Get(long id)
     {
         var getProjectResult = await _projectService.GetByIdAsync(id);
@@ -66,7 +66,7 @@ public class ProjectsController : ControllerBase
         return CreatedAtAction(nameof(Create), response);
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:long}")]
     public async Task<ActionResult<UpdateProjectResponse>> Put([FromRoute] long id,
         [FromBody] UpdateProjectRequest request)
     {
@@ -87,7 +87,7 @@ public class ProjectsController : ControllerBase
         return Ok(response);
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:long}")]
     public async Task<ActionResult> Delete(long id)
     {
         var deleteProjectResult = await _projectService.DeleteAsync(id);
