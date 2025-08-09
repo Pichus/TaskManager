@@ -6,4 +6,5 @@ public class ProjectMember
     public string MemberId { get; set; }
     
     public ProjectEntity Project { get; set; }
+    public MemberRole MemberRole { get; set; }
 }
