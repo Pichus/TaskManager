@@ -66,7 +66,7 @@ public class ProjectInvitesController : ControllerBase
                 return BadRequest(errorMessage);
 
             if (errorCode == CreateInviteErrors.AccessDenied.Code)
-                return BadRequest(errorMessage);
+                return Forbid();
         }
 
         var response = InviteToCreateInviteResponse(createInviteResult.Value);

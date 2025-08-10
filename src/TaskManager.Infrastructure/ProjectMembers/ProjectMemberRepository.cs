@@ -17,7 +17,32 @@ public class ProjectMemberRepository : IProjectMemberRepository
     {
         return await _context
             .ProjectMembers
-            .FirstOrDefaultAsync(projectMember => projectMember.ProjectId == projectId
-                                                  && projectMember.MemberId == memberId);
+            .FirstOrDefaultAsync(member => member.ProjectId == projectId
+                                           && member.MemberId == memberId);
+    }
+
+    public async Task<bool> IsUserProjectMember(string userId, long projectId)
+    {
+        return await _context
+            .ProjectMembers
+            .AnyAsync(member => member.ProjectId == projectId
+                                && member.MemberId == userId);
+    }
+
+    public async Task<IEnumerable<ProjectMemberWithUser>> GetProjectMembersWithUsersAsync(long projectId)
+    {
+        return await _context
+            .ProjectMembers
+            .Where(member => member.ProjectId == projectId)
+            .Join(_context.Users, member => member.MemberId, user => user.Id, (member, user) =>
+                new ProjectMemberWithUser
+                {
+                    UserId = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    Role = member.MemberRole.Role
+                }
+            )
+            .ToListAsync();
     }
 }

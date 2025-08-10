@@ -12,5 +12,5 @@ public interface IProjectService
     Task<Result<ProjectEntity>> GetByIdAsync(long projectId);
     Task<Result<ProjectEntity>> UpdateAsync(UpdateProjectDto updateProjectDto);
     Task<Result> DeleteAsync(long id);
-    Task<Result<IEnumerable<string>>> GetProjectMembersAsync(long projectId);
+    Task<Result<IEnumerable<ProjectMemberWithUser>>> GetProjectMembersAsync(long projectId);
 }
