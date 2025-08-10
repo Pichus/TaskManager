@@ -34,7 +34,8 @@ public class ProjectRepository : IProjectRepository
     {
         return await _context.Projects
             .Include(project => project.Invites)
-            .FirstOrDefaultAsync(project => project.Id == id);;
+            .FirstOrDefaultAsync(project => project.Id == id);
+        ;
     }
 
     public async Task<IEnumerable<ProjectEntity>> GetAllByUserIdAsync(string userId)
@@ -60,20 +61,11 @@ public class ProjectRepository : IProjectRepository
 
     public void AddMember(ProjectEntity project, string memberId)
     {
-        var projectMember = new ProjectMember
+        _context.ProjectMembers.Add(new ProjectMember
         {
-            CreatedAt = DateTime.UtcNow,
             ProjectId = project.Id,
             MemberId = memberId,
-        };
-        
-        _context.ProjectMembers.Add(projectMember);
-
-        _context.MemberRoles.Add(new MemberRole
-        {
-            CreatedAt = DateTime.UtcNow,
-            Role = Role.Member,
-            ProjectMember = projectMember
+            ProjectRole = ProjectRole.Member
         });
     }
 }

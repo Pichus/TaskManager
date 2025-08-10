@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManager.Core.ProjectAggregate;
+using TaskManager.ProjectMembers.Get;
 using TaskManager.ProjectMembers.Update;
 using TaskManager.UseCases.ProjectMembers;
 using TaskManager.UseCases.ProjectMembers.Delete;
@@ -22,7 +23,7 @@ public class ProjectMembersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<ProjectMemberWithUser>> GetAll([FromRoute] long projectId)
+    public async Task<ActionResult<IEnumerable<GetProjectMemberResponse>>> GetAll([FromRoute] long projectId)
     {
         var result = await _projectMemberService.GetProjectMembersAsync(projectId);
 
@@ -38,7 +39,28 @@ public class ProjectMembersController : ControllerBase
             if (errorCode == GetProjectMembersErrors.AccessDenied.Code) return Forbid();
         }
 
-        return Ok(result.Value);
+        var response = 
+            ProjectMembersWithUsersToGetProjectMembersResponses(result.Value);
+
+        return Ok(response);
+    }
+
+    private IEnumerable<GetProjectMemberResponse> ProjectMembersWithUsersToGetProjectMembersResponses(
+        IEnumerable<ProjectMemberWithUser> projectMembersWithUsers)
+    {
+        return projectMembersWithUsers.Select(ProjectMemberWithUserToGetProjectMemberResponse);
+    }
+
+    private GetProjectMemberResponse ProjectMemberWithUserToGetProjectMemberResponse(
+        ProjectMemberWithUser projectMemberWithUser)
+    {
+        return new GetProjectMemberResponse
+        {
+            UserId = projectMemberWithUser.UserId,
+            UserName = projectMemberWithUser.UserName,
+            Email = projectMemberWithUser.Email,
+            ProjectRole = projectMemberWithUser.ProjectRole.ToString()
+        };
     }
 
     [AllowAnonymous]
@@ -46,7 +68,7 @@ public class ProjectMembersController : ControllerBase
     public async Task<ActionResult> Update([FromRoute] long projectId, [FromRoute] string memberId,
         [FromBody] UpdateProjectMemberRequest request)
     {
-        var result = await _projectMemberService.UpdateProjectMemberAsync(projectId, memberId, request.Role);
+        var result = await _projectMemberService.UpdateProjectMemberAsync(projectId, memberId, request.ProjectRole);
 
         if (result.IsFailure)
         {

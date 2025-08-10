@@ -6,5 +6,5 @@ namespace TaskManager.ProjectMembers.Update;
 public class UpdateProjectMemberRequest
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public Role Role { get; set; }
+    public ProjectRole ProjectRole { get; set; }
 }

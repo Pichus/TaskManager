@@ -92,9 +92,9 @@ public class InviteService : IInviteService
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null) return Result.Failure(UseCaseErrors.Unauthenticated);
-        
+
         var canDeleteInvite = invite.InvitedByUserId == currentUserId;
-        
+
         if (canDeleteInvite) return Result.Failure(DeleteInviteErrors.AccessDenied);
 
         _projectInviteRepository.Delete(invite);
@@ -201,7 +201,7 @@ public class InviteService : IInviteService
     {
         var projectMember = await _projectMemberRepository.GetByProjectIdAndMemberIdAsync(project.Id, userId);
 
-        var isUserProjectManager = (projectMember is not null) && projectMember.MemberRole.Role == Role.Manager;
+        var isUserProjectManager = projectMember is not null && projectMember.ProjectRole == ProjectRole.Manager;
 
         return userId == project.LeadUserId || isUserProjectManager;
     }

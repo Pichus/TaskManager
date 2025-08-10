@@ -1,6 +1,6 @@
 namespace TaskManager.Core.ProjectAggregate;
 
-public enum Role
+public enum ProjectRole
 {
     Member,
     Manager

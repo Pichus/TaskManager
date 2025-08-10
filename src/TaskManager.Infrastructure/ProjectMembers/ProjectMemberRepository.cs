@@ -17,7 +17,6 @@ public class ProjectMemberRepository : IProjectMemberRepository
     {
         return await _context
             .ProjectMembers
-            .Include(member => member.MemberRole)
             .FirstOrDefaultAsync(member => member.ProjectId == projectId
                                            && member.MemberId == memberId);
     }
@@ -41,7 +40,7 @@ public class ProjectMemberRepository : IProjectMemberRepository
                     UserId = user.Id,
                     UserName = user.UserName,
                     Email = user.Email,
-                    Role = member.MemberRole.Role
+                    ProjectRole = member.ProjectRole
                 }
             )
             .ToListAsync();

@@ -53,7 +53,7 @@ public class ProjectMemberService : IProjectMemberService
         return Result<IEnumerable<ProjectMemberWithUser>>.Success(projectMembers);
     }
 
-    public async Task<Result> UpdateProjectMemberAsync(long projectId, string memberId, Role role)
+    public async Task<Result> UpdateProjectMemberAsync(long projectId, string memberId, ProjectRole projectRole)
     {
         var currentUserId = _currentUserService.UserId;
 
@@ -82,10 +82,10 @@ public class ProjectMemberService : IProjectMemberService
         if (!isUserProjectMember)
             return Result.Failure(UpdateProjectMemberErrors.UserIsNotAProjectMember);
 
-        if (projectMember.MemberRole.Role == role)
+        if (projectMember.ProjectRole == projectRole)
             return Result.Failure(UpdateProjectMemberErrors.MemberAlreadyHasThisRole);
 
-        projectMember.MemberRole.Role = role;
+        projectMember.ProjectRole = projectRole;
         await _dbContext.SaveChangesAsync();
 
         return Result.Success();

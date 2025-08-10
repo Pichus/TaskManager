@@ -10,8 +10,7 @@ public class ProjectMemberEntityConfiguration : IEntityTypeConfiguration<Project
     public void Configure(EntityTypeBuilder<ProjectMember> builder)
     {
         builder
-            .HasIndex(e => new { e.ProjectId, e.MemberId })
-            .IsUnique();
+            .HasKey(e => new { e.ProjectId, e.MemberId });
 
         builder
             .HasOne(e => e.Project)
@@ -26,8 +25,7 @@ public class ProjectMemberEntityConfiguration : IEntityTypeConfiguration<Project
             .IsRequired();
 
         builder
-            .HasOne(e => e.MemberRole)
-            .WithOne(e => e.ProjectMember)
-            .IsRequired();
+            .Property(e => e.ProjectRole)
+            .HasConversion<string>();
     }
 }
