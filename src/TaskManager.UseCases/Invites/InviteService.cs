@@ -9,7 +9,6 @@ using TaskManager.UseCases.Invites.Accept;
 using TaskManager.UseCases.Invites.Create;
 using TaskManager.UseCases.Invites.Decline;
 using TaskManager.UseCases.Invites.Delete;
-using TaskManager.UseCases.Invites.Get;
 using TaskManager.UseCases.Invites.GetPendingForProject;
 using TaskManager.UseCases.Shared;
 
@@ -20,17 +19,20 @@ public class InviteService : IInviteService
     private readonly ICurrentUserService _currentUserService;
     private readonly AppDbContext _dbContext;
     private readonly IProjectInviteRepository _projectInviteRepository;
+    private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly UserManager<TaskManagerUser> _userManager;
 
     public InviteService(IProjectInviteRepository projectInviteRepository, IProjectRepository projectRepository,
-        ICurrentUserService currentUserService, AppDbContext dbContext, UserManager<TaskManagerUser> userManager)
+        ICurrentUserService currentUserService, AppDbContext dbContext, UserManager<TaskManagerUser> userManager,
+        IProjectMemberRepository projectMemberRepository)
     {
         _projectInviteRepository = projectInviteRepository;
         _projectRepository = projectRepository;
         _currentUserService = currentUserService;
         _dbContext = dbContext;
         _userManager = userManager;
+        _projectMemberRepository = projectMemberRepository;
     }
 
     public async Task<Result<ProjectInvite>> CreateAsync(CreateInviteDto createInviteDto)
@@ -44,7 +46,9 @@ public class InviteService : IInviteService
 
         if (invitedByUserId is null) return Result<ProjectInvite>.Failure(UseCaseErrors.Unauthenticated);
 
-        if (invitedByUserId != project.LeadUserId)
+        var canCreateInvite = await IsUserProjectLeadOrManagerAsync(invitedByUserId, project);
+
+        if (!canCreateInvite)
             return Result<ProjectInvite>.Failure(CreateInviteErrors.AccessDenied);
 
         var invitedUser = await _userManager.FindByIdAsync(createInviteDto.InvitedUserId);
@@ -88,8 +92,10 @@ public class InviteService : IInviteService
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null) return Result.Failure(UseCaseErrors.Unauthenticated);
-
-        if (currentUserId != invite.InvitedByUserId) return Result.Failure(DeleteInviteErrors.AccessDenied);
+        
+        var canDeleteInvite = invite.InvitedByUserId == currentUserId;
+        
+        if (canDeleteInvite) return Result.Failure(DeleteInviteErrors.AccessDenied);
 
         _projectInviteRepository.Delete(invite);
         await _dbContext.SaveChangesAsync();
@@ -189,5 +195,14 @@ public class InviteService : IInviteService
         var invites = project.Invites;
 
         return Result<IEnumerable<ProjectInvite>>.Success(invites);
+    }
+
+    private async Task<bool> IsUserProjectLeadOrManagerAsync(string userId, ProjectEntity project)
+    {
+        var projectMember = await _projectMemberRepository.GetByProjectIdAndMemberIdAsync(project.Id, userId);
+
+        if (projectMember is null) return false;
+
+        return userId == project.LeadUserId || projectMember.MemberRole.Role == Role.Manager;
     }
 }

@@ -9,6 +9,7 @@ using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.Infrastructure.Identity.RefreshToken;
 using TaskManager.Infrastructure.Identity.User;
 using TaskManager.Infrastructure.ProjectInvites;
+using TaskManager.Infrastructure.ProjectMembers;
 using TaskManager.Infrastructure.Projects;
 
 namespace TaskManager.Infrastructure;
@@ -66,6 +67,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IProjectInviteRepository, ProjectInviteRepository>();
+        services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
     }
 
     private static void RegisterServices(IServiceCollection services)
