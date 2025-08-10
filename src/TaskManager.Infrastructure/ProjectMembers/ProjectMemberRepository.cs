@@ -17,6 +17,7 @@ public class ProjectMemberRepository : IProjectMemberRepository
     {
         return await _context
             .ProjectMembers
+            .Include(member => member.MemberRole)
             .FirstOrDefaultAsync(member => member.ProjectId == projectId
                                            && member.MemberId == memberId);
     }
@@ -44,5 +45,10 @@ public class ProjectMemberRepository : IProjectMemberRepository
                 }
             )
             .ToListAsync();
+    }
+
+    public void Update(ProjectMember projectMember)
+    {
+        _context.Update(projectMember);
     }
 }

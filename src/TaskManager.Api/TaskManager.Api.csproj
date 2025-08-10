@@ -26,12 +26,12 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Tasks\"/>
+        <ProjectReference Include="..\TaskManager.Infrastructure\TaskManager.Infrastructure.csproj"/>
+        <ProjectReference Include="..\TaskManager.UseCases\TaskManager.UseCases.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\TaskManager.Infrastructure\TaskManager.Infrastructure.csproj"/>
-        <ProjectReference Include="..\TaskManager.UseCases\TaskManager.UseCases.csproj"/>
+        <Folder Include="ProjectTasks\Get\"/>
     </ItemGroup>
 
 </Project>

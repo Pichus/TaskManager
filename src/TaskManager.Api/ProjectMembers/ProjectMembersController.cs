@@ -1,8 +1,10 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.ProjectMembers.Update;
 using TaskManager.UseCases.ProjectMembers;
 using TaskManager.UseCases.ProjectMembers.Get;
+using TaskManager.UseCases.ProjectMembers.Update;
 using TaskManager.UseCases.Shared;
 
 namespace TaskManager.ProjectMembers;
@@ -38,11 +40,12 @@ public class ProjectMembersController : ControllerBase
         return Ok(result.Value);
     }
 
-    [HttpPut("{memberId:long}")]
-    public async Task<ActionResult> Update([FromRoute] long projectId, [FromRoute] long memberId,
+    [AllowAnonymous]
+    [HttpPut("{memberId:guid}")]
+    public async Task<ActionResult> Update([FromRoute] long projectId, [FromRoute] string memberId,
         [FromBody] UpdateProjectMemberRequest request)
     {
-        var result = await _projectMemberService.GetProjectMembersAsync(projectId);
+        var result = await _projectMemberService.UpdateProjectMember(projectId, memberId, request.Role);
 
         if (result.IsFailure)
         {
@@ -51,16 +54,22 @@ public class ProjectMembersController : ControllerBase
 
             if (errorCode == UseCaseErrors.Unauthenticated.Code) return Unauthorized();
 
-            if (errorCode == GetProjectMembersErrors.ProjectNotFound.Code) return NotFound(errorMessage);
+            if (errorCode == UpdateProjectMemberErrors.MemberNotFound.Code
+                || errorCode == UpdateProjectMemberErrors.ProjectNotFound.Code)
+                return NotFound(errorMessage);
+            
+            if (errorCode == UpdateProjectMemberErrors.AccessDenied.Code) return Forbid();
 
-            if (errorCode == GetProjectMembersErrors.AccessDenied.Code) return Forbid();
+            if (errorCode == UpdateProjectMemberErrors.UserIsNotAProjectMember.Code
+                || errorCode == UpdateProjectMemberErrors.MemberAlreadyHasThisRole.Code)
+                return BadRequest(errorMessage);
         }
 
-        return Ok(result.Value);
+        return Ok();
     }
 
-    [HttpDelete("{memberId:long}")]
-    public async Task<ActionResult> Delete([FromRoute] long projectId, [FromRoute] long memberId)
+    [HttpDelete("{memberId:guid}")]
+    public async Task<ActionResult> Delete([FromRoute] long projectId, [FromRoute] string memberId)
     {
         // delete member
         return Ok();

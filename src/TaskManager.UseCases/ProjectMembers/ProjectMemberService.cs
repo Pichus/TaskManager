@@ -1,6 +1,10 @@
+using Microsoft.AspNetCore.Identity;
 using TaskManager.Core.ProjectAggregate;
+using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
+using TaskManager.Infrastructure.Identity.User;
 using TaskManager.UseCases.ProjectMembers.Get;
+using TaskManager.UseCases.ProjectMembers.Update;
 using TaskManager.UseCases.Shared;
 
 namespace TaskManager.UseCases.ProjectMembers;
@@ -8,15 +12,20 @@ namespace TaskManager.UseCases.ProjectMembers;
 public class ProjectMemberService : IProjectMemberService
 {
     private readonly ICurrentUserService _currentUserService;
+    private readonly AppDbContext _dbContext;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
+    private readonly UserManager<TaskManagerUser> _userManager;
 
     public ProjectMemberService(ICurrentUserService currentUserService, IProjectRepository projectRepository,
-        IProjectMemberRepository projectMemberRepository)
+        IProjectMemberRepository projectMemberRepository, UserManager<TaskManagerUser> userManager,
+        AppDbContext dbContext)
     {
         _currentUserService = currentUserService;
         _projectRepository = projectRepository;
         _projectMemberRepository = projectMemberRepository;
+        _userManager = userManager;
+        _dbContext = dbContext;
     }
 
     public async Task<Result<IEnumerable<ProjectMemberWithUser>>> GetProjectMembersAsync(long projectId)
@@ -40,5 +49,43 @@ public class ProjectMemberService : IProjectMemberService
             await _projectMemberRepository.GetProjectMembersWithUsersAsync(projectId);
 
         return Result<IEnumerable<ProjectMemberWithUser>>.Success(projectMembers);
+    }
+
+    public async Task<Result> UpdateProjectMember(long projectId, string memberId, Role role)
+    {
+        var currentUserId = _currentUserService.UserId;
+
+        if (currentUserId is null)
+            return Result.Failure(UseCaseErrors.Unauthenticated);
+
+        var memberUser = await _userManager.FindByIdAsync(memberId);
+
+        if (memberUser is null)
+            return Result.Failure(UpdateProjectMemberErrors.MemberNotFound);
+
+        var project = await _projectRepository.FindByIdAsync(projectId);
+
+        if (project is null)
+            return Result.Failure(UpdateProjectMemberErrors.ProjectNotFound);
+
+        var isCurrentUserProjectLead = currentUserId == project.LeadUserId;
+
+        if (!isCurrentUserProjectLead)
+            return Result.Failure(UpdateProjectMemberErrors.AccessDenied);
+
+        var projectMember = await _projectMemberRepository.GetByProjectIdAndMemberIdAsync(projectId, memberId);
+
+        var isUserProjectMember = projectMember is not null;
+
+        if (!isUserProjectMember)
+            return Result.Failure(UpdateProjectMemberErrors.UserIsNotAProjectMember);
+
+        if (projectMember.MemberRole.Role == role)
+            return Result.Failure(UpdateProjectMemberErrors.MemberAlreadyHasThisRole);
+
+        projectMember.MemberRole.Role = role;
+        await _dbContext.SaveChangesAsync();
+
+        return Result.Success();
     }
 }
