@@ -41,14 +41,6 @@ public class ProjectService : IProjectService
 
         await _context.SaveChangesAsync();
 
-        project.Members.Add(new ProjectMember
-        {
-            ProjectId = project.Id,
-            MemberId = project.LeadUserId
-        });
-
-        await _context.SaveChangesAsync();
-
         return Result<ProjectEntity>.Success(project);
     }
 
