@@ -18,7 +18,4 @@ public static class CreateInviteErrors
 
     public static readonly Error InvitedUserAlreadyAMember = new("Invites.Create.InvitedUserAlreadyAMember",
         "Invited user is already a project member");
-
-    public static readonly Error Unauthenticated = new("Invites.Create.Unauthenticated",
-        "Unauthenticated");
 }

@@ -7,6 +7,7 @@ using TaskManager.UseCases.Invites;
 using TaskManager.UseCases.Invites.Create;
 using TaskManager.UseCases.Invites.Delete;
 using TaskManager.UseCases.Invites.GetPendingForProject;
+using TaskManager.UseCases.Shared;
 
 namespace TaskManager.ProjectInvites;
 
@@ -32,11 +33,8 @@ public class ProjectInvitesController : ControllerBase
             var errorCode = result.Error.Code;
             var errorMessage = result.Error.Message;
 
-            if (errorCode == GetPendingInvitesForProjectErrors.Unauthenticated.Code)
-            {
-                return Unauthorized();
-            }
-            
+            if (errorCode == UseCaseErrors.Unauthenticated.Code) return Unauthorized();
+
             if (errorCode == GetPendingInvitesForProjectErrors.ProjectNotFound.Code)
                 return NotFound(errorMessage);
         }
@@ -45,37 +43,34 @@ public class ProjectInvitesController : ControllerBase
 
         return Ok(response);
     }
-    
+
     [HttpPost]
     public async Task<ActionResult<CreateInviteResponse>> CreateInvite([FromRoute] long projectId,
         [FromBody] CreateInviteRequest request)
     {
         var createInviteResult = await _inviteService.CreateAsync(CreateInviteRequestToDto(projectId, request));
-    
+
         if (createInviteResult.IsFailure)
         {
             var errorCode = createInviteResult.Error.Code;
             var errorMessage = createInviteResult.Error.Message;
-    
-            if (errorCode == CreateInviteErrors.Unauthenticated.Code)
-            {
-                return Unauthorized();
-            }
-            
+
+            if (errorCode == UseCaseErrors.Unauthenticated.Code) return Unauthorized();
+
             if (errorCode == CreateInviteErrors.InvitedUserNotFound.Code ||
                 errorCode == CreateInviteErrors.ProjectNotFound.Code)
                 return NotFound(errorMessage);
-    
+
             if (errorCode == CreateInviteErrors.UserAlreadyInvited.Code ||
                 errorCode == CreateInviteErrors.InvitedUserAlreadyAMember.Code)
                 return BadRequest(errorMessage);
-    
+
             if (errorCode == CreateInviteErrors.AccessDenied.Code)
                 return BadRequest(errorMessage);
         }
-    
+
         var response = InviteToCreateInviteResponse(createInviteResult.Value);
-    
+
         return Ok(response);
     }
 
@@ -89,9 +84,9 @@ public class ProjectInvitesController : ControllerBase
             var errorCode = deleteInviteResult.Error.Code;
             var errorMessage = deleteInviteResult.Error.Message;
 
-            if (errorCode == DeleteInviteErrors.Unauthenticated.Code)
+            if (errorCode == UseCaseErrors.Unauthenticated.Code)
                 return Unauthorized();
-            
+
             if (errorCode == DeleteInviteErrors.InviteNotFound.Code)
                 return NotFound(errorMessage);
 

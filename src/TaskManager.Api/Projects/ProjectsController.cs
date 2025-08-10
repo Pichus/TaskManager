@@ -8,8 +8,8 @@ using TaskManager.UseCases.Projects;
 using TaskManager.UseCases.Projects.Create;
 using TaskManager.UseCases.Projects.Delete;
 using TaskManager.UseCases.Projects.Get;
-using TaskManager.UseCases.Projects.GetMembers;
 using TaskManager.UseCases.Projects.Update;
+using TaskManager.UseCases.Shared;
 
 namespace TaskManager.Projects;
 
@@ -28,9 +28,17 @@ public class ProjectsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<GetProjectResponse>>> GetAll()
     {
-        var userProjects = await _projectService.GetAllByUserAsync();
+        var result = await _projectService.GetAllByUserAsync();
 
-        var userProjectsResponse = userProjects.Select(ProjectToGetProjectResponse);
+        if (result.IsFailure)
+        {
+            var errorCode = result.Error.Code;
+            var errorMessage = result.Error.Message;
+
+            if (errorCode == UseCaseErrors.Unauthenticated.Code) return Unauthorized();
+        }
+
+        var userProjectsResponse = result.Value.Select(ProjectToGetProjectResponse);
 
         return Ok(userProjectsResponse);
     }
@@ -45,6 +53,8 @@ public class ProjectsController : ControllerBase
             var errorCode = getProjectResult.Error.Code;
             var errorMessage = getProjectResult.Error.Message;
 
+            if (errorCode == UseCaseErrors.Unauthenticated.Code) return Unauthorized();
+
             if (errorCode == GetProjectErrors.NotFound().Code) return NotFound(errorMessage);
 
             if (errorCode == GetProjectErrors.AccessDenied.Code) return Forbid();
@@ -57,30 +67,22 @@ public class ProjectsController : ControllerBase
         return Ok(response);
     }
 
-    [HttpGet("{projectId:long}/members")]
-    public async Task<ActionResult<IEnumerable<string>>> GetMembers(long projectId)
-    {
-        var result = await _projectService.GetProjectMembersAsync(projectId);
-
-        if (result.IsFailure)
-        {
-            var errorCode = result.Error.Code;
-            var errorMessage = result.Error.Message;
-
-            if (errorCode == GetProjectMembersErrors.Unauthenticated.Code) return Unauthorized();
-            
-            if (errorCode == GetProjectMembersErrors.ProjectNotFound.Code) return NotFound(errorMessage);
-
-            if (errorCode == GetProjectMembersErrors.AccessDenied.Code) return Forbid();
-        }
-
-        return Ok(result.Value);
-    }
-
     [HttpPost]
     public async Task<ActionResult<CreateProjectResponse>> Create(CreateProjectRequest request)
     {
         var createProjectResult = await _projectService.CreateAsync(CreateProjectRequestToDto(request));
+
+        if (createProjectResult.IsFailure)
+        {
+            var errorCode = createProjectResult.Error.Code;
+            var errorMessage = createProjectResult.Error.Message;
+
+            if (errorCode == UseCaseErrors.Unauthenticated.Code) return Unauthorized(errorMessage);
+
+            if (errorCode == GetProjectErrors.NotFound().Code) return NotFound(errorMessage);
+
+            if (errorCode == GetProjectErrors.AccessDenied.Code) return Forbid();
+        }
 
         var response = ProjectToCreateProjectResponse(createProjectResult.Value);
 
@@ -97,6 +99,8 @@ public class ProjectsController : ControllerBase
         {
             var errorCode = updateProjectResult.Error.Code;
             var errorMessage = updateProjectResult.Error.Message;
+
+            if (errorCode == UseCaseErrors.Unauthenticated.Code) return Unauthorized();
 
             if (errorCode == UpdateProjectErrors.NotFound().Code) return NotFound(errorMessage);
 
@@ -117,6 +121,8 @@ public class ProjectsController : ControllerBase
         {
             var errorCode = deleteProjectResult.Error.Code;
             var errorMessage = deleteProjectResult.Error.Message;
+
+            if (errorCode == UseCaseErrors.Unauthenticated.Code) return Unauthorized();
 
             if (errorCode == DeleteProjectErrors.NotFound().Code) return NotFound(errorMessage);
 

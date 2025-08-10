@@ -2,7 +2,7 @@ using TaskManager.UseCases.Shared;
 
 namespace TaskManager.UseCases.Projects.Delete;
 
-public class DeleteProjectErrors
+public static class DeleteProjectErrors
 {
     public static readonly Error AccessDenied = new("Projects.Delete.AccessDenied",
         "You do not have access to this project");

@@ -9,9 +9,6 @@ public static class DeclineInviteErrors
     
     public static readonly Error ProjectNotFound = new("Invites.Decline.ProjectNotFound",
         "Project not found");
-
-    public static readonly Error Unauthenticated = new("Invites.Decline.Unauthenticated",
-        "Unauthenticated");
     
     public static readonly Error InviteAlreadyAccepted = new("Invites.Decline.InviteAlreadyAccepted",
         "The invite has been already accepted");

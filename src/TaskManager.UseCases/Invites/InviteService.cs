@@ -42,10 +42,7 @@ public class InviteService : IInviteService
 
         var invitedByUserId = _currentUserService.UserId;
 
-        if (invitedByUserId is null)
-        {
-            return Result<ProjectInvite>.Failure(CreateInviteErrors.Unauthenticated);
-        }
+        if (invitedByUserId is null) return Result<ProjectInvite>.Failure(UseCaseErrors.Unauthenticated);
 
         if (invitedByUserId != project.LeadUserId)
             return Result<ProjectInvite>.Failure(CreateInviteErrors.AccessDenied);
@@ -90,10 +87,7 @@ public class InviteService : IInviteService
 
         var currentUserId = _currentUserService.UserId;
 
-        if (currentUserId is null)
-        {
-            return Result.Failure(DeleteInviteErrors.Unauthenticated);
-        }
+        if (currentUserId is null) return Result.Failure(UseCaseErrors.Unauthenticated);
 
         if (currentUserId != invite.InvitedByUserId) return Result.Failure(DeleteInviteErrors.AccessDenied);
 
@@ -108,8 +102,8 @@ public class InviteService : IInviteService
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null)
-            return Result<IEnumerable<ProjectInvite>>.Failure(GetInviteErrors.Unauthenticated);
-        
+            return Result<IEnumerable<ProjectInvite>>.Failure(UseCaseErrors.Unauthenticated);
+
         var pendingInvites = await _projectInviteRepository
             .GetPendingInvitesByInvitedUserIdAsync(currentUserId)
             .ToListAsync();
@@ -121,7 +115,7 @@ public class InviteService : IInviteService
     {
         var currentUserId = _currentUserService.UserId;
 
-        if (currentUserId is null) return Result.Failure(AcceptInviteErrors.Unauthenticated);
+        if (currentUserId is null) return Result.Failure(UseCaseErrors.Unauthenticated);
 
         var invite = await _projectInviteRepository.FindByIdAsync(inviteId);
 
@@ -154,11 +148,8 @@ public class InviteService : IInviteService
     {
         var currentUserId = _currentUserService.UserId;
 
-        if (currentUserId is null)
-        {
-            return Result.Failure(DeclineInviteErrors.Unauthenticated);
-        }
-        
+        if (currentUserId is null) return Result.Failure(UseCaseErrors.Unauthenticated);
+
         var invite = await _projectInviteRepository.FindByIdAsync(inviteId);
 
         if (invite is null) return Result.Failure(DeclineInviteErrors.InviteNotFound);
@@ -184,27 +175,19 @@ public class InviteService : IInviteService
     {
         var currentUserId = _currentUserService.UserId;
 
-        if (currentUserId is null)
-        {
-            return Result<IEnumerable<ProjectInvite>>.Failure(GetPendingInvitesForProjectErrors.Unauthenticated);
-        }
-        
+        if (currentUserId is null) return Result<IEnumerable<ProjectInvite>>.Failure(UseCaseErrors.Unauthenticated);
+
         var project = await _projectRepository.FindByIdWithInvitesIncludedAsync(projectId);
 
         if (project is null)
-        {
             return Result<IEnumerable<ProjectInvite>>.Failure(GetPendingInvitesForProjectErrors.ProjectNotFound);
-        }
 
         var currentUser = await _userManager.FindByIdAsync(currentUserId);
 
-        if (currentUser is null)
-        {
-            return Result<IEnumerable<ProjectInvite>>.Failure(GetPendingInvitesForProjectErrors.Unauthenticated);
-        }
+        if (currentUser is null) return Result<IEnumerable<ProjectInvite>>.Failure(UseCaseErrors.Unauthenticated);
 
         var invites = project.Invites;
-        
+
         return Result<IEnumerable<ProjectInvite>>.Success(invites);
     }
 }

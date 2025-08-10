@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TaskManager.Core.ProjectInviteAggregate;
 using TaskManager.Infrastructure.Identity.User;
@@ -10,7 +9,7 @@ using TaskManager.UseCases.Invites.Accept;
 using TaskManager.UseCases.Invites.Decline;
 using TaskManager.UseCases.Invites.Get;
 using TaskManager.UseCases.Profile.ProfileDetails;
-using TaskManager.UseCases.Profile.ProfileDetails.Get;
+using TaskManager.UseCases.Shared;
 
 namespace TaskManager.Profile;
 
@@ -38,7 +37,7 @@ public class ProfileController : ControllerBase
             var errorCode = result.Error.Code;
             var errorMessage = result.Error.Message;
 
-            if (errorCode == GetCurrentUserProfileDetailsErrors.Unauthenticated.Code)
+            if (errorCode == UseCaseErrors.Unauthenticated.Code)
                 return Unauthorized();
         }
 
@@ -57,7 +56,7 @@ public class ProfileController : ControllerBase
             var errorCode = result.Error.Code;
             var errorMessage = result.Error.Message;
 
-            if (errorCode == GetInviteErrors.Unauthenticated.Code)
+            if (errorCode == UseCaseErrors.Unauthenticated.Code)
                 return Unauthorized();
         }
 
@@ -76,9 +75,9 @@ public class ProfileController : ControllerBase
             var errorCode = result.Error.Code;
             var errorMessage = result.Error.Message;
 
-            if (errorCode == AcceptInviteErrors.Unauthenticated.Code)
+            if (errorCode == UseCaseErrors.Unauthenticated.Code)
                 return Unauthorized();
-            
+
             if (errorCode == AcceptInviteErrors.InviteNotFound.Code ||
                 errorCode == AcceptInviteErrors.ProjectNotFound.Code)
                 return NotFound(errorMessage);
@@ -105,17 +104,17 @@ public class ProfileController : ControllerBase
             var errorCode = result.Error.Code;
             var errorMessage = result.Error.Message;
 
-            if (errorCode == DeclineInviteErrors.Unauthenticated.Code)
+            if (errorCode == UseCaseErrors.Unauthenticated.Code)
                 return Unauthorized();
-            
+
             if (errorCode == DeclineInviteErrors.InviteNotFound.Code ||
                 errorCode == DeclineInviteErrors.ProjectNotFound.Code)
                 return NotFound(errorMessage);
-            
+
             if (errorCode == DeclineInviteErrors.InviteAlreadyAccepted.Code ||
                 errorCode == DeclineInviteErrors.InviteAlreadyRejected.Code)
                 return BadRequest(errorMessage);
-            
+
             if (errorCode == DeclineInviteErrors.AccessDenied.Code)
                 return Forbid(errorMessage);
         }

@@ -30,11 +30,15 @@ public class ProjectService : IProjectService
 
     public async Task<Result<ProjectEntity>> CreateAsync(CreateProjectDto createProjectDto)
     {
+        var currentUserId = _currentUserService.UserId;
+
+        if (currentUserId is null) return Result<ProjectEntity>.Failure(UseCaseErrors.Unauthenticated);
+
         var project = new ProjectEntity
         {
             CreatedAt = DateTime.UtcNow,
             Title = createProjectDto.Title,
-            LeadUserId = _currentUserService.UserId
+            LeadUserId = currentUserId
         };
 
         _projectRepository.Create(project);
@@ -44,21 +48,29 @@ public class ProjectService : IProjectService
         return Result<ProjectEntity>.Success(project);
     }
 
-    public async Task<IEnumerable<ProjectEntity>> GetAllByUserAsync()
+    public async Task<Result<IEnumerable<ProjectEntity>>> GetAllByUserAsync()
     {
-        var projects = await _projectRepository.GetAllByUserIdAsync(_currentUserService.UserId);
+        var currentUserId = _currentUserService.UserId;
 
-        return projects;
+        if (currentUserId is null) return Result<IEnumerable<ProjectEntity>>.Failure(UseCaseErrors.Unauthenticated);
+
+        var projects = await _projectRepository.GetAllByUserIdAsync(currentUserId);
+
+        return Result<IEnumerable<ProjectEntity>>.Success(projects);
     }
 
     public async Task<Result<ProjectEntity>> GetByIdAsync(long projectId)
     {
+        var currentUserId = _currentUserService.UserId;
+
+        if (currentUserId is null) return Result<ProjectEntity>.Failure(UseCaseErrors.Unauthenticated);
+
         var project = await _projectRepository.FindByIdAsync(projectId);
 
         if (project is null)
             return Result<ProjectEntity>.Failure(GetProjectErrors.NotFound(projectId));
 
-        if (project.LeadUserId != _currentUserService.UserId)
+        if (project.LeadUserId != currentUserId)
             return Result<ProjectEntity>.Failure(GetProjectErrors.AccessDenied);
 
         return Result<ProjectEntity>.Success(project);
@@ -66,12 +78,14 @@ public class ProjectService : IProjectService
 
     public async Task<Result<ProjectEntity>> UpdateAsync(UpdateProjectDto updateProjectDto)
     {
+        var currentUserId = _currentUserService.UserId;
+
+        if (currentUserId is null) return Result<ProjectEntity>.Failure(UseCaseErrors.Unauthenticated);
+
         var project = await _projectRepository.FindByIdAsync(updateProjectDto.ProjectId);
 
         if (project is null)
             return Result<ProjectEntity>.Failure(UpdateProjectErrors.NotFound(updateProjectDto.ProjectId));
-
-        var currentUserId = _currentUserService.UserId;
 
         if (project.LeadUserId != currentUserId)
             return Result<ProjectEntity>.Failure(UpdateProjectErrors.AccessDenied);
@@ -86,12 +100,14 @@ public class ProjectService : IProjectService
 
     public async Task<Result> DeleteAsync(long id)
     {
+        var currentUserId = _currentUserService.UserId;
+
+        if (currentUserId is null) return Result.Failure(UseCaseErrors.Unauthenticated);
+
         var project = await _projectRepository.FindByIdAsync(id);
 
         if (project is null)
             return Result.Failure(DeleteProjectErrors.NotFound(id));
-
-        var currentUserId = _currentUserService.UserId;
 
         if (project.LeadUserId != currentUserId)
             return Result.Failure(DeleteProjectErrors.AccessDenied);
@@ -107,7 +123,7 @@ public class ProjectService : IProjectService
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null)
-            return Result<IEnumerable<string>>.Failure(GetProjectMembersErrors.Unauthenticated);
+            return Result<IEnumerable<string>>.Failure(UseCaseErrors.Unauthenticated);
 
         var project = await _projectRepository.FindByIdWithProjectMembersIncludedAsync(projectId);
 

@@ -9,7 +9,4 @@ public static class GetProjectMembersErrors
 
     public static readonly Error ProjectNotFound = new("Projects.GetMembers.ProjectNotFound",
         "Project not found");
-
-    public static readonly Error Unauthenticated = new("Projects.GetMembers.Unauthenticated",
-        "Unauthenticated");
 }

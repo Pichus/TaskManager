@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.Infrastructure.Identity.User;
-using TaskManager.UseCases.Profile.ProfileDetails.Get;
 using TaskManager.UseCases.Shared;
 
 namespace TaskManager.UseCases.Profile.ProfileDetails;
@@ -21,17 +20,11 @@ public class ProfileDetailsService : IProfileDetailsService
     {
         var currentUserId = _currentUserService.UserId;
 
-        if (currentUserId is null)
-        {
-            return Result<TaskManagerUser>.Failure(GetCurrentUserProfileDetailsErrors.Unauthenticated);
-        }
+        if (currentUserId is null) return Result<TaskManagerUser>.Failure(UseCaseErrors.Unauthenticated);
 
         var user = await _userManager.FindByIdAsync(currentUserId);
 
-        if (user is null)
-        {
-            return Result<TaskManagerUser>.Failure(GetCurrentUserProfileDetailsErrors.Unauthenticated);
-        }
+        if (user is null) return Result<TaskManagerUser>.Failure(UseCaseErrors.Unauthenticated);
 
         return Result<TaskManagerUser>.Success(user);
     }
