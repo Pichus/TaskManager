@@ -3,10 +3,10 @@ using TaskManager.Core.ProjectAggregate;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.Infrastructure.Identity.User;
+using TaskManager.UseCases.ProjectMembers.Get;
 using TaskManager.UseCases.Projects.Create;
 using TaskManager.UseCases.Projects.Delete;
 using TaskManager.UseCases.Projects.Get;
-using TaskManager.UseCases.Projects.GetMembers;
 using TaskManager.UseCases.Projects.Update;
 using TaskManager.UseCases.Shared;
 
@@ -119,28 +119,5 @@ public class ProjectService : IProjectService
         await _context.SaveChangesAsync();
 
         return Result.Success();
-    }
-
-    public async Task<Result<IEnumerable<ProjectMemberWithUser>>> GetProjectMembersAsync(long projectId)
-    {
-        var currentUserId = _currentUserService.UserId;
-
-        if (currentUserId is null)
-            return Result<IEnumerable<ProjectMemberWithUser>>.Failure(UseCaseErrors.Unauthenticated);
-
-        var project = await _projectRepository.FindByIdAsync(projectId);
-
-        if (project is null)
-            return Result<IEnumerable<ProjectMemberWithUser>>.Failure(GetProjectMembersErrors.ProjectNotFound);
-
-        var canGetProjectMembers = await _projectMemberRepository.IsUserProjectMember(currentUserId, projectId);
-
-        if (!canGetProjectMembers)
-            return Result<IEnumerable<ProjectMemberWithUser>>.Failure(GetProjectMembersErrors.AccessDenied);
-
-        var projectMembers =
-            await _projectMemberRepository.GetProjectMembersWithUsersAsync(projectId);
-
-        return Result<IEnumerable<ProjectMemberWithUser>>.Success(projectMembers);
     }
 }

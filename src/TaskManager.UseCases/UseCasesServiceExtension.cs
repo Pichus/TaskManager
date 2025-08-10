@@ -5,6 +5,7 @@ using TaskManager.UseCases.Identity.RefreshToken;
 using TaskManager.UseCases.Identity.Register;
 using TaskManager.UseCases.Invites;
 using TaskManager.UseCases.Profile.ProfileDetails;
+using TaskManager.UseCases.ProjectMembers;
 using TaskManager.UseCases.Projects;
 
 namespace TaskManager.UseCases;
@@ -52,5 +53,7 @@ public static class UseCasesServiceExtension
 
         services.AddScoped<IInviteService, InviteService>();
         services.AddScoped<IProfileDetailsService, ProfileDetailsService>();
+
+        services.AddScoped<IProjectMemberService, ProjectMemberService>();
     }
 }

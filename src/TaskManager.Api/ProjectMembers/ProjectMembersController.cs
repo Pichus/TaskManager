@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
+using TaskManager.Core.ProjectAggregate;
 using TaskManager.ProjectMembers.Update;
-using TaskManager.UseCases.Projects;
-using TaskManager.UseCases.Projects.GetMembers;
+using TaskManager.UseCases.ProjectMembers;
+using TaskManager.UseCases.ProjectMembers.Get;
 using TaskManager.UseCases.Shared;
 
 namespace TaskManager.ProjectMembers;
@@ -10,24 +11,17 @@ namespace TaskManager.ProjectMembers;
 [ApiController]
 public class ProjectMembersController : ControllerBase
 {
-    private readonly IProjectService _projectService;
+    private readonly IProjectMemberService _projectMemberService;
 
-    public ProjectMembersController(IProjectService projectService)
+    public ProjectMembersController(IProjectMemberService projectMemberService)
     {
-        _projectService = projectService;
-    }
-
-    [HttpGet("{memberId:long}")]
-    public async Task<ActionResult> Get([FromRoute] long projectId, [FromRoute] long memberId)
-    {
-        // get project member
-        return Ok();
+        _projectMemberService = projectMemberService;
     }
 
     [HttpGet]
-    public async Task<ActionResult> GetAll([FromRoute] long projectId)
+    public async Task<ActionResult<ProjectMemberWithUser>> GetAll([FromRoute] long projectId)
     {
-        var result = await _projectService.GetProjectMembersAsync(projectId);
+        var result = await _projectMemberService.GetProjectMembersAsync(projectId);
 
         if (result.IsFailure)
         {
@@ -48,8 +42,21 @@ public class ProjectMembersController : ControllerBase
     public async Task<ActionResult> Update([FromRoute] long projectId, [FromRoute] long memberId,
         [FromBody] UpdateProjectMemberRequest request)
     {
-        // update member's role
-        return Ok();
+        var result = await _projectMemberService.GetProjectMembersAsync(projectId);
+
+        if (result.IsFailure)
+        {
+            var errorCode = result.Error.Code;
+            var errorMessage = result.Error.Message;
+
+            if (errorCode == UseCaseErrors.Unauthenticated.Code) return Unauthorized();
+
+            if (errorCode == GetProjectMembersErrors.ProjectNotFound.Code) return NotFound(errorMessage);
+
+            if (errorCode == GetProjectMembersErrors.AccessDenied.Code) return Forbid();
+        }
+
+        return Ok(result.Value);
     }
 
     [HttpDelete("{memberId:long}")]

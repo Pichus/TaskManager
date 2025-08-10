@@ -1,6 +1,6 @@
 using TaskManager.UseCases.Shared;
 
-namespace TaskManager.UseCases.Projects.GetMembers;
+namespace TaskManager.UseCases.ProjectMembers.Get;
 
 public static class GetProjectMembersErrors
 {
