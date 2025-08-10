@@ -8,7 +8,9 @@ public class MemberRoleEntityConfiguration : IEntityTypeConfiguration<MemberRole
 {
     public void Configure(EntityTypeBuilder<MemberRole> builder)
     {
-        builder.HasKey(e => new { e.UserId, e.ProjectId });
+        builder
+            .HasIndex(e => e.ProjectMemberId)
+            .IsUnique();
         
         builder
             .Property(e => e.Role)

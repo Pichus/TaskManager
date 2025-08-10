@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TaskManager.Infrastructure.Data;
@@ -11,9 +12,11 @@ using TaskManager.Infrastructure.Data;
 namespace TaskManager.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250810141543_FixRemoveManyToManyBetweenProjectMemberAndMemberRole")]
+    partial class FixRemoveManyToManyBetweenProjectMemberAndMemberRole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -160,26 +163,17 @@ namespace TaskManager.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("TaskManager.Core.ProjectAggregate.MemberRole", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<long>("ProjectMemberId")
+                    b.Property<long>("ProjectId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectMemberId")
-                        .IsUnique();
+                    b.HasKey("UserId", "ProjectId");
 
                     b.ToTable("MemberRoles");
                 });
@@ -212,28 +206,24 @@ namespace TaskManager.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("TaskManager.Core.ProjectAggregate.ProjectMember", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("MemberId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<long>("ProjectId")
                         .HasColumnType("bigint");
 
-                    b.HasKey("Id");
+                    b.Property<string>("MemberId")
+                        .HasColumnType("text");
+
+                    b.Property<long>("MemberRoleProjectId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("MemberRoleUserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("ProjectId", "MemberId");
 
                     b.HasIndex("MemberId");
 
-                    b.HasIndex("ProjectId", "MemberId")
-                        .IsUnique();
+                    b.HasIndex("MemberRoleUserId", "MemberRoleProjectId");
 
                     b.ToTable("ProjectMembers");
                 });
@@ -470,17 +460,6 @@ namespace TaskManager.Infrastructure.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("TaskManager.Core.ProjectAggregate.MemberRole", b =>
-                {
-                    b.HasOne("TaskManager.Core.ProjectAggregate.ProjectMember", "ProjectMember")
-                        .WithOne("MemberRole")
-                        .HasForeignKey("TaskManager.Core.ProjectAggregate.MemberRole", "ProjectMemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ProjectMember");
-                });
-
             modelBuilder.Entity("TaskManager.Core.ProjectAggregate.ProjectEntity", b =>
                 {
                     b.HasOne("TaskManager.Infrastructure.Identity.User.TaskManagerUser", null)
@@ -503,6 +482,14 @@ namespace TaskManager.Infrastructure.Data.Migrations
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("TaskManager.Core.ProjectAggregate.MemberRole", "MemberRole")
+                        .WithMany()
+                        .HasForeignKey("MemberRoleUserId", "MemberRoleProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MemberRole");
 
                     b.Navigation("Project");
                 });
@@ -563,12 +550,6 @@ namespace TaskManager.Infrastructure.Data.Migrations
                     b.Navigation("Members");
 
                     b.Navigation("Tasks");
-                });
-
-            modelBuilder.Entity("TaskManager.Core.ProjectAggregate.ProjectMember", b =>
-                {
-                    b.Navigation("MemberRole")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("TaskManager.Infrastructure.Identity.User.TaskManagerUser", b =>

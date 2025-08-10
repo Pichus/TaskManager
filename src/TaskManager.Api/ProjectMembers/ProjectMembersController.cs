@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.ProjectMembers.Update;
 using TaskManager.UseCases.ProjectMembers;
+using TaskManager.UseCases.ProjectMembers.Delete;
 using TaskManager.UseCases.ProjectMembers.Get;
 using TaskManager.UseCases.ProjectMembers.Update;
 using TaskManager.UseCases.Shared;
@@ -45,7 +46,7 @@ public class ProjectMembersController : ControllerBase
     public async Task<ActionResult> Update([FromRoute] long projectId, [FromRoute] string memberId,
         [FromBody] UpdateProjectMemberRequest request)
     {
-        var result = await _projectMemberService.UpdateProjectMember(projectId, memberId, request.Role);
+        var result = await _projectMemberService.UpdateProjectMemberAsync(projectId, memberId, request.Role);
 
         if (result.IsFailure)
         {
@@ -57,7 +58,7 @@ public class ProjectMembersController : ControllerBase
             if (errorCode == UpdateProjectMemberErrors.MemberNotFound.Code
                 || errorCode == UpdateProjectMemberErrors.ProjectNotFound.Code)
                 return NotFound(errorMessage);
-            
+
             if (errorCode == UpdateProjectMemberErrors.AccessDenied.Code) return Forbid();
 
             if (errorCode == UpdateProjectMemberErrors.UserIsNotAProjectMember.Code
@@ -71,7 +72,22 @@ public class ProjectMembersController : ControllerBase
     [HttpDelete("{memberId:guid}")]
     public async Task<ActionResult> Delete([FromRoute] long projectId, [FromRoute] string memberId)
     {
-        // delete member
+        var result = await _projectMemberService.DeleteAsync(projectId, memberId);
+
+        if (result.IsFailure)
+        {
+            var errorCode = result.Error.Code;
+            var errorMessage = result.Error.Message;
+
+            if (errorCode == UseCaseErrors.Unauthenticated.Code) return Unauthorized();
+
+            if (errorCode == DeleteProjectMemberErrors.ProjectNotFound.Code
+                || errorCode == DeleteProjectMemberErrors.ProjectNotFound.Code)
+                return NotFound(errorMessage);
+
+            if (errorCode == DeleteProjectMemberErrors.AccessDenied.Code) return Forbid();
+        }
+
         return Ok();
     }
 }

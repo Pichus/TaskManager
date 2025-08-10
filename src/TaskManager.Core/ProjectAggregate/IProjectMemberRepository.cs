@@ -6,4 +6,5 @@ public interface IProjectMemberRepository
     Task<bool> IsUserProjectMember(string userId, long projectId);
     Task<IEnumerable<ProjectMemberWithUser>> GetProjectMembersWithUsersAsync(long projectId);
     void Update(ProjectMember projectMember);
+    void Delete(ProjectMember projectMember);
 }

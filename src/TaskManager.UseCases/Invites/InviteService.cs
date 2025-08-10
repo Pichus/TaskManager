@@ -201,8 +201,8 @@ public class InviteService : IInviteService
     {
         var projectMember = await _projectMemberRepository.GetByProjectIdAndMemberIdAsync(project.Id, userId);
 
-        if (projectMember is null) return false;
+        var isUserProjectManager = (projectMember is not null) && projectMember.MemberRole.Role == Role.Manager;
 
-        return userId == project.LeadUserId || projectMember.MemberRole.Role == Role.Manager;
+        return userId == project.LeadUserId || isUserProjectManager;
     }
 }

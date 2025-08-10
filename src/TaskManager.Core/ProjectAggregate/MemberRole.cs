@@ -1,8 +1,9 @@
 namespace TaskManager.Core.ProjectAggregate;
 
-public class MemberRole
+public class MemberRole : EntityBase
 {
-    public string UserId { get; set; }
-    public long ProjectId { get; set; }
+    public long ProjectMemberId { get; set; }
     public Role Role { get; set; }
+    
+    public ProjectMember ProjectMember { get; set; }
 }

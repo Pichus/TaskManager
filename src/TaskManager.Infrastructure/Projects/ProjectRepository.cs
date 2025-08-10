@@ -60,10 +60,20 @@ public class ProjectRepository : IProjectRepository
 
     public void AddMember(ProjectEntity project, string memberId)
     {
-        _context.ProjectMembers.Add(new ProjectMember
+        var projectMember = new ProjectMember
         {
+            CreatedAt = DateTime.UtcNow,
             ProjectId = project.Id,
-            MemberId = memberId
+            MemberId = memberId,
+        };
+        
+        _context.ProjectMembers.Add(projectMember);
+
+        _context.MemberRoles.Add(new MemberRole
+        {
+            CreatedAt = DateTime.UtcNow,
+            Role = Role.Member,
+            ProjectMember = projectMember
         });
     }
 }

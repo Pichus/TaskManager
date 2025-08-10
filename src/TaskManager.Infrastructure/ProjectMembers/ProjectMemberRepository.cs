@@ -51,4 +51,9 @@ public class ProjectMemberRepository : IProjectMemberRepository
     {
         _context.Update(projectMember);
     }
+
+    public void Delete(ProjectMember projectMember)
+    {
+        _context.ProjectMembers.Remove(projectMember);
+    }
 }

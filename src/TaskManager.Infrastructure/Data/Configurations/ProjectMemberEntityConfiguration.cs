@@ -9,7 +9,9 @@ public class ProjectMemberEntityConfiguration : IEntityTypeConfiguration<Project
 {
     public void Configure(EntityTypeBuilder<ProjectMember> builder)
     {
-        builder.HasKey(e => new { e.ProjectId, e.MemberId });
+        builder
+            .HasIndex(e => new { e.ProjectId, e.MemberId })
+            .IsUnique();
 
         builder
             .HasOne(e => e.Project)
@@ -21,6 +23,11 @@ public class ProjectMemberEntityConfiguration : IEntityTypeConfiguration<Project
             .HasOne<TaskManagerUser>()
             .WithMany()
             .HasForeignKey(e => e.MemberId)
+            .IsRequired();
+
+        builder
+            .HasOne(e => e.MemberRole)
+            .WithOne(e => e.ProjectMember)
             .IsRequired();
     }
 }

@@ -1,6 +1,6 @@
 namespace TaskManager.Core.ProjectAggregate;
 
-public class ProjectMember
+public class ProjectMember : EntityBase
 {
     public long ProjectId { get; set; }
     public string MemberId { get; set; }
