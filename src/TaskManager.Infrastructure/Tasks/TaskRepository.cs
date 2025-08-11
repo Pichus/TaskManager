@@ -31,4 +31,9 @@ public class TaskRepository : ITaskRepository
                            && task.Status == taskStatus)
             .ToListAsync();
     }
+
+    public async Task<TaskEntity?> FindByIdAsync(long taskId)
+    {
+        return await _context.Tasks.FindAsync(taskId);
+    }
 }

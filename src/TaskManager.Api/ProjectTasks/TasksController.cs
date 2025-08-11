@@ -23,13 +23,34 @@ public class TasksController : ControllerBase
     }
 
     [HttpGet("{taskId:long}")]
-    public async Task<ActionResult> Get([FromRoute] long taskId)
+    public async Task<ActionResult<GetTaskResponse>> Get([FromRoute] long projectId, [FromRoute] long taskId)
     {
-        return Ok();
+        var result = await _taskService.GetByProjectIdAndTaskIdAsync(projectId, taskId);
+
+        if (result.IsFailure)
+        {
+            var errorCode = result.Error.Code;
+            var errorMessage = result.Error.Message;
+
+            if (errorCode == UseCaseErrors.Unauthenticated.Code)
+                return Unauthorized();
+
+            if (errorCode == GetTaskErrors.ProjectNotFound.Code
+                || errorCode == GetTaskErrors.TaskNotFound.Code)
+                return NotFound(errorMessage);
+
+            if (errorCode == GetTaskErrors.AccessDenied.Code)
+                return Forbid();
+        }
+
+        var response = TaskToGetTaskResponse(result.Value);
+
+        return Ok(response);
     }
 
     [HttpGet]
-    public async Task<ActionResult> Get([FromRoute] long projectId, [FromQuery] Status? status)
+    public async Task<ActionResult<IEnumerable<GetTaskResponse>>> Get([FromRoute] long projectId,
+        [FromQuery] Status? status)
     {
         var result = await _taskService.GetAllByProjectIdAndStatusAsync(projectId, StatusToDto(status));
 
@@ -40,7 +61,7 @@ public class TasksController : ControllerBase
 
             if (errorCode == UseCaseErrors.Unauthenticated.Code)
                 return Unauthorized();
-            
+
             if (errorCode == GetTaskErrors.ProjectNotFound.Code)
                 return NotFound(errorMessage);
 
@@ -49,10 +70,10 @@ public class TasksController : ControllerBase
         }
 
         var response = TasksToResponses(result.Value);
-        
+
         return Ok(response);
     }
-    
+
     [HttpPost]
     public async Task<ActionResult<GetTaskResponse>> Create([FromRoute] long projectId,
         [FromBody] CreateTaskRequest request)
@@ -113,6 +134,12 @@ public class TasksController : ControllerBase
         return Ok();
     }
 
+    [HttpDelete("{taskId:long}")]
+    public async Task<ActionResult> Delete([FromRoute] long projectId, [FromRoute] long taskId)
+    {
+        return Ok();
+    }
+
     private StatusDto StatusToDto(Status? status)
     {
         return status switch
@@ -162,7 +189,7 @@ public class TasksController : ControllerBase
             DueDate = request.DueDate
         };
     }
-    
+
     private IEnumerable<GetTaskResponse> TasksToResponses(IEnumerable<TaskEntity> tasks)
     {
         return tasks.Select(TaskToGetTaskResponse);

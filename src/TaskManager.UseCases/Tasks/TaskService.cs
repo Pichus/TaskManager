@@ -39,11 +39,11 @@ public class TaskService : ITaskService
         if (project is null)
             return Result<IEnumerable<TaskEntity>>.Failure(GetTaskErrors.ProjectNotFound);
 
-        var canViewTasks = await _projectMemberRepository.IsUserProjectMember(currentUserId, projectId); 
+        var canViewTasks = await _projectMemberRepository.IsUserProjectMember(currentUserId, projectId);
 
         if (!canViewTasks)
             return Result<IEnumerable<TaskEntity>>.Failure(GetTaskErrors.AccessDenied);
-        
+
         var taskStatus = status switch
         {
             StatusDto.Any => Status.ToDo,
@@ -60,7 +60,7 @@ public class TaskService : ITaskService
                 .GetAllByProjectIdAndStatusAsync(projectId, taskStatus),
             _ => await _taskRepository.GetAllByProjectIdAsync(projectId)
         };
-        
+
         return Result<IEnumerable<TaskEntity>>.Success(tasks);
     }
 
@@ -76,7 +76,7 @@ public class TaskService : ITaskService
         if (project is null)
             return Result<TaskEntity>.Failure(CreateTaskErrors.ProjectNotFound);
 
-        var currentUserCanCreateTask = await CanCreateTaskAsync(project, currentUserId);
+        var currentUserCanCreateTask = await IsUserProjectLeadOrMemberAsync(project, currentUserId);
 
         if (!currentUserCanCreateTask) return Result<TaskEntity>.Failure(CreateTaskErrors.AccessDenied);
 
@@ -108,7 +108,32 @@ public class TaskService : ITaskService
         throw new NotImplementedException();
     }
 
-    private async Task<bool> CanCreateTaskAsync(ProjectEntity project, string userId)
+    public async Task<Result<TaskEntity>> GetByProjectIdAndTaskIdAsync(long projectId, long taskId)
+    {
+        var currentUserId = _currentUserService.UserId;
+
+        if (currentUserId is null)
+            return Result<TaskEntity>.Failure(UseCaseErrors.Unauthenticated);
+
+        var project = await _projectRepository.FindByIdAsync(projectId);
+
+        if (project is null)
+            return Result<TaskEntity>.Failure(GetTaskErrors.ProjectNotFound);
+
+        var canCurrentUserViewTask = await IsUserProjectLeadOrMemberAsync(project, currentUserId);
+
+        if (!canCurrentUserViewTask)
+            return Result<TaskEntity>.Failure(GetTaskErrors.AccessDenied);
+
+        var task = await _taskRepository.FindByIdAsync(taskId);
+
+        if (task is null)
+            return Result<TaskEntity>.Failure(GetTaskErrors.TaskNotFound);
+
+        return Result<TaskEntity>.Success(task);
+    }
+
+    private async Task<bool> IsUserProjectLeadOrMemberAsync(ProjectEntity project, string userId)
     {
         return project.LeadUserId == userId ||
                await _projectMemberRepository.IsUserProjectManager(userId, project.Id);
