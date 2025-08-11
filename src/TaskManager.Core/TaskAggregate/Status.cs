@@ -1,6 +1,6 @@
 namespace TaskManager.Core.TaskAggregate;
 
-public enum TaskStatus
+public enum Status
 {
     ToDo,
     InProgress,
