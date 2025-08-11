@@ -36,4 +36,9 @@ public class TaskRepository : ITaskRepository
     {
         return await _context.Tasks.FindAsync(taskId);
     }
+
+    public void Update(TaskEntity task)
+    {
+        _context.Update(task);
+    }
 }

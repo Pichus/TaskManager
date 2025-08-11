@@ -76,9 +76,11 @@ public class TaskService : ITaskService
         if (project is null)
             return Result<TaskEntity>.Failure(CreateTaskErrors.ProjectNotFound);
 
-        var currentUserCanCreateTask = await IsUserProjectLeadOrMemberAsync(project, currentUserId);
+        var canCurrentUserCanCreateTask = project.LeadUserId == currentUserId ||
+                                          await _projectMemberRepository.IsUserProjectManager(currentUserId,
+                                              project.Id);
 
-        if (!currentUserCanCreateTask) return Result<TaskEntity>.Failure(CreateTaskErrors.AccessDenied);
+        if (!canCurrentUserCanCreateTask) return Result<TaskEntity>.Failure(CreateTaskErrors.AccessDenied);
 
         var task = new TaskEntity
         {
@@ -100,7 +102,35 @@ public class TaskService : ITaskService
 
     public async Task<Result> UpdateAsync(UpdateTaskDto updateTaskDto)
     {
-        throw new NotImplementedException();
+        var currentUserId = _currentUserService.UserId;
+
+        if (currentUserId is null)
+            return Result<TaskEntity>.Failure(UseCaseErrors.Unauthenticated);
+
+        var project = await _projectRepository.FindByIdAsync(updateTaskDto.ProjectId);
+
+        if (project is null)
+            return Result.Failure(UpdateTaskErrors.ProjectNotFound);
+
+        var task = await _taskRepository.FindByIdAsync(updateTaskDto.TaskId);
+
+        if (task is null)
+            return Result.Failure(UpdateTaskErrors.TaskNotFound);
+
+        var canCurrentUserUpdateTask = project.LeadUserId == currentUserId ||
+                                       await _projectMemberRepository.IsUserProjectManager(currentUserId, project.Id);
+
+        if (!canCurrentUserUpdateTask)
+            return Result.Failure(UpdateTaskErrors.AccessDenied);
+
+        task.Description = updateTaskDto.Description;
+        task.Title = updateTaskDto.Title;
+        task.DueDate = updateTaskDto.DueDate;
+
+        _taskRepository.Update(task);
+        await _dbContext.SaveChangesAsync();
+
+        return Result.Success();
     }
 
     public Task<Result> UpdateStatusAsync(long taskId, Status status)
@@ -120,7 +150,8 @@ public class TaskService : ITaskService
         if (project is null)
             return Result<TaskEntity>.Failure(GetTaskErrors.ProjectNotFound);
 
-        var canCurrentUserViewTask = await IsUserProjectLeadOrMemberAsync(project, currentUserId);
+        var canCurrentUserViewTask = project.LeadUserId == currentUserId
+                                     || await _projectMemberRepository.IsUserProjectMember(currentUserId, projectId);
 
         if (!canCurrentUserViewTask)
             return Result<TaskEntity>.Failure(GetTaskErrors.AccessDenied);
@@ -131,11 +162,5 @@ public class TaskService : ITaskService
             return Result<TaskEntity>.Failure(GetTaskErrors.TaskNotFound);
 
         return Result<TaskEntity>.Success(task);
-    }
-
-    private async Task<bool> IsUserProjectLeadOrMemberAsync(ProjectEntity project, string userId)
-    {
-        return project.LeadUserId == userId ||
-               await _projectMemberRepository.IsUserProjectManager(userId, project.Id);
     }
 }

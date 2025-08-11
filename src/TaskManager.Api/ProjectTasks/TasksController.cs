@@ -101,9 +101,10 @@ public class TasksController : ControllerBase
     }
 
     [HttpPut("{taskId:long}")]
-    public async Task<ActionResult> Update([FromRoute] long taskId, UpdateTaskRequest request)
+    public async Task<ActionResult> Update([FromRoute] long projectId, [FromRoute] long taskId,
+        [FromBody] UpdateTaskRequest request)
     {
-        var result = await _taskService.UpdateAsync(UpdateTaskRequestToDto(taskId, request));
+        var result = await _taskService.UpdateAsync(UpdateTaskRequestToDto(projectId, taskId, request));
 
         if (result.IsFailure)
         {
@@ -112,6 +113,13 @@ public class TasksController : ControllerBase
 
             if (errorCode == UseCaseErrors.Unauthenticated.Code)
                 return Unauthorized();
+
+            if (errorCode == UpdateTaskErrors.ProjectNotFound.Code
+                || errorCode == UpdateTaskErrors.TaskNotFound.Code)
+                return NotFound(errorMessage);
+
+            if (errorCode == UpdateTaskErrors.AccessDenied.Code)
+                return Forbid();
         }
 
         return Ok();
@@ -179,11 +187,12 @@ public class TasksController : ControllerBase
         };
     }
 
-    private UpdateTaskDto UpdateTaskRequestToDto(long id, UpdateTaskRequest request)
+    private UpdateTaskDto UpdateTaskRequestToDto(long projectId, long taskId, UpdateTaskRequest request)
     {
         return new UpdateTaskDto
         {
-            Id = id,
+            ProjectId = projectId,
+            TaskId = taskId,
             Title = request.Title,
             Description = request.Description,
             DueDate = request.DueDate

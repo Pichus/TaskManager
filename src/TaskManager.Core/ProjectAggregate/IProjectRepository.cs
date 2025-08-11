@@ -13,4 +13,5 @@ public interface IProjectRepository
     void AddMember(ProjectEntity project, string memberId);
     Task<IEnumerable<ProjectEntity>> GetAllByUserIdWhereUserIsLead(string userId);
     Task<IEnumerable<ProjectEntity>> GetAllByUserIdWhereUserHasRoleAsync(string userId, ProjectRole role);
+    Task<bool> ExistsAsync(long projectId);
 }

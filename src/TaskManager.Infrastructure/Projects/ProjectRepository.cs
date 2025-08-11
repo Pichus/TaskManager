@@ -91,4 +91,9 @@ public class ProjectRepository : IProjectRepository
                                && member.ProjectRole == role))
             .ToListAsync();
     }
+
+    public async Task<bool> ExistsAsync(long projectId)
+    {
+        return await _context.Projects.AnyAsync(project => project.Id == projectId);
+    }
 }
