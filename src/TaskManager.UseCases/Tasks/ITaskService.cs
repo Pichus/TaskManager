@@ -11,6 +11,6 @@ public interface ITaskService
     Task<Result<IEnumerable<TaskEntity>>> GetAllByProjectIdAndStatusAsync(long projectId, StatusDto status);
     Task<Result<TaskEntity>> CreateAsync(CreateTaskDto createTaskDto);
     Task<Result> UpdateAsync(UpdateTaskDto updateTaskDto);
-    Task<Result> UpdateStatusAsync(long taskId, Status status);
+    Task<Result> UpdateStatusAsync(long projectId, long taskId, Status status);
     Task<Result<TaskEntity>> GetByProjectIdAndTaskIdAsync(long projectId, long taskId);
 }

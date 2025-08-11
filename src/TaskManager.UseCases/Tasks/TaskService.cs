@@ -114,7 +114,7 @@ public class TaskService : ITaskService
 
         var task = await _taskRepository.FindByIdAsync(updateTaskDto.TaskId);
 
-        if (task is null)
+        if (task is null || task.ProjectId != project.Id)
             return Result.Failure(UpdateTaskErrors.TaskNotFound);
 
         var canCurrentUserUpdateTask = project.LeadUserId == currentUserId ||
@@ -133,9 +133,38 @@ public class TaskService : ITaskService
         return Result.Success();
     }
 
-    public Task<Result> UpdateStatusAsync(long taskId, Status status)
+    public async Task<Result> UpdateStatusAsync(long projectId, long taskId, Status status)
     {
-        throw new NotImplementedException();
+        var currentUserId = _currentUserService.UserId;
+
+        if (currentUserId is null)
+            return Result<TaskEntity>.Failure(UseCaseErrors.Unauthenticated);
+
+        var project = await _projectRepository.FindByIdAsync(projectId);
+
+        if (project is null)
+            return Result.Failure(UpdateTaskErrors.ProjectNotFound);
+
+        var task = await _taskRepository.FindByIdAsync(taskId);
+
+        if (task is null || task.ProjectId != projectId)
+            return Result.Failure(UpdateTaskErrors.TaskNotFound);
+
+        var canCurrentUserUpdateTaskStatus = currentUserId == project.LeadUserId
+                                             || await _projectMemberRepository.IsUserProjectMember(currentUserId,
+                                                 projectId);
+        
+        if (!canCurrentUserUpdateTaskStatus)
+            return Result.Failure(UpdateTaskErrors.AccessDenied);
+        
+        if (task.Status == status)
+            return Result.Failure(UpdateTaskErrors.StatusAlreadySet);
+
+        task.Status = status;
+        _taskRepository.Update(task);
+        await _dbContext.SaveChangesAsync();
+        
+        return Result.Success();
     }
 
     public async Task<Result<TaskEntity>> GetByProjectIdAndTaskIdAsync(long projectId, long taskId)
@@ -158,7 +187,7 @@ public class TaskService : ITaskService
 
         var task = await _taskRepository.FindByIdAsync(taskId);
 
-        if (task is null)
+        if (task is null || task.ProjectId != projectId)
             return Result<TaskEntity>.Failure(GetTaskErrors.TaskNotFound);
 
         return Result<TaskEntity>.Success(task);

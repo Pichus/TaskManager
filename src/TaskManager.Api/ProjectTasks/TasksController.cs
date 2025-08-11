@@ -126,9 +126,10 @@ public class TasksController : ControllerBase
     }
 
     [HttpPut("{taskId:long}/status")]
-    public async Task<ActionResult> UpdateStatus([FromRoute] long taskId, [FromQuery] Status status)
+    public async Task<ActionResult> UpdateStatus([FromRoute] long projectId, [FromRoute] long taskId,
+        [FromQuery] Status status)
     {
-        var result = await _taskService.UpdateStatusAsync(taskId, status);
+        var result = await _taskService.UpdateStatusAsync(projectId, taskId, status);
 
         if (result.IsFailure)
         {
@@ -137,6 +138,16 @@ public class TasksController : ControllerBase
 
             if (errorCode == UseCaseErrors.Unauthenticated.Code)
                 return Unauthorized();
+            
+            if (errorCode == UpdateTaskErrors.ProjectNotFound.Code
+                || errorCode == UpdateTaskErrors.TaskNotFound.Code)
+                return NotFound(errorMessage);
+
+            if (errorCode == UpdateTaskErrors.AccessDenied.Code)
+                return Forbid();
+            
+            if (errorCode == UpdateTaskErrors.StatusAlreadySet.Code)
+                return BadRequest(errorMessage);
         }
 
         return Ok();

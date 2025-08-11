@@ -11,4 +11,7 @@ public static class UpdateTaskErrors
         "task not found");
 
     public static readonly Error AccessDenied = new("Tasks.Update.AccessDenied");
+    
+    public static readonly Error StatusAlreadySet = new("Tasks.Update.StatusAlreadySet",
+        "this status has been already set");
 }
