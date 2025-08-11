@@ -13,4 +13,5 @@ public interface ITaskService
     Task<Result> UpdateAsync(UpdateTaskDto updateTaskDto);
     Task<Result> UpdateStatusAsync(long projectId, long taskId, Status status);
     Task<Result<TaskEntity>> GetByProjectIdAndTaskIdAsync(long projectId, long taskId);
+    Task<Result> DeleteAsync(long projectId, long taskId);
 }

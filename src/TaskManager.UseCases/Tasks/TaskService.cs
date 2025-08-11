@@ -4,6 +4,7 @@ using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.UseCases.Shared;
 using TaskManager.UseCases.Tasks.Create;
+using TaskManager.UseCases.Tasks.Delete;
 using TaskManager.UseCases.Tasks.Get;
 using TaskManager.UseCases.Tasks.Update;
 
@@ -153,17 +154,17 @@ public class TaskService : ITaskService
         var canCurrentUserUpdateTaskStatus = currentUserId == project.LeadUserId
                                              || await _projectMemberRepository.IsUserProjectMember(currentUserId,
                                                  projectId);
-        
+
         if (!canCurrentUserUpdateTaskStatus)
             return Result.Failure(UpdateTaskErrors.AccessDenied);
-        
+
         if (task.Status == status)
             return Result.Failure(UpdateTaskErrors.StatusAlreadySet);
 
         task.Status = status;
         _taskRepository.Update(task);
         await _dbContext.SaveChangesAsync();
-        
+
         return Result.Success();
     }
 
@@ -191,5 +192,34 @@ public class TaskService : ITaskService
             return Result<TaskEntity>.Failure(GetTaskErrors.TaskNotFound);
 
         return Result<TaskEntity>.Success(task);
+    }
+
+    public async Task<Result> DeleteAsync(long projectId, long taskId)
+    {
+        var currentUserId = _currentUserService.UserId;
+
+        if (currentUserId is null)
+            return Result<TaskEntity>.Failure(UseCaseErrors.Unauthenticated);
+
+        var project = await _projectRepository.FindByIdAsync(projectId);
+
+        if (project is null)
+            return Result.Failure(DeleteTaskErrors.ProjectNotFound);
+
+        var task = await _taskRepository.FindByIdAsync(taskId);
+        
+        if (task == null || task.ProjectId != projectId)
+            return Result.Failure(DeleteTaskErrors.TaskNotFound);
+
+        var canCurrentUserDeleteTask = project.LeadUserId == currentUserId
+                                       || await _projectMemberRepository.IsUserProjectManager(currentUserId, projectId);
+        
+        if (!canCurrentUserDeleteTask)
+            return Result.Failure(DeleteTaskErrors.AccessDenied);
+
+        _taskRepository.Delete(task);
+        await _dbContext.SaveChangesAsync();
+        
+        return Result.Success();
     }
 }

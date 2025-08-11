@@ -6,6 +6,7 @@ using TaskManager.ProjectTasks.Update;
 using TaskManager.UseCases.Shared;
 using TaskManager.UseCases.Tasks;
 using TaskManager.UseCases.Tasks.Create;
+using TaskManager.UseCases.Tasks.Delete;
 using TaskManager.UseCases.Tasks.Get;
 using TaskManager.UseCases.Tasks.Update;
 
@@ -138,14 +139,14 @@ public class TasksController : ControllerBase
 
             if (errorCode == UseCaseErrors.Unauthenticated.Code)
                 return Unauthorized();
-            
+
             if (errorCode == UpdateTaskErrors.ProjectNotFound.Code
                 || errorCode == UpdateTaskErrors.TaskNotFound.Code)
                 return NotFound(errorMessage);
 
             if (errorCode == UpdateTaskErrors.AccessDenied.Code)
                 return Forbid();
-            
+
             if (errorCode == UpdateTaskErrors.StatusAlreadySet.Code)
                 return BadRequest(errorMessage);
         }
@@ -156,6 +157,24 @@ public class TasksController : ControllerBase
     [HttpDelete("{taskId:long}")]
     public async Task<ActionResult> Delete([FromRoute] long projectId, [FromRoute] long taskId)
     {
+        var result = await _taskService.DeleteAsync(projectId, taskId);
+
+        if (result.IsFailure)
+        {
+            var errorCode = result.Error.Code;
+            var errorMessage = result.Error.Message;
+
+            if (errorCode == UseCaseErrors.Unauthenticated.Code)
+                return Unauthorized();
+
+            if (errorCode == DeleteTaskErrors.ProjectNotFound.Code
+                || errorCode == DeleteTaskErrors.TaskNotFound.Code)
+                return NotFound(errorMessage);
+
+            if (errorCode == DeleteTaskErrors.AccessDenied.Code)
+                return Forbid();
+        }
+
         return Ok();
     }
 

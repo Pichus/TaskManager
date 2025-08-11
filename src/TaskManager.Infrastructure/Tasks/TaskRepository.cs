@@ -41,4 +41,9 @@ public class TaskRepository : ITaskRepository
     {
         _context.Update(task);
     }
+
+    public void Delete(TaskEntity task)
+    {
+        _context.Tasks.Remove(task);
+    }
 }
