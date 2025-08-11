@@ -25,10 +25,12 @@ public class ProjectsController : ControllerBase
         _projectService = projectService;
     }
 
+    [AllowAnonymous]
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GetProjectResponse>>> GetAll()
+    public async Task<ActionResult<IEnumerable<GetProjectResponse>>> GetAll(
+        [FromQuery] RoleQueryParameter? role = null)
     {
-        var result = await _projectService.GetAllByUserAsync();
+        var result = await _projectService.GetAllByUserAsync(RoleQueryParameterToDto(role));
 
         if (result.IsFailure)
         {
@@ -176,6 +178,18 @@ public class ProjectsController : ControllerBase
         return new CreateProjectDto
         {
             Title = request.Title
+        };
+    }
+
+    private RoleDto RoleQueryParameterToDto(RoleQueryParameter? role)
+    {
+        return role switch
+        {
+            RoleQueryParameter.Member => RoleDto.Member,
+            RoleQueryParameter.Manager => RoleDto.Manager,
+            RoleQueryParameter.Lead => RoleDto.Lead,
+            null => RoleDto.Any,
+            _ => throw new ArgumentOutOfRangeException(nameof(role), role, null)
         };
     }
 }

@@ -3,7 +3,6 @@ using TaskManager.Core.ProjectAggregate;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.Infrastructure.Identity.User;
-using TaskManager.UseCases.ProjectMembers.Get;
 using TaskManager.UseCases.Projects.Create;
 using TaskManager.UseCases.Projects.Delete;
 using TaskManager.UseCases.Projects.Get;
@@ -51,13 +50,27 @@ public class ProjectService : IProjectService
         return Result<ProjectEntity>.Success(project);
     }
 
-    public async Task<Result<IEnumerable<ProjectEntity>>> GetAllByUserAsync()
+    public async Task<Result<IEnumerable<ProjectEntity>>> GetAllByUserAsync(RoleDto role)
     {
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null) return Result<IEnumerable<ProjectEntity>>.Failure(UseCaseErrors.Unauthenticated);
 
-        var projects = await _projectRepository.GetAllByUserIdAsync(currentUserId);
+        var projectRole = role switch
+        {
+            RoleDto.Member => ProjectRole.Member,
+            RoleDto.Manager => ProjectRole.Manager,
+            _ => ProjectRole.Member
+        };
+
+        var projects = role switch
+        {
+            RoleDto.Any => await _projectRepository.GetAllByUserIdAsync(currentUserId),
+            RoleDto.Lead => await _projectRepository.GetAllByUserIdWhereUserIsLead(currentUserId),
+            RoleDto.Member or RoleDto.Manager => await _projectRepository.GetAllByUserIdWhereUserHasRoleAsync(
+                currentUserId, projectRole),
+            _ => await _projectRepository.GetAllByUserIdAsync(currentUserId)
+        };
 
         return Result<IEnumerable<ProjectEntity>>.Success(projects);
     }

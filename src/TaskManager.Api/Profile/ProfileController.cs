@@ -7,7 +7,6 @@ using TaskManager.Profile.GetProfileDetails;
 using TaskManager.UseCases.Invites;
 using TaskManager.UseCases.Invites.Accept;
 using TaskManager.UseCases.Invites.Decline;
-using TaskManager.UseCases.Invites.Get;
 using TaskManager.UseCases.Profile.ProfileDetails;
 using TaskManager.UseCases.Shared;
 
@@ -27,7 +26,7 @@ public class ProfileController : ControllerBase
         _profileDetailsService = profileDetailsService;
     }
 
-    [HttpGet]
+    [HttpGet("/me")]
     public async Task<ActionResult<GetProfileDetailsResponse>> GetProfileDetails()
     {
         var result = await _profileDetailsService.GetCurrentUserProfileDetailsAsync();

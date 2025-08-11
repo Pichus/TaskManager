@@ -40,7 +40,14 @@ public class ProjectRepository : IProjectRepository
 
     public async Task<IEnumerable<ProjectEntity>> GetAllByUserIdAsync(string userId)
     {
-        return await _context.Projects.Where(project => project.LeadUserId == userId).ToListAsync();
+        return await _context
+            .Projects
+            .Where(project => project.LeadUserId == userId ||
+                              _context
+                                  .ProjectMembers
+                                  .Any(member => member.MemberId == userId
+                                                 && member.ProjectId == project.Id))
+            .ToListAsync();
     }
 
     public void Update(ProjectEntity project)
@@ -67,5 +74,21 @@ public class ProjectRepository : IProjectRepository
             MemberId = memberId,
             ProjectRole = ProjectRole.Member
         });
+    }
+
+    public async Task<IEnumerable<ProjectEntity>> GetAllByUserIdWhereUserIsLead(string userId)
+    {
+        return await _context.Projects.Where(project => project.LeadUserId == userId).ToListAsync();
+    }
+
+    public async Task<IEnumerable<ProjectEntity>> GetAllByUserIdWhereUserHasRoleAsync(string userId, ProjectRole role)
+    {
+        return await _context
+            .Projects
+            .Where(project => _context.ProjectMembers
+                .Any(member => member.ProjectId == project.Id
+                               && member.MemberId == userId
+                               && member.ProjectRole == role))
+            .ToListAsync();
     }
 }

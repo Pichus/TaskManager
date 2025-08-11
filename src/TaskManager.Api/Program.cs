@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using NSwag;
@@ -30,10 +31,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options => { options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 
 builder.Services.AddOpenApiDocument(document =>
 {
+    // to enable dropdowns for nullable enums in swagger ui
+    document.SchemaSettings.AllowReferencesWithProperties = true;
+    document.SchemaSettings.GenerateEnumMappingDescription = true;
+
     document.AddSecurity("Bearer", [], new OpenApiSecurityScheme
     {
         Type = OpenApiSecuritySchemeType.Http,
