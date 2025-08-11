@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.ProjectInviteAggregate;
+using TaskManager.Core.TaskAggregate;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.AccessToken;
 using TaskManager.Infrastructure.Identity.CurrentUser;
@@ -11,6 +12,7 @@ using TaskManager.Infrastructure.Identity.User;
 using TaskManager.Infrastructure.ProjectInvites;
 using TaskManager.Infrastructure.ProjectMembers;
 using TaskManager.Infrastructure.Projects;
+using TaskManager.Infrastructure.Tasks;
 
 namespace TaskManager.Infrastructure;
 
@@ -68,6 +70,7 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IProjectInviteRepository, ProjectInviteRepository>();
         services.AddScoped<IProjectMemberRepository, ProjectMemberRepository>();
+        services.AddScoped<ITaskRepository, TaskRepository>();
     }
 
     private static void RegisterServices(IServiceCollection services)

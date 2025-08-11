@@ -24,8 +24,7 @@ public class ProjectsController : ControllerBase
     {
         _projectService = projectService;
     }
-
-    [AllowAnonymous]
+    
     [HttpGet]
     public async Task<ActionResult<IEnumerable<GetProjectResponse>>> GetAll(
         [FromQuery] RoleQueryParameter? role = null)

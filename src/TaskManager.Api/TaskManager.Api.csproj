@@ -30,8 +30,4 @@
         <ProjectReference Include="..\TaskManager.UseCases\TaskManager.UseCases.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="ProjectTasks\Get\"/>
-    </ItemGroup>
-
 </Project>

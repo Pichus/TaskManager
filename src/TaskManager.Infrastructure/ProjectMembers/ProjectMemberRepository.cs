@@ -29,6 +29,15 @@ public class ProjectMemberRepository : IProjectMemberRepository
                                 && member.MemberId == userId);
     }
 
+    public async Task<bool> IsUserProjectManager(string userId, long projectId)
+    {
+        return await _context
+            .ProjectMembers
+            .AnyAsync(member => member.ProjectId == projectId
+                                && member.MemberId == userId
+                                && member.ProjectRole == ProjectRole.Manager);
+    }
+
     public async Task<IEnumerable<ProjectMemberWithUser>> GetProjectMembersWithUsersAsync(long projectId)
     {
         return await _context

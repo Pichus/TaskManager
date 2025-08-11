@@ -7,6 +7,7 @@ using TaskManager.UseCases.Invites;
 using TaskManager.UseCases.Profile.ProfileDetails;
 using TaskManager.UseCases.ProjectMembers;
 using TaskManager.UseCases.Projects;
+using TaskManager.UseCases.Tasks;
 
 namespace TaskManager.UseCases;
 
@@ -55,5 +56,7 @@ public static class UseCasesServiceExtension
         services.AddScoped<IProfileDetailsService, ProfileDetailsService>();
 
         services.AddScoped<IProjectMemberService, ProjectMemberService>();
+
+        services.AddScoped<ITaskService, TaskService>();
     }
 }
