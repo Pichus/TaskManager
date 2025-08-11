@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using TaskManager.Core.TaskAggregate;
 using TaskManager.Infrastructure.Data;
 
@@ -15,5 +16,19 @@ public class TaskRepository : ITaskRepository
     public void Create(TaskEntity task)
     {
         _context.Tasks.Add(task);
+    }
+
+    public async Task<IEnumerable<TaskEntity>> GetAllByProjectIdAsync(long projectId)
+    {
+        return await _context.Tasks.Where(task => task.ProjectId == projectId).ToListAsync();
+    }
+
+    public async Task<IEnumerable<TaskEntity>> GetAllByProjectIdAndStatusAsync(long projectId, Status taskStatus)
+    {
+        return await _context
+            .Tasks
+            .Where(task => task.Id == task.ProjectId
+                           && task.Status == taskStatus)
+            .ToListAsync();
     }
 }

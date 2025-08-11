@@ -27,9 +27,41 @@ public class TaskService : ITaskService
         _dbContext = dbContext;
     }
 
-    public async Task<Result<TaskEntity>> GetAllByProjectIdAndStatusAsync(long projectId, StatusDto status)
+    public async Task<Result<IEnumerable<TaskEntity>>> GetAllByProjectIdAndStatusAsync(long projectId, StatusDto status)
     {
-        throw new NotImplementedException();
+        var currentUserId = _currentUserService.UserId;
+
+        if (currentUserId is null)
+            return Result<IEnumerable<TaskEntity>>.Failure(UseCaseErrors.Unauthenticated);
+
+        var project = await _projectRepository.FindByIdAsync(projectId);
+
+        if (project is null)
+            return Result<IEnumerable<TaskEntity>>.Failure(GetTaskErrors.ProjectNotFound);
+
+        var canViewTasks = await _projectMemberRepository.IsUserProjectMember(currentUserId, projectId); 
+
+        if (!canViewTasks)
+            return Result<IEnumerable<TaskEntity>>.Failure(GetTaskErrors.AccessDenied);
+        
+        var taskStatus = status switch
+        {
+            StatusDto.Any => Status.ToDo,
+            StatusDto.ToDo => Status.ToDo,
+            StatusDto.InProgress => Status.InProgress,
+            StatusDto.Complete => Status.Complete,
+            _ => Status.ToDo
+        };
+
+        var tasks = status switch
+        {
+            StatusDto.Any => await _taskRepository.GetAllByProjectIdAsync(projectId),
+            StatusDto.ToDo or StatusDto.InProgress or StatusDto.Complete => await _taskRepository
+                .GetAllByProjectIdAndStatusAsync(projectId, taskStatus),
+            _ => await _taskRepository.GetAllByProjectIdAsync(projectId)
+        };
+        
+        return Result<IEnumerable<TaskEntity>>.Success(tasks);
     }
 
     public async Task<Result<TaskEntity>> CreateAsync(CreateTaskDto createTaskDto)

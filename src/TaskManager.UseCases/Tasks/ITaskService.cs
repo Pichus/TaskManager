@@ -8,7 +8,7 @@ namespace TaskManager.UseCases.Tasks;
 
 public interface ITaskService
 {
-    Task<Result<TaskEntity>> GetAllByProjectIdAndStatusAsync(long projectId, StatusDto status);
+    Task<Result<IEnumerable<TaskEntity>>> GetAllByProjectIdAndStatusAsync(long projectId, StatusDto status);
     Task<Result<TaskEntity>> CreateAsync(CreateTaskDto createTaskDto);
     Task<Result> UpdateAsync(UpdateTaskDto updateTaskDto);
     Task<Result> UpdateStatusAsync(long taskId, Status status);

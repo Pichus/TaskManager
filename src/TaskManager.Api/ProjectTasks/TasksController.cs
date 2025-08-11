@@ -40,11 +40,19 @@ public class TasksController : ControllerBase
 
             if (errorCode == UseCaseErrors.Unauthenticated.Code)
                 return Unauthorized();
+            
+            if (errorCode == GetTaskErrors.ProjectNotFound.Code)
+                return NotFound(errorMessage);
+
+            if (errorCode == GetTaskErrors.AccessDenied.Code)
+                return Forbid();
         }
 
-        return Ok();
+        var response = TasksToResponses(result.Value);
+        
+        return Ok(response);
     }
-
+    
     [HttpPost]
     public async Task<ActionResult<GetTaskResponse>> Create([FromRoute] long projectId,
         [FromBody] CreateTaskRequest request)
@@ -58,6 +66,12 @@ public class TasksController : ControllerBase
 
             if (errorCode == UseCaseErrors.Unauthenticated.Code)
                 return Unauthorized();
+
+            if (errorCode == CreateTaskErrors.ProjectNotFound.Code)
+                return NotFound(errorMessage);
+
+            if (errorCode == CreateTaskErrors.AccessDenied.Code)
+                return Forbid();
         }
 
         var response = TaskToGetTaskResponse(result.Value);
@@ -77,12 +91,6 @@ public class TasksController : ControllerBase
 
             if (errorCode == UseCaseErrors.Unauthenticated.Code)
                 return Unauthorized();
-
-            if (errorCode == CreateTaskErrors.ProjectNotFound.Code)
-                return NotFound(errorMessage);
-
-            if (errorCode == CreateTaskErrors.AccessDenied.Code)
-                return Forbid();
         }
 
         return Ok();
@@ -153,5 +161,10 @@ public class TasksController : ControllerBase
             Description = request.Description,
             DueDate = request.DueDate
         };
+    }
+    
+    private IEnumerable<GetTaskResponse> TasksToResponses(IEnumerable<TaskEntity> tasks)
+    {
+        return tasks.Select(TaskToGetTaskResponse);
     }
 }
