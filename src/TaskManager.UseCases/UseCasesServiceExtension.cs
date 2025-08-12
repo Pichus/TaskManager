@@ -16,20 +16,19 @@ public static class UseCasesServiceExtension
     public static IServiceCollection AddUseCasesServices(
         this IServiceCollection services,
         IConfiguration configuration,
-        // ILogger logger,
         string environmentName)
     {
         if (environmentName == "Development")
-            RegisterDevelopmentOnlyDependencies(services, configuration);
+            RegisterDevelopmentOnlyDependencies(services);
         else if (environmentName == "Testing")
             RegisterTestingOnlyDependencies(services);
         else
-            RegisterProductionOnlyDependencies(services, configuration);
+            RegisterProductionOnlyDependencies(services);
 
         return services;
     }
 
-    private static void RegisterProductionOnlyDependencies(IServiceCollection services, IConfiguration configuration)
+    private static void RegisterProductionOnlyDependencies(IServiceCollection services)
     {
         RegisterServices(services);
     }
@@ -39,7 +38,7 @@ public static class UseCasesServiceExtension
         RegisterServices(services);
     }
 
-    private static void RegisterDevelopmentOnlyDependencies(IServiceCollection services, IConfiguration configuration)
+    private static void RegisterDevelopmentOnlyDependencies(IServiceCollection services)
     {
         RegisterServices(services);
     }
