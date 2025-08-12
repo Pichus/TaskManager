@@ -27,7 +27,7 @@ public class TaskRepository : ITaskRepository
     {
         return await _context
             .Tasks
-            .Where(task => task.Id == task.ProjectId
+            .Where(task => task.ProjectId == projectId
                            && task.Status == taskStatus)
             .ToListAsync();
     }
