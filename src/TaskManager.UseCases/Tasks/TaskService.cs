@@ -151,9 +151,7 @@ public class TaskService : ITaskService
         if (task is null || task.ProjectId != projectId)
             return Result.Failure(UpdateTaskErrors.TaskNotFound);
 
-        var canCurrentUserUpdateTaskStatus = currentUserId == project.LeadUserId
-                                             || await _projectMemberRepository.IsUserProjectMember(currentUserId,
-                                                 projectId);
+        var canCurrentUserUpdateTaskStatus = currentUserId == project.LeadUserId || task.AssigneeUserId == currentUserId;
 
         if (!canCurrentUserUpdateTaskStatus)
             return Result.Failure(UpdateTaskErrors.AccessDenied);
