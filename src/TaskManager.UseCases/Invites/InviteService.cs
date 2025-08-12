@@ -304,6 +304,14 @@ public class InviteService : IInviteService
             return Result<IEnumerable<ProjectInvite>>.Failure(GetPendingInvitesForProjectErrors.ProjectNotFound);
         }
 
+        var canCurrentUserGetPendingInvitesForProject = await IsUserProjectLeadOrManagerAsync(currentUserId, project);
+
+        if (!canCurrentUserGetPendingInvitesForProject)
+        {
+            _logger.LogWarning("Getting pending invites for project failed - access denied");
+            return Result<IEnumerable<ProjectInvite>>.Failure(GetPendingInvitesForProjectErrors.AccessDenied);
+        }
+        
         var invites = project.Invites;
 
         _logger.LogWarning("Got pending invites for project successfully");
