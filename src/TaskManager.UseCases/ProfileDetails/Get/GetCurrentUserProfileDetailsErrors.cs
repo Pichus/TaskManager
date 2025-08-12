@@ -1,4 +1,4 @@
-namespace TaskManager.UseCases.Profile.ProfileDetails.Get;
+namespace TaskManager.UseCases.ProfileDetails.Get;
 
 public static class GetCurrentUserProfileDetailsErrors
 {

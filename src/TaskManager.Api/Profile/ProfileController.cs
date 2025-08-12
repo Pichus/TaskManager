@@ -7,7 +7,7 @@ using TaskManager.Profile.GetProfileDetails;
 using TaskManager.UseCases.Invites;
 using TaskManager.UseCases.Invites.Accept;
 using TaskManager.UseCases.Invites.Decline;
-using TaskManager.UseCases.Profile.ProfileDetails;
+using TaskManager.UseCases.ProfileDetails;
 using TaskManager.UseCases.Shared;
 
 namespace TaskManager.Profile;

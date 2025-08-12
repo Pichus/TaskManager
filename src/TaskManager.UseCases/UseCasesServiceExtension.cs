@@ -4,7 +4,7 @@ using TaskManager.UseCases.Identity.Login;
 using TaskManager.UseCases.Identity.RefreshToken;
 using TaskManager.UseCases.Identity.Register;
 using TaskManager.UseCases.Invites;
-using TaskManager.UseCases.Profile.ProfileDetails;
+using TaskManager.UseCases.ProfileDetails;
 using TaskManager.UseCases.ProjectMembers;
 using TaskManager.UseCases.Projects;
 using TaskManager.UseCases.Tasks;
