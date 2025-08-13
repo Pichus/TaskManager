@@ -54,7 +54,7 @@ public class TaskService : ITaskService
             return Result<IEnumerable<TaskEntity>>.Failure(GetTaskErrors.ProjectNotFound);
         }
 
-        var canViewTasks = await _projectMemberRepository.IsUserProjectMember(currentUserId, projectId);
+        var canViewTasks = await _projectMemberRepository.IsUserProjectParticipantAsync(currentUserId, projectId);
 
         if (!canViewTasks)
         {
@@ -106,7 +106,7 @@ public class TaskService : ITaskService
         }
 
         var canCurrentUserCanCreateTask = project.LeadUserId == currentUserId ||
-                                          await _projectMemberRepository.IsUserProjectManager(currentUserId,
+                                          await _projectMemberRepository.IsUserProjectManagerAsync(currentUserId,
                                               project.Id);
 
         if (!canCurrentUserCanCreateTask)
@@ -165,7 +165,7 @@ public class TaskService : ITaskService
         }
 
         var canCurrentUserUpdateTask = project.LeadUserId == currentUserId ||
-                                       await _projectMemberRepository.IsUserProjectManager(currentUserId, project.Id);
+                                       await _projectMemberRepository.IsUserProjectManagerAsync(currentUserId, project.Id);
 
         if (!canCurrentUserUpdateTask)
         {
@@ -257,8 +257,7 @@ public class TaskService : ITaskService
             return Result<TaskEntity>.Failure(GetTaskErrors.ProjectNotFound);
         }
 
-        var canCurrentUserViewTask = project.LeadUserId == currentUserId
-                                     || await _projectMemberRepository.IsUserProjectMember(currentUserId, projectId);
+        var canCurrentUserViewTask = await _projectMemberRepository.IsUserProjectParticipantAsync(currentUserId, projectId);
 
         if (!canCurrentUserViewTask)
         {
@@ -308,7 +307,7 @@ public class TaskService : ITaskService
         }
 
         var canCurrentUserDeleteTask = project.LeadUserId == currentUserId
-                                       || await _projectMemberRepository.IsUserProjectManager(currentUserId, projectId);
+                                       || await _projectMemberRepository.IsUserProjectManagerAsync(currentUserId, projectId);
 
         if (!canCurrentUserDeleteTask)
         {

@@ -19,15 +19,16 @@ public class ProjectMemberRepository : RepositoryBase<ProjectMember, long>, IPro
                                            && member.MemberId == memberId);
     }
 
-    public async Task<bool> IsUserProjectMember(string userId, long projectId)
+    public async Task<bool> IsUserProjectMemberAsync(string userId, long projectId)
     {
         return await Context
             .ProjectMembers
             .AnyAsync(member => member.ProjectId == projectId
-                                && member.MemberId == userId);
+                                && member.MemberId == userId
+                                && member.ProjectRole == ProjectRole.Member);
     }
 
-    public async Task<bool> IsUserProjectManager(string userId, long projectId)
+    public async Task<bool> IsUserProjectManagerAsync(string userId, long projectId)
     {
         return await Context
             .ProjectMembers
@@ -51,5 +52,25 @@ public class ProjectMemberRepository : RepositoryBase<ProjectMember, long>, IPro
                 }
             )
             .ToListAsync();
+    }
+
+    public async Task<bool> IsUserProjectParticipantAsync(string userId, long projectId)
+    {
+        var isExplicitMember = await Context
+            .ProjectMembers
+            .AnyAsync(member => member.ProjectId == projectId
+                                && member.MemberId == userId);
+
+        var isLead = await IsUserProjectLeadAsync(userId, projectId);
+
+        return isExplicitMember || isLead;
+    }
+
+    public async Task<bool> IsUserProjectLeadAsync(string userId, long projectId)
+    {
+        return await Context
+            .Projects
+            .AnyAsync(project => project.Id == projectId
+                                 && project.LeadUserId == userId);
     }
 }

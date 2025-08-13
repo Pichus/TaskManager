@@ -122,7 +122,7 @@ public class InviteService : IInviteService
             _logger.LogWarning("Deleting invite failed - user unauthenticated");
             return Result.Failure(UseCaseErrors.Unauthenticated);
         }
-        
+
         var invite = await _projectInviteRepository.FindByIdAsync(inviteId);
 
         if (invite is null)
@@ -149,7 +149,7 @@ public class InviteService : IInviteService
     public async Task<Result<IEnumerable<ProjectInvite>>> GetPendingInvitesForCurrentUser()
     {
         _logger.LogInformation("Getting pending invites for current user");
-        
+
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null)
@@ -169,7 +169,7 @@ public class InviteService : IInviteService
     public async Task<Result> AcceptInviteAsync(long inviteId)
     {
         _logger.LogInformation("Accepting Invite: {InviteId}", inviteId);
-        
+
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null)
@@ -194,7 +194,7 @@ public class InviteService : IInviteService
 
         if (invite.Status == InviteStatus.Rejected)
         {
-            _logger.LogWarning("Accepting invite failed - invite already rejected");   
+            _logger.LogWarning("Accepting invite failed - invite already rejected");
             return Result.Failure(AcceptInviteErrors.InviteAlreadyRejected);
         }
 
@@ -233,7 +233,7 @@ public class InviteService : IInviteService
     public async Task<Result> DeclineInviteAsync(long inviteId)
     {
         _logger.LogInformation("Declining Invite: {InviteId}", inviteId);
-        
+
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null)
@@ -287,7 +287,7 @@ public class InviteService : IInviteService
     public async Task<Result<IEnumerable<ProjectInvite>>> GetPendingProjectInvitesAsync(long projectId)
     {
         _logger.LogInformation("Getting pending invites for Project: {ProjectId}", projectId);
-        
+
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null)
@@ -311,7 +311,7 @@ public class InviteService : IInviteService
             _logger.LogWarning("Getting pending invites for project failed - access denied");
             return Result<IEnumerable<ProjectInvite>>.Failure(GetPendingInvitesForProjectErrors.AccessDenied);
         }
-        
+
         var invites = project.Invites;
 
         _logger.LogWarning("Got pending invites for project successfully");
@@ -320,9 +320,7 @@ public class InviteService : IInviteService
 
     private async Task<bool> IsUserProjectLeadOrManagerAsync(string userId, ProjectEntity project)
     {
-        var projectMember = await _projectMemberRepository.GetByProjectIdAndMemberIdAsync(project.Id, userId);
-
-        var isUserProjectManager = projectMember is not null && projectMember.ProjectRole == ProjectRole.Manager;
+        var isUserProjectManager = await _projectMemberRepository.IsUserProjectManagerAsync(userId, project.Id);
 
         return userId == project.LeadUserId || isUserProjectManager;
     }

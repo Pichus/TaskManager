@@ -52,8 +52,7 @@ public class ProjectMemberService : IProjectMemberService
             return Result<IEnumerable<ProjectMemberWithUser>>.Failure(GetProjectMembersErrors.ProjectNotFound);
         }
 
-        var canGetProjectMembers = project.LeadUserId == currentUserId ||
-                                   await _projectMemberRepository.IsUserProjectMember(currentUserId, projectId);
+        var canGetProjectMembers = await _projectMemberRepository.IsUserProjectParticipantAsync(currentUserId, projectId);
 
         if (!canGetProjectMembers)
         {
