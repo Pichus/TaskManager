@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.ProjectInviteAggregate;
+using TaskManager.Infrastructure;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.UseCases.Invites.Response.Accept;
@@ -12,21 +13,21 @@ namespace TaskManager.UseCases.Invites.Response;
 public class InviteResponseService : IInviteResponseService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly AppDbContext _dbContext;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
     private readonly IProjectInviteRepository _projectInviteRepository;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
 
     public InviteResponseService(ILogger logger, ICurrentUserService currentUserService,
-        IProjectInviteRepository projectInviteRepository, IProjectRepository projectRepository, AppDbContext dbContext,
+        IProjectInviteRepository projectInviteRepository, IProjectRepository projectRepository, IUnitOfWork unitOfWork,
         IProjectMemberRepository projectMemberRepository)
     {
         _logger = logger;
         _currentUserService = currentUserService;
         _projectInviteRepository = projectInviteRepository;
         _projectRepository = projectRepository;
-        _dbContext = dbContext;
+        _unitOfWork = unitOfWork;
         _projectMemberRepository = projectMemberRepository;
     }
 
@@ -98,7 +99,7 @@ public class InviteResponseService : IInviteResponseService
         
         invite.Status = InviteStatus.Accepted;
         _projectInviteRepository.Update(invite);
-        await _dbContext.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         _logger.LogInformation("Accepted invite successfully");
         return Result.Success();
@@ -152,7 +153,7 @@ public class InviteResponseService : IInviteResponseService
 
         invite.Status = InviteStatus.Rejected;
         _projectInviteRepository.Update(invite);
-        await _dbContext.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         _logger.LogInformation("Declined invite successfully");
         return Result.Success();

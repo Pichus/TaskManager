@@ -11,6 +11,10 @@ namespace TaskManager.Infrastructure.Data;
 
 public class AppDbContext : IdentityDbContext<TaskManagerUser>
 {
+    protected AppDbContext()
+    {
+    }
+
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
     {

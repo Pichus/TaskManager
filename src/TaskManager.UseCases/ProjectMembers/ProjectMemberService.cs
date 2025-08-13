@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
+using TaskManager.Infrastructure;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.Infrastructure.Identity.User;
@@ -14,7 +15,7 @@ namespace TaskManager.UseCases.ProjectMembers;
 public class ProjectMemberService : IProjectMemberService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly AppDbContext _dbContext;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
@@ -22,13 +23,13 @@ public class ProjectMemberService : IProjectMemberService
 
     public ProjectMemberService(ICurrentUserService currentUserService, IProjectRepository projectRepository,
         IProjectMemberRepository projectMemberRepository, UserManager<TaskManagerUser> userManager,
-        AppDbContext dbContext, ILogger logger)
+        IUnitOfWork unitOfWork, ILogger logger)
     {
         _currentUserService = currentUserService;
         _projectRepository = projectRepository;
         _projectMemberRepository = projectMemberRepository;
         _userManager = userManager;
-        _dbContext = dbContext;
+        _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
@@ -120,7 +121,7 @@ public class ProjectMemberService : IProjectMemberService
         }
 
         projectMember.ProjectRole = projectRole;
-        await _dbContext.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         _logger.LogInformation("Updated project member successfully");
         return Result.Success();
@@ -165,7 +166,7 @@ public class ProjectMemberService : IProjectMemberService
         }
 
         _projectMemberRepository.Remove(projectMember!);
-        await _dbContext.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         _logger.LogInformation("Deleted project member successfully");
         return Result.Success();

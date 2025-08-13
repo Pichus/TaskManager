@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.TaskAggregate;
+using TaskManager.Infrastructure;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.UseCases.Shared;
@@ -10,7 +11,7 @@ namespace TaskManager.UseCases.Tasks.Delete;
 public class TaskDeletionService : ITaskDeletionService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly AppDbContext _dbContext;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
@@ -18,14 +19,14 @@ public class TaskDeletionService : ITaskDeletionService
 
     public TaskDeletionService(ILogger logger, ICurrentUserService currentUserService,
         IProjectRepository projectRepository, ITaskRepository taskRepository,
-        IProjectMemberRepository projectMemberRepository, AppDbContext dbContext)
+        IProjectMemberRepository projectMemberRepository, IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _currentUserService = currentUserService;
         _projectRepository = projectRepository;
         _taskRepository = taskRepository;
         _projectMemberRepository = projectMemberRepository;
-        _dbContext = dbContext;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result> DeleteAsync(long projectId, long taskId)
@@ -68,7 +69,7 @@ public class TaskDeletionService : ITaskDeletionService
         }
 
         _taskRepository.Delete(task);
-        await _dbContext.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         _logger.LogInformation("Successfully deleted Task: {TaskId}", task.Id);
         return Result.Success();

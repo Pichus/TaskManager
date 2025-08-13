@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.ProjectInviteAggregate;
+using TaskManager.Infrastructure;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.Infrastructure.Identity.User;
@@ -12,7 +13,7 @@ namespace TaskManager.UseCases.Invites.Create;
 public class InviteCreationService : IInviteCreationService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly AppDbContext _dbContext;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
     private readonly IProjectInviteRepository _projectInviteRepository;
     private readonly IProjectMemberRepository _projectMemberRepository;
@@ -21,7 +22,7 @@ public class InviteCreationService : IInviteCreationService
 
     public InviteCreationService(ILogger logger, ICurrentUserService currentUserService,
         IProjectRepository projectRepository, UserManager<TaskManagerUser> userManager,
-        IProjectInviteRepository projectInviteRepository, AppDbContext dbContext,
+        IProjectInviteRepository projectInviteRepository, IUnitOfWork unitOfWork,
         IProjectMemberRepository projectMemberRepository)
     {
         _logger = logger;
@@ -29,7 +30,7 @@ public class InviteCreationService : IInviteCreationService
         _projectRepository = projectRepository;
         _userManager = userManager;
         _projectInviteRepository = projectInviteRepository;
-        _dbContext = dbContext;
+        _unitOfWork = unitOfWork;
         _projectMemberRepository = projectMemberRepository;
     }
 
@@ -101,7 +102,7 @@ public class InviteCreationService : IInviteCreationService
         };
 
         _projectInviteRepository.Create(invite);
-        await _dbContext.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         _logger.LogInformation("Created invite successfully");
         return Result<ProjectInvite>.Success(invite);

@@ -21,7 +21,6 @@ public static class InfrastructureServiceExtensions
     public static IServiceCollection AddInfrastructureServices(
         this IServiceCollection services,
         IConfiguration configuration,
-        // ILogger logger,
         string environmentName)
     {
         if (environmentName == "Development")
@@ -33,8 +32,6 @@ public static class InfrastructureServiceExtensions
 
         RegisterEFRepositories(services);
         RegisterServices(services);
-
-        // logger.LogInformation("{Project} services registered", "Infrastructure");
 
         return services;
     }
@@ -79,5 +76,6 @@ public static class InfrastructureServiceExtensions
         services.AddScoped<IAccessTokenProvider, AccessTokenProvider>();
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
     }
 }

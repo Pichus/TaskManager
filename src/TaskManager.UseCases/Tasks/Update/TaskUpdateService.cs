@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.TaskAggregate;
+using TaskManager.Infrastructure;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.UseCases.Shared;
@@ -10,18 +11,18 @@ namespace TaskManager.UseCases.Tasks.Update;
 public class TaskUpdateService : ITaskUpdateService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly AppDbContext _dbContext;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly ITaskRepository _taskRepository;
 
-    public TaskUpdateService(ICurrentUserService currentUserService, AppDbContext dbContext, ILogger logger,
+    public TaskUpdateService(ICurrentUserService currentUserService, IUnitOfWork unitOfWork, ILogger logger,
         IProjectMemberRepository projectMemberRepository, IProjectRepository projectRepository,
         ITaskRepository taskRepository)
     {
         _currentUserService = currentUserService;
-        _dbContext = dbContext;
+        _unitOfWork = unitOfWork;
         _logger = logger;
         _projectMemberRepository = projectMemberRepository;
         _projectRepository = projectRepository;
@@ -73,7 +74,7 @@ public class TaskUpdateService : ITaskUpdateService
         task.DueDate = updateTaskDto.DueDate;
 
         _taskRepository.Update(task);
-        await _dbContext.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         _logger.LogInformation("Successfully updated a Task: {TaskId}", task.Id);
         return Result.Success();
@@ -126,7 +127,7 @@ public class TaskUpdateService : ITaskUpdateService
 
         task.Status = status;
         _taskRepository.Update(task);
-        await _dbContext.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         _logger.LogInformation("Successfully updated Task: {TaskId} status", task.Id);
         return Result.Success();

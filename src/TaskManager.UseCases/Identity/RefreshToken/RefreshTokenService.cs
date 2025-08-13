@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using TaskManager.Infrastructure;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.AccessToken;
 using TaskManager.Infrastructure.Identity.RefreshToken;
@@ -14,7 +15,7 @@ public class RefreshTokenService : IRefreshTokenService
 {
     private readonly IAccessTokenProvider _accessTokenProvider;
     private readonly IConfiguration _configuration;
-    private readonly AppDbContext _dbContext;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
     private readonly IRefreshTokenGenerator _refreshTokenGenerator;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
@@ -22,13 +23,13 @@ public class RefreshTokenService : IRefreshTokenService
 
     public RefreshTokenService(IRefreshTokenRepository refreshTokenRepository,
         IRefreshTokenGenerator refreshTokenGenerator, IAccessTokenProvider accessTokenProvider,
-        UserManager<TaskManagerUser> userManager, AppDbContext dbContext, IConfiguration configuration, ILogger logger)
+        UserManager<TaskManagerUser> userManager, IUnitOfWork unitOfWork, IConfiguration configuration, ILogger logger)
     {
         _refreshTokenRepository = refreshTokenRepository;
         _refreshTokenGenerator = refreshTokenGenerator;
         _accessTokenProvider = accessTokenProvider;
         _userManager = userManager;
-        _dbContext = dbContext;
+        _unitOfWork = unitOfWork;
         _configuration = configuration;
         _logger = logger;
     }
@@ -67,7 +68,7 @@ public class RefreshTokenService : IRefreshTokenService
         }
 
         _refreshTokenRepository.RevokeRefreshToken(oldRefreshToken);
-        await _dbContext.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         var newRefreshTokenString = await CreateAndSaveNewRefreshTokenAsync(user.Id);
 
@@ -93,7 +94,7 @@ public class RefreshTokenService : IRefreshTokenService
         };
 
         _refreshTokenRepository.Create(refreshToken);
-        await _dbContext.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         return newRefreshTokenString;
     }

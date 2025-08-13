@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.TaskAggregate;
+using TaskManager.Infrastructure;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.UseCases.Shared;
@@ -10,7 +11,7 @@ namespace TaskManager.UseCases.Tasks.Create;
 public class TaskCreationService : ITaskCreationService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly AppDbContext _dbContext;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
@@ -18,14 +19,14 @@ public class TaskCreationService : ITaskCreationService
 
     public TaskCreationService(ILogger logger, ICurrentUserService currentUserService,
         IProjectMemberRepository projectMemberRepository, IProjectRepository projectRepository,
-        ITaskRepository taskRepository, AppDbContext dbContext)
+        ITaskRepository taskRepository, IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _currentUserService = currentUserService;
         _projectMemberRepository = projectMemberRepository;
         _projectRepository = projectRepository;
         _taskRepository = taskRepository;
-        _dbContext = dbContext;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result<TaskEntity>> CreateAsync(CreateTaskDto createTaskDto)
@@ -73,7 +74,7 @@ public class TaskCreationService : ITaskCreationService
         };
 
         _taskRepository.Create(task);
-        await _dbContext.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         _logger.LogInformation("Successfully created a task for Project: {ProjectId}", createTaskDto.ProjectId);
         return Result<TaskEntity>.Success(task);

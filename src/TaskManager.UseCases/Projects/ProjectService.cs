@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
+using TaskManager.Infrastructure;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.UseCases.Projects.Create;
@@ -12,16 +13,16 @@ namespace TaskManager.UseCases.Projects;
 
 public class ProjectService : IProjectService
 {
-    private readonly AppDbContext _context;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
     private readonly IProjectRepository _projectRepository;
 
-    public ProjectService(IProjectRepository projectRepository, AppDbContext context,
+    public ProjectService(IProjectRepository projectRepository, IUnitOfWork unitOfWork,
         ICurrentUserService currentUserService, ILogger logger)
     {
         _projectRepository = projectRepository;
-        _context = context;
+        _unitOfWork = unitOfWork;
         _currentUserService = currentUserService;
         _logger = logger;
     }
@@ -46,7 +47,7 @@ public class ProjectService : IProjectService
         };
 
         _projectRepository.Create(project);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         _logger.LogInformation("Created Project: {ProjectId} successfully", project.Id);
         return Result<ProjectEntity>.Success(project);
@@ -139,7 +140,7 @@ public class ProjectService : IProjectService
         project.Title = updateProjectDto.ProjectTitle;
 
         _projectRepository.Update(project);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         _logger.LogInformation("Updated project successfully");
         return Result<ProjectEntity>.Success(project);
@@ -172,7 +173,7 @@ public class ProjectService : IProjectService
         }
 
         _projectRepository.Remove(project);
-        await _context.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         _logger.LogInformation("Deleted project successfully");
         return Result.Success();

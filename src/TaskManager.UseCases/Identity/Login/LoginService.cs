@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using TaskManager.Infrastructure.Data;
+using TaskManager.Infrastructure;
 using TaskManager.Infrastructure.Identity.AccessToken;
 using TaskManager.Infrastructure.Identity.RefreshToken;
 using TaskManager.Infrastructure.Identity.User;
@@ -14,29 +14,29 @@ public class LoginService : ILoginService
 {
     private readonly IAccessTokenProvider _accessTokenProvider;
     private readonly IConfiguration _configuration;
-    private readonly AppDbContext _dbContext;
     private readonly ILogger _logger;
     private readonly IRefreshTokenGenerator _refreshTokenGenerator;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly UserManager<TaskManagerUser> _userManager;
 
     public LoginService(UserManager<TaskManagerUser> userManager, IRefreshTokenRepository refreshTokenRepository,
         IAccessTokenProvider accessTokenProvider, IRefreshTokenGenerator refreshTokenGenerator,
-        IConfiguration configuration, AppDbContext dbContext, ILogger logger)
+        IConfiguration configuration, IUnitOfWork unitOfWork, ILogger logger)
     {
         _userManager = userManager;
         _refreshTokenRepository = refreshTokenRepository;
         _accessTokenProvider = accessTokenProvider;
         _refreshTokenGenerator = refreshTokenGenerator;
         _configuration = configuration;
-        _dbContext = dbContext;
+        _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
     public async Task<Result<AccessAndRefreshTokenPair>> LoginAsync(LoginDto dto)
     {
         _logger.LogInformation("Logging in User: {Email}", dto.Email);
-        
+
         var user = await _userManager.FindByEmailAsync(dto.Email);
 
         if (user is null || await _userManager.CheckPasswordAsync(user, dto.Password))
@@ -69,6 +69,6 @@ public class LoginService : ILoginService
         };
 
         _refreshTokenRepository.Create(refreshToken);
-        await _dbContext.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
     }
 }

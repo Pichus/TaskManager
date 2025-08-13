@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectInviteAggregate;
+using TaskManager.Infrastructure;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.UseCases.Shared;
@@ -9,17 +10,17 @@ namespace TaskManager.UseCases.Invites.Delete;
 public class InviteDeletionService : IInviteDeletionService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly AppDbContext _dbContext;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
     private readonly IProjectInviteRepository _projectInviteRepository;
 
     public InviteDeletionService(ILogger logger, ICurrentUserService currentUserService,
-        IProjectInviteRepository projectInviteRepository, AppDbContext dbContext)
+        IProjectInviteRepository projectInviteRepository, IUnitOfWork unitOfWork)
     {
         _logger = logger;
         _currentUserService = currentUserService;
         _projectInviteRepository = projectInviteRepository;
-        _dbContext = dbContext;
+        _unitOfWork = unitOfWork;
     }
 
     public async Task<Result> DeleteAsync(long inviteId)
@@ -51,7 +52,7 @@ public class InviteDeletionService : IInviteDeletionService
         }
 
         _projectInviteRepository.Remove(invite);
-        await _dbContext.SaveChangesAsync();
+        await _unitOfWork.SaveChangesAsync();
 
         _logger.LogInformation("Deleted invite successfully");
         return Result.Success();
