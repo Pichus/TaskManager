@@ -1,8 +1,8 @@
 using TaskManager.UseCases.Shared;
 
-namespace TaskManager.UseCases.Tasks.Get;
+namespace TaskManager.UseCases.Tasks.Retrieve;
 
-public static class GetTaskErrors
+public static class RetrieveTaskErrors
 {
     public static readonly Error ProjectNotFound = new("Tasks.Get.ProjectNotFound",
         "project not found");

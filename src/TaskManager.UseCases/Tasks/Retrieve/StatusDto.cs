@@ -1,4 +1,4 @@
-namespace TaskManager.UseCases.Tasks.Get;
+namespace TaskManager.UseCases.Tasks.Retrieve;
 
 public enum StatusDto
 {

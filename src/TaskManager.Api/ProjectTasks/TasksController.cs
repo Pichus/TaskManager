@@ -4,10 +4,9 @@ using TaskManager.ProjectTasks.Create;
 using TaskManager.ProjectTasks.Get;
 using TaskManager.ProjectTasks.Update;
 using TaskManager.UseCases.Shared;
-using TaskManager.UseCases.Tasks;
 using TaskManager.UseCases.Tasks.Create;
 using TaskManager.UseCases.Tasks.Delete;
-using TaskManager.UseCases.Tasks.Get;
+using TaskManager.UseCases.Tasks.Retrieve;
 using TaskManager.UseCases.Tasks.Update;
 
 namespace TaskManager.ProjectTasks;
@@ -16,17 +15,24 @@ namespace TaskManager.ProjectTasks;
 [ApiController]
 public class TasksController : ControllerBase
 {
-    private readonly ITaskService _taskService;
+    private readonly ITaskCreationService _taskCreationService;
+    private readonly ITaskDeletionService _taskDeletionService;
+    private readonly ITaskRetrievalService _taskRetrievalService;
+    private readonly ITaskUpdateService _taskUpdateService;
 
-    public TasksController(ITaskService taskService)
+    public TasksController(ITaskRetrievalService taskRetrievalService, ITaskCreationService taskCreationService,
+        ITaskDeletionService taskDeletionService, ITaskUpdateService taskUpdateService)
     {
-        _taskService = taskService;
+        _taskRetrievalService = taskRetrievalService;
+        _taskCreationService = taskCreationService;
+        _taskDeletionService = taskDeletionService;
+        _taskUpdateService = taskUpdateService;
     }
 
     [HttpGet("{taskId:long}")]
     public async Task<ActionResult<GetTaskResponse>> Get([FromRoute] long projectId, [FromRoute] long taskId)
     {
-        var result = await _taskService.GetByProjectIdAndTaskIdAsync(projectId, taskId);
+        var result = await _taskRetrievalService.RetrieveByProjectIdAndTaskIdAsync(projectId, taskId);
 
         if (result.IsFailure)
         {
@@ -36,11 +42,11 @@ public class TasksController : ControllerBase
             if (errorCode == UseCaseErrors.Unauthenticated.Code)
                 return Unauthorized();
 
-            if (errorCode == GetTaskErrors.ProjectNotFound.Code
-                || errorCode == GetTaskErrors.TaskNotFound.Code)
+            if (errorCode == RetrieveTaskErrors.ProjectNotFound.Code
+                || errorCode == RetrieveTaskErrors.TaskNotFound.Code)
                 return NotFound(errorMessage);
 
-            if (errorCode == GetTaskErrors.AccessDenied.Code)
+            if (errorCode == RetrieveTaskErrors.AccessDenied.Code)
                 return Forbid();
         }
 
@@ -53,7 +59,7 @@ public class TasksController : ControllerBase
     public async Task<ActionResult<IEnumerable<GetTaskResponse>>> Get([FromRoute] long projectId,
         [FromQuery] Status? status)
     {
-        var result = await _taskService.GetAllByProjectIdAndStatusAsync(projectId, StatusToDto(status));
+        var result = await _taskRetrievalService.RetrieveAllByProjectIdAndStatusAsync(projectId, StatusToDto(status));
 
         if (result.IsFailure)
         {
@@ -63,10 +69,10 @@ public class TasksController : ControllerBase
             if (errorCode == UseCaseErrors.Unauthenticated.Code)
                 return Unauthorized();
 
-            if (errorCode == GetTaskErrors.ProjectNotFound.Code)
+            if (errorCode == RetrieveTaskErrors.ProjectNotFound.Code)
                 return NotFound(errorMessage);
 
-            if (errorCode == GetTaskErrors.AccessDenied.Code)
+            if (errorCode == RetrieveTaskErrors.AccessDenied.Code)
                 return Forbid();
         }
 
@@ -79,7 +85,7 @@ public class TasksController : ControllerBase
     public async Task<ActionResult<GetTaskResponse>> Create([FromRoute] long projectId,
         [FromBody] CreateTaskRequest request)
     {
-        var result = await _taskService.CreateAsync(CreateTaskRequestToDto(projectId, request));
+        var result = await _taskCreationService.CreateAsync(CreateTaskRequestToDto(projectId, request));
 
         if (result.IsFailure)
         {
@@ -105,7 +111,7 @@ public class TasksController : ControllerBase
     public async Task<ActionResult> Update([FromRoute] long projectId, [FromRoute] long taskId,
         [FromBody] UpdateTaskRequest request)
     {
-        var result = await _taskService.UpdateAsync(UpdateTaskRequestToDto(projectId, taskId, request));
+        var result = await _taskUpdateService.UpdateAsync(UpdateTaskRequestToDto(projectId, taskId, request));
 
         if (result.IsFailure)
         {
@@ -130,7 +136,7 @@ public class TasksController : ControllerBase
     public async Task<ActionResult> UpdateStatus([FromRoute] long projectId, [FromRoute] long taskId,
         [FromQuery] Status status)
     {
-        var result = await _taskService.UpdateStatusAsync(projectId, taskId, status);
+        var result = await _taskUpdateService.UpdateStatusAsync(projectId, taskId, status);
 
         if (result.IsFailure)
         {
@@ -157,7 +163,7 @@ public class TasksController : ControllerBase
     [HttpDelete("{taskId:long}")]
     public async Task<ActionResult> Delete([FromRoute] long projectId, [FromRoute] long taskId)
     {
-        var result = await _taskService.DeleteAsync(projectId, taskId);
+        var result = await _taskDeletionService.DeleteAsync(projectId, taskId);
 
         if (result.IsFailure)
         {

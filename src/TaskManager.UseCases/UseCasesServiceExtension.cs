@@ -10,7 +10,10 @@ using TaskManager.UseCases.Invites.Retrieve;
 using TaskManager.UseCases.ProfileDetails;
 using TaskManager.UseCases.ProjectMembers;
 using TaskManager.UseCases.Projects;
-using TaskManager.UseCases.Tasks;
+using TaskManager.UseCases.Tasks.Create;
+using TaskManager.UseCases.Tasks.Delete;
+using TaskManager.UseCases.Tasks.Retrieve;
+using TaskManager.UseCases.Tasks.Update;
 
 namespace TaskManager.UseCases;
 
@@ -58,7 +61,10 @@ public static class UseCasesServiceExtension
 
         services.AddScoped<IProjectMemberService, ProjectMemberService>();
 
-        services.AddScoped<ITaskService, TaskService>();
+        services.AddScoped<ITaskRetrievalService, TaskRetrievalService>();
+        services.AddScoped<ITaskCreationService, TaskCreationService>();
+        services.AddScoped<ITaskDeletionService, TaskDeletionService>();
+        services.AddScoped<ITaskUpdateService, TaskUpdateService>();
 
         services.AddScoped<IInviteCreationService, InviteCreationService>();
         services.AddScoped<IInviteDeletionService, InviteDeletionService>();
