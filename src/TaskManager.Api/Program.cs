@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.IdentityModel.Tokens;
 using NSwag;
 using NSwag.Generation.Processors.Security;
@@ -10,6 +11,16 @@ using TaskManager.UseCases;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
+
+builder.Services.AddHttpLogging(logging =>
+{
+    logging.LoggingFields = HttpLoggingFields.All;
+    logging.RequestHeaders.Remove("Authorization");
+    logging.RequestHeaders.Remove("Cookie");
+    logging.RequestBodyLogLimit = 4096;
+    logging.ResponseBodyLogLimit = 4096;
+    logging.CombineLogs = true;
+});
 
 builder.Services.AddHttpContextAccessor();
 
@@ -53,6 +64,8 @@ builder.Services.AddOpenApiDocument(document =>
 });
 
 var app = builder.Build();
+
+app.UseHttpLogging();
 
 if (app.Environment.IsDevelopment())
 {
