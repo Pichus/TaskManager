@@ -3,10 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using TaskManager.Core.ProjectInviteAggregate;
 using TaskManager.ProjectInvites.Create;
 using TaskManager.ProjectInvites.Get;
-using TaskManager.UseCases.Invites;
 using TaskManager.UseCases.Invites.Create;
 using TaskManager.UseCases.Invites.Delete;
-using TaskManager.UseCases.Invites.GetPendingForProject;
+using TaskManager.UseCases.Invites.Retrieve;
 using TaskManager.UseCases.Shared;
 
 namespace TaskManager.ProjectInvites;
@@ -18,20 +17,20 @@ public class ProjectInvitesController : ControllerBase
 {
     private readonly IInviteCreationService _inviteCreationService;
     private readonly IInviteDeletionService _inviteDeletionService;
-    private readonly IInviteService _inviteService;
+    private readonly IInviteRetrievalService _inviteRetrievalService;
 
-    public ProjectInvitesController(IInviteService inviteService, IInviteCreationService inviteCreationService,
-        IInviteDeletionService inviteDeletionService)
+    public ProjectInvitesController(IInviteCreationService inviteCreationService,
+        IInviteDeletionService inviteDeletionService, IInviteRetrievalService inviteRetrievalService)
     {
-        _inviteService = inviteService;
         _inviteCreationService = inviteCreationService;
         _inviteDeletionService = inviteDeletionService;
+        _inviteRetrievalService = inviteRetrievalService;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<GetInviteResponse>>> GetInvites([FromRoute] long projectId)
     {
-        var result = await _inviteService.GetPendingProjectInvitesAsync(projectId);
+        var result = await _inviteRetrievalService.RetrievePendingProjectInvitesAsync(projectId);
 
         if (result.IsFailure)
         {
@@ -40,7 +39,7 @@ public class ProjectInvitesController : ControllerBase
 
             if (errorCode == UseCaseErrors.Unauthenticated.Code) return Unauthorized();
 
-            if (errorCode == GetPendingInvitesForProjectErrors.ProjectNotFound.Code)
+            if (errorCode == RetrieveInvitesErrors.ProjectNotFound.Code)
                 return NotFound(errorMessage);
         }
 

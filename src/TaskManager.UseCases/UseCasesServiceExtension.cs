@@ -3,10 +3,10 @@ using Microsoft.Extensions.DependencyInjection;
 using TaskManager.UseCases.Identity.Login;
 using TaskManager.UseCases.Identity.RefreshToken;
 using TaskManager.UseCases.Identity.Register;
-using TaskManager.UseCases.Invites;
 using TaskManager.UseCases.Invites.Create;
 using TaskManager.UseCases.Invites.Delete;
 using TaskManager.UseCases.Invites.Response;
+using TaskManager.UseCases.Invites.Retrieve;
 using TaskManager.UseCases.ProfileDetails;
 using TaskManager.UseCases.ProjectMembers;
 using TaskManager.UseCases.Projects;
@@ -54,7 +54,6 @@ public static class UseCasesServiceExtension
 
         services.AddScoped<IProjectService, ProjectService>();
 
-        services.AddScoped<IInviteService, InviteService>();
         services.AddScoped<IProfileDetailsService, ProfileDetailsService>();
 
         services.AddScoped<IProjectMemberService, ProjectMemberService>();
@@ -64,5 +63,6 @@ public static class UseCasesServiceExtension
         services.AddScoped<IInviteCreationService, InviteCreationService>();
         services.AddScoped<IInviteDeletionService, InviteDeletionService>();
         services.AddScoped<IInviteResponseService, InviteResponseService>();
+        services.AddScoped<IInviteRetrievalService, InviteRetrievalService>();
     }
 }

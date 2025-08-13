@@ -1,15 +1,15 @@
 using TaskManager.UseCases.Shared;
 
-namespace TaskManager.UseCases.Invites.Decline;
+namespace TaskManager.UseCases.Invites.Response.Decline;
 
 public static class DeclineInviteErrors
 {
     public static readonly Error InviteNotFound = new("Invites.Decline.InviteNotFound",
         "Invite not found");
-    
+
     public static readonly Error ProjectNotFound = new("Invites.Decline.ProjectNotFound",
         "Project not found");
-    
+
     public static readonly Error InviteAlreadyAccepted = new("Invites.Decline.InviteAlreadyAccepted",
         "The invite has been already accepted");
 

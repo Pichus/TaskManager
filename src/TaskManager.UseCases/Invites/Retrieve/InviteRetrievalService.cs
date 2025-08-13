@@ -1,37 +1,31 @@
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.ProjectInviteAggregate;
-using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
-using TaskManager.Infrastructure.Identity.User;
-using TaskManager.UseCases.Invites.GetPendingForProject;
 using TaskManager.UseCases.Shared;
 
-namespace TaskManager.UseCases.Invites;
+namespace TaskManager.UseCases.Invites.Retrieve;
 
-public class InviteService : IInviteService
+public class InviteRetrievalService : IInviteRetrievalService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly AppDbContext _dbContext;
     private readonly ILogger _logger;
     private readonly IProjectInviteRepository _projectInviteRepository;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
 
-    public InviteService(IProjectInviteRepository projectInviteRepository, IProjectRepository projectRepository,
-        ICurrentUserService currentUserService, AppDbContext dbContext, UserManager<TaskManagerUser> userManager,
-        IProjectMemberRepository projectMemberRepository, ILogger logger)
+    public InviteRetrievalService(ILogger logger, ICurrentUserService currentUserService,
+        IProjectInviteRepository projectInviteRepository, IProjectMemberRepository projectMemberRepository,
+        IProjectRepository projectRepository)
     {
-        _projectInviteRepository = projectInviteRepository;
-        _projectRepository = projectRepository;
-        _currentUserService = currentUserService;
-        _dbContext = dbContext;
-        _projectMemberRepository = projectMemberRepository;
         _logger = logger;
+        _currentUserService = currentUserService;
+        _projectInviteRepository = projectInviteRepository;
+        _projectMemberRepository = projectMemberRepository;
+        _projectRepository = projectRepository;
     }
 
-    public async Task<Result<IEnumerable<ProjectInvite>>> GetPendingInvitesForCurrentUser()
+    public async Task<Result<IEnumerable<ProjectInvite>>> RetrievePendingInvitesForCurrentUser()
     {
         _logger.LogInformation("Getting pending invites for current user");
 
@@ -50,7 +44,7 @@ public class InviteService : IInviteService
         return Result<IEnumerable<ProjectInvite>>.Success(pendingInvites);
     }
 
-    public async Task<Result<IEnumerable<ProjectInvite>>> GetPendingProjectInvitesAsync(long projectId)
+    public async Task<Result<IEnumerable<ProjectInvite>>> RetrievePendingProjectInvitesAsync(long projectId)
     {
         _logger.LogInformation("Getting pending invites for Project: {ProjectId}", projectId);
 
@@ -67,27 +61,23 @@ public class InviteService : IInviteService
         if (project is null)
         {
             _logger.LogWarning("Getting pending invites for project failed - project not found");
-            return Result<IEnumerable<ProjectInvite>>.Failure(GetPendingInvitesForProjectErrors.ProjectNotFound);
+            return Result<IEnumerable<ProjectInvite>>.Failure(RetrieveInvitesErrors.ProjectNotFound);
         }
 
-        var canCurrentUserGetPendingInvitesForProject = await IsUserProjectLeadOrManagerAsync(currentUserId, project);
+        var canCurrentUserGetPendingInvitesForProject =
+            await _projectMemberRepository.IsUserProjectLeadAsync(currentUserId, projectId) ||
+            await _projectMemberRepository.IsUserProjectManagerAsync(currentUserId, projectId);
+
 
         if (!canCurrentUserGetPendingInvitesForProject)
         {
             _logger.LogWarning("Getting pending invites for project failed - access denied");
-            return Result<IEnumerable<ProjectInvite>>.Failure(GetPendingInvitesForProjectErrors.AccessDenied);
+            return Result<IEnumerable<ProjectInvite>>.Failure(RetrieveInvitesErrors.AccessDenied);
         }
 
         var invites = project.Invites;
 
         _logger.LogWarning("Got pending invites for project successfully");
         return Result<IEnumerable<ProjectInvite>>.Success(invites);
-    }
-
-    private async Task<bool> IsUserProjectLeadOrManagerAsync(string userId, ProjectEntity project)
-    {
-        var isUserProjectManager = await _projectMemberRepository.IsUserProjectManagerAsync(userId, project.Id);
-
-        return userId == project.LeadUserId || isUserProjectManager;
     }
 }

@@ -3,8 +3,8 @@ using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.ProjectInviteAggregate;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
-using TaskManager.UseCases.Invites.Accept;
-using TaskManager.UseCases.Invites.Decline;
+using TaskManager.UseCases.Invites.Response.Accept;
+using TaskManager.UseCases.Invites.Response.Decline;
 using TaskManager.UseCases.Shared;
 
 namespace TaskManager.UseCases.Invites.Response;

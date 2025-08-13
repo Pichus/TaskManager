@@ -4,10 +4,10 @@ using TaskManager.Core.ProjectInviteAggregate;
 using TaskManager.Infrastructure.Identity.User;
 using TaskManager.Profile.GetInvite;
 using TaskManager.Profile.GetProfileDetails;
-using TaskManager.UseCases.Invites;
-using TaskManager.UseCases.Invites.Accept;
-using TaskManager.UseCases.Invites.Decline;
 using TaskManager.UseCases.Invites.Response;
+using TaskManager.UseCases.Invites.Response.Accept;
+using TaskManager.UseCases.Invites.Response.Decline;
+using TaskManager.UseCases.Invites.Retrieve;
 using TaskManager.UseCases.ProfileDetails;
 using TaskManager.UseCases.Shared;
 
@@ -19,15 +19,15 @@ namespace TaskManager.Profile;
 public class ProfileController : ControllerBase
 {
     private readonly IInviteResponseService _inviteResponseService;
-    private readonly IInviteService _inviteService;
+    private readonly IInviteRetrievalService _inviteRetrievalService;
     private readonly IProfileDetailsService _profileDetailsService;
 
-    public ProfileController(IInviteService inviteService, IProfileDetailsService profileDetailsService,
-        IInviteResponseService inviteResponseService)
+    public ProfileController(IProfileDetailsService profileDetailsService,
+        IInviteResponseService inviteResponseService, IInviteRetrievalService inviteRetrievalService)
     {
-        _inviteService = inviteService;
         _profileDetailsService = profileDetailsService;
         _inviteResponseService = inviteResponseService;
+        _inviteRetrievalService = inviteRetrievalService;
     }
 
     [HttpGet("/me")]
@@ -52,7 +52,7 @@ public class ProfileController : ControllerBase
     [HttpGet("invites/pending")]
     public async Task<ActionResult<IEnumerable<GetInviteResponse>>> GetPendingInvites()
     {
-        var result = await _inviteService.GetPendingInvitesForCurrentUser();
+        var result = await _inviteRetrievalService.RetrievePendingInvitesForCurrentUser();
 
         if (result.IsFailure)
         {

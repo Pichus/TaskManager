@@ -1,6 +1,6 @@
 using TaskManager.UseCases.Shared;
 
-namespace TaskManager.UseCases.Invites.Accept;
+namespace TaskManager.UseCases.Invites.Response.Accept;
 
 public static class AcceptInviteErrors
 {
