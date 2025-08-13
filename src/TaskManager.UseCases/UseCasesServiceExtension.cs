@@ -6,6 +6,7 @@ using TaskManager.UseCases.Identity.Register;
 using TaskManager.UseCases.Invites;
 using TaskManager.UseCases.Invites.Create;
 using TaskManager.UseCases.Invites.Delete;
+using TaskManager.UseCases.Invites.Response;
 using TaskManager.UseCases.ProfileDetails;
 using TaskManager.UseCases.ProjectMembers;
 using TaskManager.UseCases.Projects;
@@ -62,5 +63,6 @@ public static class UseCasesServiceExtension
 
         services.AddScoped<IInviteCreationService, InviteCreationService>();
         services.AddScoped<IInviteDeletionService, InviteDeletionService>();
+        services.AddScoped<IInviteResponseService, InviteResponseService>();
     }
 }

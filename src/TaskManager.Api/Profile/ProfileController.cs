@@ -7,6 +7,7 @@ using TaskManager.Profile.GetProfileDetails;
 using TaskManager.UseCases.Invites;
 using TaskManager.UseCases.Invites.Accept;
 using TaskManager.UseCases.Invites.Decline;
+using TaskManager.UseCases.Invites.Response;
 using TaskManager.UseCases.ProfileDetails;
 using TaskManager.UseCases.Shared;
 
@@ -17,13 +18,16 @@ namespace TaskManager.Profile;
 [ApiController]
 public class ProfileController : ControllerBase
 {
+    private readonly IInviteResponseService _inviteResponseService;
     private readonly IInviteService _inviteService;
     private readonly IProfileDetailsService _profileDetailsService;
 
-    public ProfileController(IInviteService inviteService, IProfileDetailsService profileDetailsService)
+    public ProfileController(IInviteService inviteService, IProfileDetailsService profileDetailsService,
+        IInviteResponseService inviteResponseService)
     {
         _inviteService = inviteService;
         _profileDetailsService = profileDetailsService;
+        _inviteResponseService = inviteResponseService;
     }
 
     [HttpGet("/me")]
@@ -67,7 +71,7 @@ public class ProfileController : ControllerBase
     [HttpPut("invites/{inviteId:long}/accept")]
     public async Task<ActionResult> AcceptInvite(long inviteId)
     {
-        var result = await _inviteService.AcceptInviteAsync(inviteId);
+        var result = await _inviteResponseService.AcceptInviteAsync(inviteId);
 
         if (result.IsFailure)
         {
@@ -96,7 +100,7 @@ public class ProfileController : ControllerBase
     [HttpPut("invites/{inviteId:long}/decline")]
     public async Task<ActionResult> DeclineInvite(long inviteId)
     {
-        var result = await _inviteService.DeclineInviteAsync(inviteId);
+        var result = await _inviteResponseService.DeclineInviteAsync(inviteId);
 
         if (result.IsFailure)
         {
