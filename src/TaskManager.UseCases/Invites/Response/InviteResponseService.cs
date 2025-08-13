@@ -85,7 +85,17 @@ public class InviteResponseService : IInviteResponseService
             return Result.Failure(AcceptInviteErrors.ProjectNotFound);
         }
 
-        _projectRepository.AddMember(project, currentUserId);
+        var defaultProjectRole = ProjectRole.Member;
+        
+        var member = new ProjectMember
+        {
+            ProjectId = project.Id,
+            MemberId = currentUserId,
+            ProjectRole = defaultProjectRole,
+        };
+
+        _projectMemberRepository.Create(member);
+        
         invite.Status = InviteStatus.Accepted;
         _projectInviteRepository.Update(invite);
         await _dbContext.SaveChangesAsync();

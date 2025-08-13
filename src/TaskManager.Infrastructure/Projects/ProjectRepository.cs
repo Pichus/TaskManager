@@ -49,16 +49,6 @@ public class ProjectRepository : RepositoryBase<ProjectEntity, long>, IProjectRe
             projectMember.MemberId == currentUserId && projectMember.ProjectId == projectId);
     }
 
-    public void AddMember(ProjectEntity project, string memberId)
-    {
-        Context.ProjectMembers.Add(new ProjectMember
-        {
-            ProjectId = project.Id,
-            MemberId = memberId,
-            ProjectRole = ProjectRole.Member
-        });
-    }
-
     public async Task<IEnumerable<ProjectEntity>> GetAllByUserIdWhereUserIsLead(string userId)
     {
         return await Context.Projects.Where(project => project.LeadUserId == userId).ToListAsync();
@@ -73,10 +63,5 @@ public class ProjectRepository : RepositoryBase<ProjectEntity, long>, IProjectRe
                                && member.MemberId == userId
                                && member.ProjectRole == role))
             .ToListAsync();
-    }
-
-    public async Task<bool> ExistsAsync(long projectId)
-    {
-        return await Context.Projects.AnyAsync(project => project.Id == projectId);
     }
 }

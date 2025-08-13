@@ -17,9 +17,4 @@
         <ProjectReference Include="..\TaskManager.Infrastructure\TaskManager.Infrastructure.csproj"/>
     </ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Invites\GetPendingForProject\"/>
-        <Folder Include="Invites\Get\"/>
-    </ItemGroup>
-
 </Project>
