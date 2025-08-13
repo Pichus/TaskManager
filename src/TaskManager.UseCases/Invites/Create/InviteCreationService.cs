@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.ProjectInviteAggregate;
 using TaskManager.Infrastructure;
-using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.Infrastructure.Identity.User;
 using TaskManager.UseCases.Shared;
@@ -13,11 +12,11 @@ namespace TaskManager.UseCases.Invites.Create;
 public class InviteCreationService : IInviteCreationService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger _logger;
     private readonly IProjectInviteRepository _projectInviteRepository;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly UserManager<TaskManagerUser> _userManager;
 
     public InviteCreationService(ILogger logger, ICurrentUserService currentUserService,
@@ -46,7 +45,7 @@ public class InviteCreationService : IInviteCreationService
             return Result<ProjectInvite>.Failure(UseCaseErrors.Unauthenticated);
         }
 
-        var project = await _projectRepository.FindByIdWithProjectMembersIncludedAsync(createInviteDto.ProjectId);
+        var project = await _projectRepository.FindByIdAsync(createInviteDto.ProjectId);
 
         if (project is null)
         {
@@ -73,7 +72,8 @@ public class InviteCreationService : IInviteCreationService
             return Result<ProjectInvite>.Failure(CreateInviteErrors.InvitedUserNotFound);
         }
 
-        var inviteExists = await _projectInviteRepository.InviteExistsAsync(invitedUser.Id, project.Id);
+        var inviteExists =
+            await _projectInviteRepository.InviteExistsAsync(createInviteDto.InvitedUserId, createInviteDto.ProjectId);
 
         if (inviteExists)
         {
@@ -83,7 +83,8 @@ public class InviteCreationService : IInviteCreationService
         }
 
         var isInvitedUserProjectParticipant =
-            await _projectMemberRepository.IsUserProjectParticipantAsync(invitedUser.Id, project.Id);
+            await _projectMemberRepository.IsUserProjectParticipantAsync(createInviteDto.InvitedUserId,
+                createInviteDto.ProjectId);
 
         if (isInvitedUserProjectParticipant)
         {
@@ -95,8 +96,8 @@ public class InviteCreationService : IInviteCreationService
         var invite = new ProjectInvite
         {
             CreatedAt = DateTime.UtcNow,
-            ProjectId = project.Id,
-            InvitedUserId = invitedUser.Id,
+            ProjectId = createInviteDto.ProjectId,
+            InvitedUserId = createInviteDto.InvitedUserId,
             InvitedByUserId = invitedByUserId,
             Status = InviteStatus.Pending
         };
