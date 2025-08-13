@@ -2,47 +2,25 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Core.ProjectInviteAggregate;
 using TaskManager.Infrastructure.Data;
+using TaskManager.Infrastructure.Shared;
 
 namespace TaskManager.Infrastructure.ProjectInvites;
 
-public class ProjectInviteRepository : IProjectInviteRepository
+public class ProjectInviteRepository : RepositoryBase<ProjectInvite, long>, IProjectInviteRepository
 {
-    private readonly AppDbContext _context;
-
-    public ProjectInviteRepository(AppDbContext context)
+    public ProjectInviteRepository(AppDbContext context) : base(context)
     {
-        _context = context;
-    }
-
-    public void Create(ProjectInvite invite)
-    {
-        _context.Add(invite);
-    }
-
-    public async Task<ProjectInvite?> FindByIdAsync(long id)
-    {
-        return await _context.ProjectInvites.FindAsync(id);
     }
 
     public async Task<bool> AnyAsync(Expression<Func<ProjectInvite, bool>> predicate)
     {
-        return await _context.ProjectInvites
+        return await Context.ProjectInvites
             .AnyAsync(predicate);
-    }
-
-    public void Delete(ProjectInvite invite)
-    {
-        _context.ProjectInvites.Remove(invite);
     }
 
     public IQueryable<ProjectInvite> GetPendingInvitesByInvitedUserIdAsync(string userId)
     {
-        return _context.ProjectInvites.Where(invite =>
+        return Context.ProjectInvites.Where(invite =>
             invite.InvitedUserId == userId && invite.Status == InviteStatus.Pending);
-    }
-
-    public void Update(ProjectInvite invite)
-    {
-        _context.Update(invite);
     }
 }

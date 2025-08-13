@@ -139,7 +139,7 @@ public class InviteService : IInviteService
             return Result.Failure(DeleteInviteErrors.AccessDenied);
         }
 
-        _projectInviteRepository.Delete(invite);
+        _projectInviteRepository.Remove(invite);
         await _dbContext.SaveChangesAsync();
 
         _logger.LogInformation("Deleted invite successfully");

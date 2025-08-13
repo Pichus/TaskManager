@@ -1,14 +1,10 @@
 using System.Linq.Expressions;
+using TaskManager.Core.Shared;
 
 namespace TaskManager.Core.ProjectInviteAggregate;
 
-public interface IProjectInviteRepository
+public interface IProjectInviteRepository : IRepositoryBase<ProjectInvite, long>
 {
-    void Create(ProjectInvite invite);
-    Task<ProjectInvite?> FindByIdAsync(long id);
-
     Task<bool> AnyAsync(Expression<Func<ProjectInvite, bool>> predicate);
-    void Delete(ProjectInvite invite);
     IQueryable<ProjectInvite> GetPendingInvitesByInvitedUserIdAsync(string userId);
-    void Update(ProjectInvite invite);
 }
