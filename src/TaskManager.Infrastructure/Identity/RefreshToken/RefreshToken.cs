@@ -1,4 +1,5 @@
 using TaskManager.Core;
+using TaskManager.Core.Shared;
 using TaskManager.Infrastructure.Identity.User;
 
 namespace TaskManager.Infrastructure.Identity.RefreshToken;

@@ -1,4 +1,4 @@
-namespace TaskManager.Core;
+namespace TaskManager.Core.Shared;
 
 public interface IAggregateRoot
 {

@@ -1,4 +1,5 @@
 using TaskManager.Core.ProjectAggregate;
+using TaskManager.Core.Shared;
 
 namespace TaskManager.Core.TaskAggregate;
 

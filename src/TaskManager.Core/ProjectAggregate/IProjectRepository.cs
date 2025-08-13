@@ -1,14 +1,12 @@
+using TaskManager.Core.Shared;
+
 namespace TaskManager.Core.ProjectAggregate;
 
-public interface IProjectRepository
+public interface IProjectRepository : IRepositoryBase<ProjectEntity, long>
 {
-    void Create(ProjectEntity project);
-    Task<ProjectEntity?> FindByIdAsync(long id);
     Task<ProjectEntity?> FindByIdWithProjectMembersIncludedAsync(long id);
     Task<ProjectEntity?> FindByIdWithInvitesIncludedAsync(long id);
     Task<IEnumerable<ProjectEntity>> GetAllByUserIdAsync(string userId);
-    void Update(ProjectEntity project);
-    void Remove(ProjectEntity project);
     Task<bool> IsUserProjectMemberAsync(string currentUserId, long projectId);
     void AddMember(ProjectEntity project, string memberId);
     Task<IEnumerable<ProjectEntity>> GetAllByUserIdWhereUserIsLead(string userId);

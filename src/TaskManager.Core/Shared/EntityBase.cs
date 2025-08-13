@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TaskManager.Core;
+namespace TaskManager.Core.Shared;
 
 public abstract class EntityBase
 {
