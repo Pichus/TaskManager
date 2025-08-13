@@ -17,12 +17,15 @@ namespace TaskManager.ProjectInvites;
 public class ProjectInvitesController : ControllerBase
 {
     private readonly IInviteCreationService _inviteCreationService;
+    private readonly IInviteDeletionService _inviteDeletionService;
     private readonly IInviteService _inviteService;
 
-    public ProjectInvitesController(IInviteService inviteService, IInviteCreationService inviteCreationService)
+    public ProjectInvitesController(IInviteService inviteService, IInviteCreationService inviteCreationService,
+        IInviteDeletionService inviteDeletionService)
     {
         _inviteService = inviteService;
         _inviteCreationService = inviteCreationService;
+        _inviteDeletionService = inviteDeletionService;
     }
 
     [HttpGet]
@@ -79,7 +82,7 @@ public class ProjectInvitesController : ControllerBase
     [HttpDelete("{inviteId:long}")]
     public async Task<ActionResult> DeleteInvite([FromRoute] long inviteId)
     {
-        var deleteInviteResult = await _inviteService.DeleteAsync(inviteId);
+        var deleteInviteResult = await _inviteDeletionService.DeleteAsync(inviteId);
 
         if (deleteInviteResult.IsFailure)
         {

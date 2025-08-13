@@ -7,7 +7,6 @@ using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.Infrastructure.Identity.User;
 using TaskManager.UseCases.Invites.Accept;
 using TaskManager.UseCases.Invites.Decline;
-using TaskManager.UseCases.Invites.Delete;
 using TaskManager.UseCases.Invites.GetPendingForProject;
 using TaskManager.UseCases.Shared;
 
@@ -32,41 +31,6 @@ public class InviteService : IInviteService
         _dbContext = dbContext;
         _projectMemberRepository = projectMemberRepository;
         _logger = logger;
-    }
-
-    public async Task<Result> DeleteAsync(long inviteId)
-    {
-        _logger.LogInformation("Deleting Invite: {InvitedId}", inviteId);
-
-        var currentUserId = _currentUserService.UserId;
-
-        if (currentUserId is null)
-        {
-            _logger.LogWarning("Deleting invite failed - user unauthenticated");
-            return Result.Failure(UseCaseErrors.Unauthenticated);
-        }
-
-        var invite = await _projectInviteRepository.FindByIdAsync(inviteId);
-
-        if (invite is null)
-        {
-            _logger.LogWarning("Deleting invite failed - invite not found");
-            return Result.Failure(DeleteInviteErrors.InviteNotFound);
-        }
-
-        var canDeleteInvite = invite.InvitedByUserId == currentUserId;
-
-        if (canDeleteInvite)
-        {
-            _logger.LogWarning("Deleting invite failed - access denied");
-            return Result.Failure(DeleteInviteErrors.AccessDenied);
-        }
-
-        _projectInviteRepository.Remove(invite);
-        await _dbContext.SaveChangesAsync();
-
-        _logger.LogInformation("Deleted invite successfully");
-        return Result.Success();
     }
 
     public async Task<Result<IEnumerable<ProjectInvite>>> GetPendingInvitesForCurrentUser()
