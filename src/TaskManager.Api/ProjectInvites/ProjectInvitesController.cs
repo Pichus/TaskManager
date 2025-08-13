@@ -16,11 +16,13 @@ namespace TaskManager.ProjectInvites;
 [ApiController]
 public class ProjectInvitesController : ControllerBase
 {
+    private readonly IInviteCreationService _inviteCreationService;
     private readonly IInviteService _inviteService;
 
-    public ProjectInvitesController(IInviteService inviteService)
+    public ProjectInvitesController(IInviteService inviteService, IInviteCreationService inviteCreationService)
     {
         _inviteService = inviteService;
+        _inviteCreationService = inviteCreationService;
     }
 
     [HttpGet]
@@ -48,7 +50,7 @@ public class ProjectInvitesController : ControllerBase
     public async Task<ActionResult<CreateInviteResponse>> CreateInvite([FromRoute] long projectId,
         [FromBody] CreateInviteRequest request)
     {
-        var createInviteResult = await _inviteService.CreateAsync(CreateInviteRequestToDto(projectId, request));
+        var createInviteResult = await _inviteCreationService.CreateAsync(CreateInviteRequestToDto(projectId, request));
 
         if (createInviteResult.IsFailure)
         {

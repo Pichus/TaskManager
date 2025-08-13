@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Core.ProjectInviteAggregate;
 using TaskManager.Infrastructure.Data;
@@ -12,15 +11,20 @@ public class ProjectInviteRepository : RepositoryBase<ProjectInvite, long>, IPro
     {
     }
 
-    public async Task<bool> AnyAsync(Expression<Func<ProjectInvite, bool>> predicate)
+    public async Task<IEnumerable<ProjectInvite>> GetPendingInvitesByInvitedUserIdAsync(string userId)
     {
-        return await Context.ProjectInvites
-            .AnyAsync(predicate);
+        return await Context
+            .ProjectInvites
+            .Where(invite => invite.InvitedUserId == userId
+                             && invite.Status == InviteStatus.Pending)
+            .ToListAsync();
     }
 
-    public IQueryable<ProjectInvite> GetPendingInvitesByInvitedUserIdAsync(string userId)
+    public async Task<bool> InviteExistsAsync(string invitedUserId, long projectId)
     {
-        return Context.ProjectInvites.Where(invite =>
-            invite.InvitedUserId == userId && invite.Status == InviteStatus.Pending);
+        return await Context
+            .ProjectInvites
+            .AnyAsync(projectInvite => projectInvite.InvitedUserId == invitedUserId
+                                       && projectInvite.ProjectId == projectId);
     }
 }

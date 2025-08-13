@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.ProjectInviteAggregate;
@@ -7,7 +6,6 @@ using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.Infrastructure.Identity.User;
 using TaskManager.UseCases.Invites.Accept;
-using TaskManager.UseCases.Invites.Create;
 using TaskManager.UseCases.Invites.Decline;
 using TaskManager.UseCases.Invites.Delete;
 using TaskManager.UseCases.Invites.GetPendingForProject;
@@ -23,7 +21,6 @@ public class InviteService : IInviteService
     private readonly IProjectInviteRepository _projectInviteRepository;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
-    private readonly UserManager<TaskManagerUser> _userManager;
 
     public InviteService(IProjectInviteRepository projectInviteRepository, IProjectRepository projectRepository,
         ICurrentUserService currentUserService, AppDbContext dbContext, UserManager<TaskManagerUser> userManager,
@@ -33,82 +30,8 @@ public class InviteService : IInviteService
         _projectRepository = projectRepository;
         _currentUserService = currentUserService;
         _dbContext = dbContext;
-        _userManager = userManager;
         _projectMemberRepository = projectMemberRepository;
         _logger = logger;
-    }
-
-    public async Task<Result<ProjectInvite>> CreateAsync(CreateInviteDto createInviteDto)
-    {
-        _logger.LogInformation("Creating invite");
-
-        var invitedByUserId = _currentUserService.UserId;
-
-        if (invitedByUserId is null)
-        {
-            _logger.LogWarning("Creating invite failed - user unauthenticated");
-            return Result<ProjectInvite>.Failure(UseCaseErrors.Unauthenticated);
-        }
-
-        var project = await _projectRepository.FindByIdWithProjectMembersIncludedAsync(createInviteDto.ProjectId);
-
-        if (project is null)
-        {
-            _logger.LogWarning("Creating invite failed - Project: {ProjectId} not found", createInviteDto.ProjectId);
-            return Result<ProjectInvite>.Failure(CreateInviteErrors.ProjectNotFound);
-        }
-
-        var canCreateInvite = await IsUserProjectLeadOrManagerAsync(invitedByUserId, project);
-
-        if (!canCreateInvite)
-        {
-            _logger.LogWarning("Creating invite failed - access denied");
-            return Result<ProjectInvite>.Failure(CreateInviteErrors.AccessDenied);
-        }
-
-        var invitedUser = await _userManager.FindByIdAsync(createInviteDto.InvitedUserId);
-
-        if (invitedUser is null)
-        {
-            _logger.LogWarning("Creating invite failed - invited User: {UserId} not found",
-                createInviteDto.InvitedUserId);
-            return Result<ProjectInvite>.Failure(CreateInviteErrors.InvitedUserNotFound);
-        }
-
-        var inviteExists = await _projectInviteRepository
-            .AnyAsync(projectInvite => projectInvite.InvitedUserId == invitedUser.Id
-                                       && projectInvite.ProjectId == project.Id);
-
-        if (inviteExists)
-        {
-            _logger.LogWarning("Creating invite failed - User: {UserId} already invited",
-                createInviteDto.InvitedUserId);
-            return Result<ProjectInvite>.Failure(CreateInviteErrors.UserAlreadyInvited);
-        }
-
-        var isInvitedUserProjectMember = project.Members.Any(member => member.MemberId == invitedUser.Id);
-
-        if (isInvitedUserProjectMember)
-        {
-            _logger.LogWarning("Creating invite failed - User: {UserId} is already a member",
-                createInviteDto.InvitedUserId);
-            return Result<ProjectInvite>.Failure(CreateInviteErrors.InvitedUserAlreadyAMember);
-        }
-
-        var invite = new ProjectInvite
-        {
-            CreatedAt = DateTime.UtcNow,
-            ProjectId = project.Id,
-            InvitedUserId = invitedUser.Id,
-            InvitedByUserId = invitedByUserId,
-            Status = InviteStatus.Pending
-        };
-
-        _projectInviteRepository.Create(invite);
-        await _dbContext.SaveChangesAsync();
-
-        _logger.LogInformation("Created invite successfully");
-        return Result<ProjectInvite>.Success(invite);
     }
 
     public async Task<Result> DeleteAsync(long inviteId)
@@ -159,8 +82,7 @@ public class InviteService : IInviteService
         }
 
         var pendingInvites = await _projectInviteRepository
-            .GetPendingInvitesByInvitedUserIdAsync(currentUserId)
-            .ToListAsync();
+            .GetPendingInvitesByInvitedUserIdAsync(currentUserId);
 
         _logger.LogInformation("Got pending invites for current user successfully");
         return Result<IEnumerable<ProjectInvite>>.Success(pendingInvites);
