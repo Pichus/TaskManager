@@ -31,6 +31,8 @@ public class InviteCreationServiceTests
         _loggerMock = new Mock<ILogger>();
         _currentUserServiceMock = new Mock<ICurrentUserService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
+        _unitOfWorkMock.Setup(work => work.SaveChangesAsync(CancellationToken.None))
+            .ReturnsAsync(1);
 
         var userStoreMock = new Mock<IUserStore<TaskManagerUser>>();
         _userManagerMock =
@@ -79,7 +81,7 @@ public class InviteCreationServiceTests
 
         result.IsSuccess.Should().Be(true);
     }
-    
+
     [Fact]
     public async Task CreateInviteAsync_InvokedByProjectManager_ReturnsSuccess()
     {
@@ -111,8 +113,8 @@ public class InviteCreationServiceTests
 
         result.IsSuccess.Should().Be(true);
     }
-    
-    
+
+
     [Fact]
     public async Task CreateInviteAsync_WithNonExistingProjectId_ReturnsFailureResult()
     {
@@ -132,7 +134,7 @@ public class InviteCreationServiceTests
         result.IsFailure.Should().Be(true);
         result.Error.Should().Be(CreateInviteErrors.ProjectNotFound);
     }
-    
+
     [Fact]
     public async Task CreateInviteAsync_WhenInvitedUser_IsNotFound_ReturnsFailureResult()
     {
@@ -189,7 +191,7 @@ public class InviteCreationServiceTests
         result.IsFailure.Should().Be(true);
         result.Error.Should().Be(CreateInviteErrors.UserAlreadyInvited);
     }
-    
+
     [Fact]
     public async Task CreateInviteAsync_WhenInvitedUser_IsAlreadyAMember_ReturnsFailureResult()
     {
