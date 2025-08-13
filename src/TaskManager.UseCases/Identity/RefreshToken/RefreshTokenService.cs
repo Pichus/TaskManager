@@ -92,7 +92,7 @@ public class RefreshTokenService : IRefreshTokenService
             UserId = userId
         };
 
-        _refreshTokenRepository.CreateRefreshToken(refreshToken);
+        _refreshTokenRepository.Create(refreshToken);
         await _dbContext.SaveChangesAsync();
 
         return newRefreshTokenString;

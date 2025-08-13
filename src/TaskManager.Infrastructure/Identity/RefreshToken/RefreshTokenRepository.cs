@@ -1,21 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using TaskManager.Infrastructure.Data;
+using TaskManager.Infrastructure.Shared;
 
 namespace TaskManager.Infrastructure.Identity.RefreshToken;
 
-public class RefreshTokenRepository : IRefreshTokenRepository
+public class RefreshTokenRepository : RepositoryBase<RefreshToken, long>, IRefreshTokenRepository
 {
-    private readonly AppDbContext _databaseContext;
-
-    public RefreshTokenRepository(AppDbContext databaseContext)
+    public RefreshTokenRepository(AppDbContext context) : base(context)
     {
-        _databaseContext = databaseContext;
     }
 
     public async Task<RefreshToken?> GetRefreshTokenByTokenStringAsync(string tokenString)
     {
-        var result = await _databaseContext
+        var result = await Context
             .RefreshTokens
             .FirstOrDefaultAsync(token => token.Token == tokenString);
 
@@ -25,10 +23,5 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     public void RevokeRefreshToken(RefreshToken token)
     {
         token.RevokedAt = DateTime.UtcNow;
-    }
-
-    public void CreateRefreshToken(RefreshToken token)
-    {
-        _databaseContext.RefreshTokens.Add(token);
     }
 }

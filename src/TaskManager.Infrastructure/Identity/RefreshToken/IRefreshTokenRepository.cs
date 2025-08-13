@@ -1,8 +1,9 @@
+using TaskManager.Core.Shared;
+
 namespace TaskManager.Infrastructure.Identity.RefreshToken;
 
-public interface IRefreshTokenRepository
+public interface IRefreshTokenRepository : IRepositoryBase<RefreshToken, long>
 {
-    void CreateRefreshToken(RefreshToken token);
     Task<RefreshToken?> GetRefreshTokenByTokenStringAsync(string tokenString);
     void RevokeRefreshToken(RefreshToken token);
 }

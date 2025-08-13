@@ -68,7 +68,7 @@ public class LoginService : ILoginService
             UserId = userId
         };
 
-        _refreshTokenRepository.CreateRefreshToken(refreshToken);
+        _refreshTokenRepository.Create(refreshToken);
         await _dbContext.SaveChangesAsync();
     }
 }
