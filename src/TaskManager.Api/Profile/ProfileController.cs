@@ -52,7 +52,7 @@ public class ProfileController : ControllerBase
     [HttpGet("invites/pending")]
     public async Task<ActionResult<IEnumerable<GetInviteResponse>>> GetPendingInvites()
     {
-        var result = await _inviteRetrievalService.RetrievePendingInvitesForCurrentUser();
+        var result = await _inviteRetrievalService.RetrievePendingInvitesForCurrentUserAsync();
 
         if (result.IsFailure)
         {
