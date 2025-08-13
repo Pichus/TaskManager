@@ -1,21 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Infrastructure.Data;
+using TaskManager.Infrastructure.Shared;
 
 namespace TaskManager.Infrastructure.ProjectMembers;
 
-public class ProjectMemberRepository : IProjectMemberRepository
+public class ProjectMemberRepository : RepositoryBase<ProjectMember, long>, IProjectMemberRepository
 {
-    private readonly AppDbContext _context;
-
-    public ProjectMemberRepository(AppDbContext context)
+    public ProjectMemberRepository(AppDbContext context) : base(context)
     {
-        _context = context;
     }
 
     public async Task<ProjectMember?> GetByProjectIdAndMemberIdAsync(long projectId, string memberId)
     {
-        return await _context
+        return await Context
             .ProjectMembers
             .FirstOrDefaultAsync(member => member.ProjectId == projectId
                                            && member.MemberId == memberId);
@@ -23,7 +21,7 @@ public class ProjectMemberRepository : IProjectMemberRepository
 
     public async Task<bool> IsUserProjectMember(string userId, long projectId)
     {
-        return await _context
+        return await Context
             .ProjectMembers
             .AnyAsync(member => member.ProjectId == projectId
                                 && member.MemberId == userId);
@@ -31,7 +29,7 @@ public class ProjectMemberRepository : IProjectMemberRepository
 
     public async Task<bool> IsUserProjectManager(string userId, long projectId)
     {
-        return await _context
+        return await Context
             .ProjectMembers
             .AnyAsync(member => member.ProjectId == projectId
                                 && member.MemberId == userId
@@ -40,10 +38,10 @@ public class ProjectMemberRepository : IProjectMemberRepository
 
     public async Task<IEnumerable<ProjectMemberWithUser>> GetProjectMembersWithUsersAsync(long projectId)
     {
-        return await _context
+        return await Context
             .ProjectMembers
             .Where(member => member.ProjectId == projectId)
-            .Join(_context.Users, member => member.MemberId, user => user.Id, (member, user) =>
+            .Join(Context.Users, member => member.MemberId, user => user.Id, (member, user) =>
                 new ProjectMemberWithUser
                 {
                     UserId = user.Id,
@@ -53,15 +51,5 @@ public class ProjectMemberRepository : IProjectMemberRepository
                 }
             )
             .ToListAsync();
-    }
-
-    public void Update(ProjectMember projectMember)
-    {
-        _context.Update(projectMember);
-    }
-
-    public void Delete(ProjectMember projectMember)
-    {
-        _context.ProjectMembers.Remove(projectMember);
     }
 }

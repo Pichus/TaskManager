@@ -165,7 +165,7 @@ public class ProjectMemberService : IProjectMemberService
             return Result.Failure(DeleteProjectMemberErrors.ProjectMemberNotFound);
         }
 
-        _projectMemberRepository.Delete(projectMember);
+        _projectMemberRepository.Remove(projectMember!);
         await _dbContext.SaveChangesAsync();
 
         _logger.LogInformation("Deleted project member successfully");
