@@ -45,7 +45,7 @@ public class InviteDeletionService : IInviteDeletionService
 
         var canDeleteInvite = invite.InvitedByUserId == currentUserId;
 
-        if (canDeleteInvite)
+        if (!canDeleteInvite)
         {
             _logger.LogWarning("Deleting invite failed - access denied");
             return Result.Failure(DeleteInviteErrors.AccessDenied);
