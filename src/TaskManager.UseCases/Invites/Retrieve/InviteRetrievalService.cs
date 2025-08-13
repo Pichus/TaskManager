@@ -25,7 +25,7 @@ public class InviteRetrievalService : IInviteRetrievalService
         _projectRepository = projectRepository;
     }
 
-    public async Task<Result<IEnumerable<ProjectInvite>>> RetrievePendingInvitesForCurrentUser()
+    public async Task<Result<IEnumerable<ProjectInvite>>> RetrievePendingInvitesForCurrentUserAsync()
     {
         _logger.LogInformation("Getting pending invites for current user");
 
