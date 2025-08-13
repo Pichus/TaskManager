@@ -14,7 +14,6 @@ namespace TaskManager.UnitTests.Invites;
 public class InviteCreationServiceTests
 {
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
-
     private readonly InviteCreationService _inviteCreationService;
     private readonly Mock<ILogger> _loggerMock;
     private readonly Mock<IProjectInviteRepository> _projectInviteRepositoryMock;
