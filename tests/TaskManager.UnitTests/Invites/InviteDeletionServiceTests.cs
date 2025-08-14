@@ -49,7 +49,7 @@ public class InviteDeletionServiceTests
         var result = await _inviteDeletionService.DeleteAsync(inviteId);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(DeleteInviteErrors.InviteNotFound);
+        result.Error.Code.Should().Be(DeleteInviteErrors.InviteNotFound.Code);
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public class InviteDeletionServiceTests
         var result = await _inviteDeletionService.DeleteAsync(inviteId);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(DeleteInviteErrors.AccessDenied);
+        result.Error.Code.Should().Be(DeleteInviteErrors.AccessDenied.Code);
     }
 
     [Fact]

@@ -58,7 +58,7 @@ public class InviteResponseServiceTests
         var result = await _inviteResponseService.AcceptInviteAsync(inviteId);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(AcceptInviteErrors.InviteNotFound);
+        result.Error.Code.Should().Be(AcceptInviteErrors.InviteNotFound.Code);
     }
 
     [Fact]
@@ -79,7 +79,7 @@ public class InviteResponseServiceTests
         var result = await _inviteResponseService.AcceptInviteAsync(inviteId);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(AcceptInviteErrors.InviteAlreadyAccepted);
+        result.Error.Code.Should().Be(AcceptInviteErrors.InviteAlreadyAccepted.Code);
     }
 
     [Fact]
@@ -100,7 +100,7 @@ public class InviteResponseServiceTests
         var result = await _inviteResponseService.AcceptInviteAsync(inviteId);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(AcceptInviteErrors.InviteAlreadyRejected);
+        result.Error.Code.Should().Be(AcceptInviteErrors.InviteAlreadyRejected.Code);
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public class InviteResponseServiceTests
         var result = await _inviteResponseService.AcceptInviteAsync(inviteId);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(AcceptInviteErrors.AccessDenied);
+        result.Error.Code.Should().Be(AcceptInviteErrors.AccessDenied.Code);
     }
 
     [Fact]
@@ -151,7 +151,7 @@ public class InviteResponseServiceTests
         var result = await _inviteResponseService.AcceptInviteAsync(inviteId);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(AcceptInviteErrors.InvitedUserAlreadyAMember);
+        result.Error.Code.Should().Be(AcceptInviteErrors.InvitedUserAlreadyAMember.Code);
     }
 
     [Fact]
@@ -183,7 +183,7 @@ public class InviteResponseServiceTests
         var result = await _inviteResponseService.AcceptInviteAsync(inviteId);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(AcceptInviteErrors.ProjectNotFound);
+        result.Error.Code.Should().Be(AcceptInviteErrors.ProjectNotFound.Code);
     }
 
     [Fact]
@@ -232,7 +232,7 @@ public class InviteResponseServiceTests
         var result = await _inviteResponseService.DeclineInviteAsync(inviteId);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(DeclineInviteErrors.InviteNotFound);
+        result.Error.Code.Should().Be(DeclineInviteErrors.InviteNotFound.Code);
     }
 
     [Fact]
@@ -253,7 +253,7 @@ public class InviteResponseServiceTests
         var result = await _inviteResponseService.DeclineInviteAsync(inviteId);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(DeclineInviteErrors.InviteAlreadyAccepted);
+        result.Error.Code.Should().Be(DeclineInviteErrors.InviteAlreadyAccepted.Code);
     }
 
     [Fact]
@@ -274,7 +274,7 @@ public class InviteResponseServiceTests
         var result = await _inviteResponseService.DeclineInviteAsync(inviteId);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(DeclineInviteErrors.InviteAlreadyRejected);
+        result.Error.Code.Should().Be(DeclineInviteErrors.InviteAlreadyRejected.Code);
     }
 
     [Fact]
@@ -297,7 +297,7 @@ public class InviteResponseServiceTests
         var result = await _inviteResponseService.DeclineInviteAsync(inviteId);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(DeclineInviteErrors.AccessDenied);
+        result.Error.Code.Should().Be(DeclineInviteErrors.AccessDenied.Code);
     }
 
     [Fact]
@@ -328,7 +328,7 @@ public class InviteResponseServiceTests
         var result = await _inviteResponseService.DeclineInviteAsync(inviteId);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(DeclineInviteErrors.ProjectNotFound);
+        result.Error.Code.Should().Be(DeclineInviteErrors.ProjectNotFound.Code);
     }
 
     [Fact]

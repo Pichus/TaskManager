@@ -142,7 +142,7 @@ public class InviteCreationServiceTests
         var result = await _inviteCreationService.CreateAsync(createInviteDto);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(CreateInviteErrors.ProjectNotFound);
+        result.Error.Code.Should().Be(CreateInviteErrors.ProjectNotFound.Code);
     }
 
     [Fact]
@@ -172,7 +172,7 @@ public class InviteCreationServiceTests
         var result = await _inviteCreationService.CreateAsync(createInviteDto);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(CreateInviteErrors.InvitedUserNotFound);
+        result.Error.Code.Should().Be(CreateInviteErrors.InvitedUserNotFound.Code);
     }
 
     [Fact]
@@ -205,7 +205,7 @@ public class InviteCreationServiceTests
         var result = await _inviteCreationService.CreateAsync(createInviteDto);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(CreateInviteErrors.UserAlreadyInvited);
+        result.Error.Code.Should().Be(CreateInviteErrors.UserAlreadyInvited.Code);
     }
 
     [Fact]
@@ -242,6 +242,6 @@ public class InviteCreationServiceTests
         var result = await _inviteCreationService.CreateAsync(createInviteDto);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(CreateInviteErrors.InvitedUserAlreadyAMember);
+        result.Error.Code.Should().Be(CreateInviteErrors.InvitedUserAlreadyAMember.Code);
     }
 }

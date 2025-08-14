@@ -68,7 +68,7 @@ public class InviteRetrievalServiceTests
         var result = await _inviteRetrievalService.RetrievePendingProjectInvitesAsync(projectId);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(RetrieveInvitesErrors.ProjectNotFound);
+        result.Error.Code.Should().Be(RetrieveInvitesErrors.ProjectNotFound.Code);
     }
 
     [Fact]
@@ -97,7 +97,7 @@ public class InviteRetrievalServiceTests
         var result = await _inviteRetrievalService.RetrievePendingProjectInvitesAsync(projectId);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(RetrieveInvitesErrors.AccessDenied);
+        result.Error.Code.Should().Be(RetrieveInvitesErrors.AccessDenied.Code);
     }
 
     [Fact]

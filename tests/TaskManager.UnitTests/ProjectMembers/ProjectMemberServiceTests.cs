@@ -62,7 +62,7 @@ public class ProjectMemberServiceTests
         var result = await _projectMemberService.GetProjectMembersAsync(projectId);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(GetProjectMembersErrors.ProjectNotFound);
+        result.Error.Code.Should().Be(GetProjectMembersErrors.ProjectNotFound.Code);
     }
     
     [Fact]
@@ -84,7 +84,7 @@ public class ProjectMemberServiceTests
         var result = await _projectMemberService.GetProjectMembersAsync(projectId);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(GetProjectMembersErrors.AccessDenied);
+        result.Error.Code.Should().Be(GetProjectMembersErrors.AccessDenied.Code);
     }
     
     [Fact]
@@ -126,7 +126,7 @@ public class ProjectMemberServiceTests
         var result = await _projectMemberService.UpdateProjectMemberAsync(projectId, memberId, projectRole);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(UpdateProjectMemberErrors.MemberNotFound);
+        result.Error.Code.Should().Be(UpdateProjectMemberErrors.MemberNotFound.Code);
     }
     
     [Fact]
@@ -150,7 +150,7 @@ public class ProjectMemberServiceTests
         var result = await _projectMemberService.UpdateProjectMemberAsync(projectId, memberId, projectRole);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(UpdateProjectMemberErrors.ProjectNotFound);
+        result.Error.Code.Should().Be(UpdateProjectMemberErrors.ProjectNotFound.Code);
     }
     
     [Fact]
@@ -177,7 +177,7 @@ public class ProjectMemberServiceTests
         var result = await _projectMemberService.UpdateProjectMemberAsync(projectId, memberId, projectRole);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(UpdateProjectMemberErrors.AccessDenied);
+        result.Error.Code.Should().Be(UpdateProjectMemberErrors.AccessDenied.Code);
     }
     
     [Fact]
@@ -207,7 +207,7 @@ public class ProjectMemberServiceTests
         var result = await _projectMemberService.UpdateProjectMemberAsync(projectId, memberId, projectRole);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(UpdateProjectMemberErrors.UserIsNotAProjectMember);
+        result.Error.Code.Should().Be(UpdateProjectMemberErrors.UserIsNotAProjectMember.Code);
     }
     
     [Fact]
@@ -240,7 +240,7 @@ public class ProjectMemberServiceTests
         var result = await _projectMemberService.UpdateProjectMemberAsync(projectId, memberId, projectRole);
 
         result.IsFailure.Should().Be(true);
-        result.Error.Should().Be(UpdateProjectMemberErrors.MemberAlreadyHasThisRole);
+        result.Error.Code.Should().Be(UpdateProjectMemberErrors.MemberAlreadyHasThisRole.Code);
     }
     
     [Fact]

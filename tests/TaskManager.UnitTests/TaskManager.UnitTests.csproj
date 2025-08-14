@@ -26,4 +26,8 @@
         <ProjectReference Include="..\..\src\TaskManager.UseCases\TaskManager.UseCases.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Tasks\" />
+    </ItemGroup>
+
 </Project>
