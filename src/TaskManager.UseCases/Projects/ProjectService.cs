@@ -105,7 +105,7 @@ public class ProjectService : IProjectService
         var canCurrentUserGetProject =
             await _projectMemberRepository.IsUserProjectParticipantAsync(currentUserId, projectId);
 
-        if (canCurrentUserGetProject)
+        if (!canCurrentUserGetProject)
         {
             _logger.LogWarning("Getting project failed - access denied");
             return Result<ProjectEntity>.Failure(GetProjectErrors.AccessDenied);
@@ -135,7 +135,10 @@ public class ProjectService : IProjectService
             return Result<ProjectEntity>.Failure(UpdateProjectErrors.NotFound(updateProjectDto.ProjectId));
         }
 
-        if (project.LeadUserId != currentUserId)
+        var isCurrentUserProjectLead = project.LeadUserId == currentUserId;
+        var canCurrentUserUpdateProject = isCurrentUserProjectLead;
+        
+        if (!canCurrentUserUpdateProject)
         {
             _logger.LogWarning("Updating project failed - access denied");
             return Result<ProjectEntity>.Failure(UpdateProjectErrors.AccessDenied);
@@ -170,7 +173,10 @@ public class ProjectService : IProjectService
             return Result.Failure(DeleteProjectErrors.NotFound(id));
         }
 
-        if (project.LeadUserId != currentUserId)
+        var isCurrentUserProjectLead = project.LeadUserId == currentUserId;
+        var canCurrentUserDeleteProject = isCurrentUserProjectLead;
+
+        if (!canCurrentUserDeleteProject)
         {
             _logger.LogWarning("Deleting project failed - access denied");
             return Result.Failure(DeleteProjectErrors.AccessDenied);
