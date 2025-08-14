@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Infrastructure;
-using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.UseCases.Projects.Create;
 using TaskManager.UseCases.Projects.Delete;
@@ -13,18 +12,20 @@ namespace TaskManager.UseCases.Projects;
 
 public class ProjectService : IProjectService
 {
-    private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger _logger;
+    private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
     public ProjectService(IProjectRepository projectRepository, IUnitOfWork unitOfWork,
-        ICurrentUserService currentUserService, ILogger logger)
+        ICurrentUserService currentUserService, ILogger logger, IProjectMemberRepository projectMemberRepository)
     {
         _projectRepository = projectRepository;
         _unitOfWork = unitOfWork;
         _currentUserService = currentUserService;
         _logger = logger;
+        _projectMemberRepository = projectMemberRepository;
     }
 
     public async Task<Result<ProjectEntity>> CreateAsync(CreateProjectDto createProjectDto)
@@ -56,7 +57,7 @@ public class ProjectService : IProjectService
     public async Task<Result<IEnumerable<ProjectEntity>>> GetAllByUserAsync(RoleDto role)
     {
         _logger.LogInformation("Getting all projects by user");
-        
+
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null)
@@ -88,7 +89,7 @@ public class ProjectService : IProjectService
     public async Task<Result<ProjectEntity>> GetByIdAsync(long projectId)
     {
         _logger.LogInformation("Getting Project: {ProjectId}", projectId);
-        
+
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null) return Result<ProjectEntity>.Failure(UseCaseErrors.Unauthenticated);
@@ -101,7 +102,10 @@ public class ProjectService : IProjectService
             return Result<ProjectEntity>.Failure(GetProjectErrors.NotFound(projectId));
         }
 
-        if (project.LeadUserId != currentUserId)
+        var canCurrentUserGetProject =
+            await _projectMemberRepository.IsUserProjectParticipantAsync(currentUserId, projectId);
+
+        if (canCurrentUserGetProject)
         {
             _logger.LogWarning("Getting project failed - access denied");
             return Result<ProjectEntity>.Failure(GetProjectErrors.AccessDenied);
@@ -114,7 +118,7 @@ public class ProjectService : IProjectService
     public async Task<Result<ProjectEntity>> UpdateAsync(UpdateProjectDto updateProjectDto)
     {
         _logger.LogInformation("Updating Project: {ProjectId}", updateProjectDto.ProjectId);
-        
+
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null)
@@ -149,7 +153,7 @@ public class ProjectService : IProjectService
     public async Task<Result> DeleteAsync(long id)
     {
         _logger.LogInformation("Deleting Project: {ProjectId}", id);
-        
+
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null)
