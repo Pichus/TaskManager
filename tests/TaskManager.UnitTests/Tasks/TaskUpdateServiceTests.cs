@@ -1,3 +1,4 @@
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TaskManager.Core.ProjectAggregate;
@@ -38,5 +39,223 @@ public class TaskUpdateServiceTests
             _projectRepositoryMock.Object,
             _taskRepositoryMock.Object
         );
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WhenProjectIsNonExistent_ReturnsFailure()
+    {
+        long projectId = 0;
+        long taskId = 0;
+        var updateTaskDto = new UpdateTaskDto
+        {
+            ProjectId = projectId,
+            TaskId = taskId,
+            Title = "title",
+            Description = "description",
+            DueDate = DateTime.UtcNow.AddDays(7)
+        };
+        var currentUserId = "some valid id";
+
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
+            .Returns(currentUserId);
+        _projectRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(projectId))
+            .ReturnsAsync((ProjectEntity?)null);
+
+        var result = await _taskUpdateService.UpdateAsync(updateTaskDto);
+
+        result.IsFailure.Should().Be(true);
+        result.Error.Code.Should().Be(UpdateTaskErrors.ProjectNotFound.Code);
+    }
+    
+    [Fact]
+    public async Task UpdateAsync_WhenTaskIsNonExistent_ReturnsFailure()
+    {
+        long projectId = 0;
+        long taskId = 0;
+        var updateTaskDto = new UpdateTaskDto
+        {
+            ProjectId = projectId,
+            TaskId = taskId,
+            Title = "title",
+            Description = "description",
+            DueDate = DateTime.UtcNow.AddDays(7)
+        };
+        var currentUserId = "some valid id";
+
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
+            .Returns(currentUserId);
+        _projectRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(projectId))
+            .ReturnsAsync(new ProjectEntity());
+        _taskRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(taskId))
+            .ReturnsAsync((TaskEntity?)null);
+
+        var result = await _taskUpdateService.UpdateAsync(updateTaskDto);
+
+        result.IsFailure.Should().Be(true);
+        result.Error.Code.Should().Be(UpdateTaskErrors.TaskNotFound.Code);
+    }
+    
+    [Fact]
+    public async Task UpdateAsync_WhenTheTask_DoesNotBelongToThisProject_ReturnsFailure()
+    {
+        long projectId = 0;
+        long taskId = 0;
+        var updateTaskDto = new UpdateTaskDto
+        {
+            ProjectId = projectId,
+            TaskId = taskId,
+            Title = "title",
+            Description = "description",
+            DueDate = DateTime.UtcNow.AddDays(7)
+        };
+        var currentUserId = "some valid id";
+
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
+            .Returns(currentUserId);
+        _projectRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(projectId))
+            .ReturnsAsync(new ProjectEntity());
+        _taskRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(taskId))
+            .ReturnsAsync(new TaskEntity
+            {
+                Id = taskId,
+                ProjectId = 999,
+            });
+
+        var result = await _taskUpdateService.UpdateAsync(updateTaskDto);
+
+        result.IsFailure.Should().Be(true);
+        result.Error.Code.Should().Be(UpdateTaskErrors.TaskNotFound.Code);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WhenCurrentUser_IsNotAProjectLeadOrManager_ReturnsFailure()
+    {
+        long projectId = 0;
+        long taskId = 0;
+        var updateTaskDto = new UpdateTaskDto
+        {
+            ProjectId = projectId,
+            TaskId = taskId,
+            Title = "title",
+            Description = "description",
+            DueDate = DateTime.UtcNow.AddDays(7)
+        };
+        var currentUserId = "some valid id";
+
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
+            .Returns(currentUserId);
+        _projectRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(projectId))
+            .ReturnsAsync(new ProjectEntity
+            {
+                Id = projectId,
+                LeadUserId = "random id",
+            });
+        _taskRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(taskId))
+            .ReturnsAsync(new TaskEntity()
+            {
+                Id = taskId,
+                ProjectId = projectId,
+            });
+        _projectMemberRepositoryMock
+            .Setup(repository => repository.IsUserProjectMemberAsync(currentUserId, projectId))
+            .ReturnsAsync(false);
+
+        var result = await _taskUpdateService.UpdateAsync(updateTaskDto);
+
+        result.IsFailure.Should().Be(true);
+        result.Error.Code.Should().Be(UpdateTaskErrors.AccessDenied.Code);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WhenCurrentUser_IsAProjectLead_ReturnsSuccess()
+    {
+        long projectId = 0;
+        long taskId = 0;
+        var updateTaskDto = new UpdateTaskDto
+        {
+            ProjectId = projectId,
+            TaskId = taskId,
+            Title = "title",
+            Description = "description",
+            DueDate = DateTime.UtcNow.AddDays(7)
+        };
+        var currentUserId = "some valid id";
+
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
+            .Returns(currentUserId);
+        _projectRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(projectId))
+            .ReturnsAsync(new ProjectEntity
+            {
+                Id = projectId,
+                LeadUserId = currentUserId,
+            });
+        _taskRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(taskId))
+            .ReturnsAsync(new TaskEntity()
+            {
+                Id = taskId,
+                ProjectId = projectId,
+            });
+        _projectMemberRepositoryMock
+            .Setup(repository => repository.IsUserProjectManagerAsync(currentUserId, projectId))
+            .ReturnsAsync(false);
+
+        var result = await _taskUpdateService.UpdateAsync(updateTaskDto);
+
+        result.IsSuccess.Should().Be(true);
+    }
+    
+    [Fact]
+    public async Task UpdateAsync_WhenCurrentUser_IsAProjectManager_ReturnsSuccess()
+    {
+        long projectId = 0;
+        long taskId = 0;
+        var updateTaskDto = new UpdateTaskDto
+        {
+            ProjectId = projectId,
+            TaskId = taskId,
+            Title = "title",
+            Description = "description",
+            DueDate = DateTime.UtcNow.AddDays(7)
+        };
+        var currentUserId = "some valid id";
+
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
+            .Returns(currentUserId);
+        _projectRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(projectId))
+            .ReturnsAsync(new ProjectEntity
+            {
+                Id = projectId,
+                LeadUserId = "random id",
+            });
+        _taskRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(taskId))
+            .ReturnsAsync(new TaskEntity()
+            {
+                Id = taskId,
+                ProjectId = projectId,
+            });
+        _projectMemberRepositoryMock
+            .Setup(repository => repository.IsUserProjectManagerAsync(currentUserId, projectId))
+            .ReturnsAsync(true);
+
+        var result = await _taskUpdateService.UpdateAsync(updateTaskDto);
+
+        result.IsSuccess.Should().Be(true);
     }
 }
