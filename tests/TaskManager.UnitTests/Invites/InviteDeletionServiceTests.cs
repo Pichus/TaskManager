@@ -39,9 +39,11 @@ public class InviteDeletionServiceTests
     {
         long inviteId = 0;
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(" ");
-        _projectInviteRepositoryMock.Setup(repository => repository.FindByIdAsync(inviteId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(inviteId))
             .ReturnsAsync((ProjectInvite?)null);
 
         var result = await _inviteDeletionService.DeleteAsync(inviteId);
@@ -49,20 +51,22 @@ public class InviteDeletionServiceTests
         result.IsFailure.Should().Be(true);
         result.Error.Should().Be(DeleteInviteErrors.InviteNotFound);
     }
-    
+
     [Fact]
     public async Task DeleteAsync_WhenCurrentUser_IsNotTheOne_Who_CreatedTheInvite_ReturnsFailure()
     {
         var currentUserId = "some id";
-        
+
         long inviteId = 1;
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(currentUserId);
-        _projectInviteRepositoryMock.Setup(repository => repository.FindByIdAsync(inviteId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(inviteId))
             .ReturnsAsync(new ProjectInvite
             {
-                InvitedByUserId = "random user id",
+                InvitedByUserId = "random user id"
             });
 
         var result = await _inviteDeletionService.DeleteAsync(inviteId);
@@ -70,20 +74,22 @@ public class InviteDeletionServiceTests
         result.IsFailure.Should().Be(true);
         result.Error.Should().Be(DeleteInviteErrors.AccessDenied);
     }
-    
+
     [Fact]
     public async Task DeleteAsync_WhenCurrentUser_IsTheOne_Who_CreatedTheInvite_ReturnsSuccess()
     {
         var currentUserId = "some id";
-        
+
         long inviteId = 1;
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(currentUserId);
-        _projectInviteRepositoryMock.Setup(repository => repository.FindByIdAsync(inviteId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(inviteId))
             .ReturnsAsync(new ProjectInvite
-            { 
-                InvitedByUserId = currentUserId,
+            {
+                InvitedByUserId = currentUserId
             });
 
         var result = await _inviteDeletionService.DeleteAsync(inviteId);

@@ -48,9 +48,11 @@ public class InviteResponseServiceTests
     {
         long inviteId = 0;
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(" ");
-        _projectInviteRepositoryMock.Setup(repository => repository.FindByIdAsync(inviteId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(inviteId))
             .ReturnsAsync((ProjectInvite?)null);
 
         var result = await _inviteResponseService.AcceptInviteAsync(inviteId);
@@ -58,15 +60,17 @@ public class InviteResponseServiceTests
         result.IsFailure.Should().Be(true);
         result.Error.Should().Be(AcceptInviteErrors.InviteNotFound);
     }
-    
+
     [Fact]
     public async Task AcceptInviteAsync_WhenInvite_IsAlreadyAccepted_ReturnsFailure()
     {
         long inviteId = 1;
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(" ");
-        _projectInviteRepositoryMock.Setup(repository => repository.FindByIdAsync(inviteId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(inviteId))
             .ReturnsAsync(new ProjectInvite
             {
                 Status = InviteStatus.Accepted
@@ -77,15 +81,17 @@ public class InviteResponseServiceTests
         result.IsFailure.Should().Be(true);
         result.Error.Should().Be(AcceptInviteErrors.InviteAlreadyAccepted);
     }
-    
+
     [Fact]
     public async Task AcceptInviteAsync_WhenInvite_IsAlreadyRejected_ReturnsFailure()
     {
         long inviteId = 1;
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(" ");
-        _projectInviteRepositoryMock.Setup(repository => repository.FindByIdAsync(inviteId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(inviteId))
             .ReturnsAsync(new ProjectInvite
             {
                 Status = InviteStatus.Rejected
@@ -96,16 +102,18 @@ public class InviteResponseServiceTests
         result.IsFailure.Should().Be(true);
         result.Error.Should().Be(AcceptInviteErrors.InviteAlreadyRejected);
     }
-    
+
     [Fact]
     public async Task AcceptInviteAsync_WhenCurrentUser_IsNotTheInvitedUser_ReturnsFailure()
     {
         var currentUserId = "some valid id";
         long inviteId = 1;
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(currentUserId);
-        _projectInviteRepositoryMock.Setup(repository => repository.FindByIdAsync(inviteId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(inviteId))
             .ReturnsAsync(new ProjectInvite
             {
                 InvitedUserId = "some random id",
@@ -117,7 +125,7 @@ public class InviteResponseServiceTests
         result.IsFailure.Should().Be(true);
         result.Error.Should().Be(AcceptInviteErrors.AccessDenied);
     }
-    
+
     [Fact]
     public async Task AcceptInviteAsync_WhenInvitedUser_IsAlreadyAProjectMember_ReturnsFailure()
     {
@@ -125,17 +133,19 @@ public class InviteResponseServiceTests
         long inviteId = 1;
         var projectId = 1;
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(currentUserId);
-        _projectInviteRepositoryMock.Setup(repository => repository.FindByIdAsync(inviteId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(inviteId))
             .ReturnsAsync(new ProjectInvite
             {
                 ProjectId = projectId,
                 InvitedUserId = currentUserId,
                 Status = InviteStatus.Pending
             });
-        _projectMemberRepositoryMock.Setup(repository =>
-            repository.IsUserProjectParticipantAsync(currentUserId, inviteId))
+        _projectMemberRepositoryMock
+            .Setup(repository => repository.IsUserProjectParticipantAsync(currentUserId, inviteId))
             .ReturnsAsync(true);
 
         var result = await _inviteResponseService.AcceptInviteAsync(inviteId);
@@ -143,7 +153,7 @@ public class InviteResponseServiceTests
         result.IsFailure.Should().Be(true);
         result.Error.Should().Be(AcceptInviteErrors.InvitedUserAlreadyAMember);
     }
-    
+
     [Fact]
     public async Task AcceptInviteAsync_WhenInviteProject_IsNonExistent_ReturnsFailure()
     {
@@ -151,9 +161,11 @@ public class InviteResponseServiceTests
         long inviteId = 1;
         var projectId = 1;
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(currentUserId);
-        _projectInviteRepositoryMock.Setup(repository => repository.FindByIdAsync(inviteId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(inviteId))
             .ReturnsAsync(new ProjectInvite
             {
                 Id = projectId,
@@ -161,10 +173,11 @@ public class InviteResponseServiceTests
                 ProjectId = 999,
                 Status = InviteStatus.Pending
             });
-        _projectMemberRepositoryMock.Setup(repository =>
-                repository.IsUserProjectParticipantAsync(currentUserId, inviteId))
+        _projectMemberRepositoryMock
+            .Setup(repository => repository.IsUserProjectParticipantAsync(currentUserId, inviteId))
             .ReturnsAsync(false);
-        _projectRepositoryMock.Setup(repository => repository.FindByIdAsync(projectId))
+        _projectRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(projectId))
             .ReturnsAsync((ProjectEntity?)null);
 
         var result = await _inviteResponseService.AcceptInviteAsync(inviteId);
@@ -172,7 +185,7 @@ public class InviteResponseServiceTests
         result.IsFailure.Should().Be(true);
         result.Error.Should().Be(AcceptInviteErrors.ProjectNotFound);
     }
-    
+
     [Fact]
     public async Task AcceptInviteAsync_WhenEveryConditionIsMet_ReturnsSuccess()
     {
@@ -180,9 +193,11 @@ public class InviteResponseServiceTests
         long inviteId = 1;
         var projectId = 1;
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(currentUserId);
-        _projectInviteRepositoryMock.Setup(repository => repository.FindByIdAsync(inviteId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(inviteId))
             .ReturnsAsync(new ProjectInvite
             {
                 Id = projectId,
@@ -190,25 +205,28 @@ public class InviteResponseServiceTests
                 ProjectId = projectId,
                 Status = InviteStatus.Pending
             });
-        _projectMemberRepositoryMock.Setup(repository =>
-                repository.IsUserProjectParticipantAsync(currentUserId, inviteId))
+        _projectMemberRepositoryMock
+            .Setup(repository => repository.IsUserProjectParticipantAsync(currentUserId, inviteId))
             .ReturnsAsync(false);
-        _projectRepositoryMock.Setup(repository => repository.FindByIdAsync(projectId))
+        _projectRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(projectId))
             .ReturnsAsync(new ProjectEntity());
 
         var result = await _inviteResponseService.AcceptInviteAsync(inviteId);
 
         result.IsSuccess.Should().Be(true);
     }
-    
+
     [Fact]
     public async Task DeclineInviteAsync_WhenInviteId_IsNonExistent_ReturnsFailure()
     {
         long inviteId = 0;
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(" ");
-        _projectInviteRepositoryMock.Setup(repository => repository.FindByIdAsync(inviteId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(inviteId))
             .ReturnsAsync((ProjectInvite?)null);
 
         var result = await _inviteResponseService.DeclineInviteAsync(inviteId);
@@ -216,15 +234,17 @@ public class InviteResponseServiceTests
         result.IsFailure.Should().Be(true);
         result.Error.Should().Be(DeclineInviteErrors.InviteNotFound);
     }
-    
+
     [Fact]
     public async Task DeclineInviteAsync_WhenInvite_IsAlreadyAccepted_ReturnsFailure()
     {
         long inviteId = 1;
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(" ");
-        _projectInviteRepositoryMock.Setup(repository => repository.FindByIdAsync(inviteId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(inviteId))
             .ReturnsAsync(new ProjectInvite
             {
                 Status = InviteStatus.Accepted
@@ -235,15 +255,17 @@ public class InviteResponseServiceTests
         result.IsFailure.Should().Be(true);
         result.Error.Should().Be(DeclineInviteErrors.InviteAlreadyAccepted);
     }
-    
+
     [Fact]
     public async Task DeclineInviteAsync_WhenInvite_IsAlreadyRejected_ReturnsFailure()
     {
         long inviteId = 1;
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(" ");
-        _projectInviteRepositoryMock.Setup(repository => repository.FindByIdAsync(inviteId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(inviteId))
             .ReturnsAsync(new ProjectInvite
             {
                 Status = InviteStatus.Rejected
@@ -254,16 +276,18 @@ public class InviteResponseServiceTests
         result.IsFailure.Should().Be(true);
         result.Error.Should().Be(DeclineInviteErrors.InviteAlreadyRejected);
     }
-    
+
     [Fact]
     public async Task DeclineInviteAsync_WhenCurrentUser_IsNotTheInvitedUser_ReturnsFailure()
     {
         var currentUserId = "some valid id";
         long inviteId = 1;
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(currentUserId);
-        _projectInviteRepositoryMock.Setup(repository => repository.FindByIdAsync(inviteId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(inviteId))
             .ReturnsAsync(new ProjectInvite
             {
                 InvitedUserId = "some random id",
@@ -275,7 +299,7 @@ public class InviteResponseServiceTests
         result.IsFailure.Should().Be(true);
         result.Error.Should().Be(DeclineInviteErrors.AccessDenied);
     }
-    
+
     [Fact]
     public async Task DeclineInviteAsync_WhenInviteProject_IsNonExistent_ReturnsFailure()
     {
@@ -283,9 +307,11 @@ public class InviteResponseServiceTests
         long inviteId = 1;
         var projectId = 1;
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(currentUserId);
-        _projectInviteRepositoryMock.Setup(repository => repository.FindByIdAsync(inviteId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(inviteId))
             .ReturnsAsync(new ProjectInvite
             {
                 Id = projectId,
@@ -293,8 +319,8 @@ public class InviteResponseServiceTests
                 ProjectId = 999,
                 Status = InviteStatus.Pending
             });
-        _projectMemberRepositoryMock.Setup(repository =>
-                repository.IsUserProjectParticipantAsync(currentUserId, inviteId))
+        _projectMemberRepositoryMock
+            .Setup(repository => repository.IsUserProjectParticipantAsync(currentUserId, inviteId))
             .ReturnsAsync(false);
         _projectRepositoryMock.Setup(repository => repository.FindByIdAsync(projectId))
             .ReturnsAsync((ProjectEntity?)null);
@@ -304,7 +330,7 @@ public class InviteResponseServiceTests
         result.IsFailure.Should().Be(true);
         result.Error.Should().Be(DeclineInviteErrors.ProjectNotFound);
     }
-    
+
     [Fact]
     public async Task DeclineInviteAsync_WhenEveryConditionIsMet_ReturnsSuccess()
     {
@@ -312,9 +338,11 @@ public class InviteResponseServiceTests
         long inviteId = 1;
         var projectId = 1;
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(currentUserId);
-        _projectInviteRepositoryMock.Setup(repository => repository.FindByIdAsync(inviteId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(inviteId))
             .ReturnsAsync(new ProjectInvite
             {
                 Id = projectId,
@@ -322,10 +350,11 @@ public class InviteResponseServiceTests
                 ProjectId = projectId,
                 Status = InviteStatus.Pending
             });
-        _projectMemberRepositoryMock.Setup(repository =>
-                repository.IsUserProjectParticipantAsync(currentUserId, inviteId))
+        _projectMemberRepositoryMock
+            .Setup(repository => repository.IsUserProjectParticipantAsync(currentUserId, inviteId))
             .ReturnsAsync(false);
-        _projectRepositoryMock.Setup(repository => repository.FindByIdAsync(projectId))
+        _projectRepositoryMock
+            .Setup(repository => repository.FindByIdAsync(projectId))
             .ReturnsAsync(new ProjectEntity());
 
         var result = await _inviteResponseService.AcceptInviteAsync(inviteId);

@@ -30,7 +30,8 @@ public class InviteCreationServiceTests
         _loggerMock = new Mock<ILogger>();
         _currentUserServiceMock = new Mock<ICurrentUserService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
-        _unitOfWorkMock.Setup(work => work.SaveChangesAsync(CancellationToken.None))
+        _unitOfWorkMock
+            .Setup(work => work.SaveChangesAsync(CancellationToken.None))
             .ReturnsAsync(1);
 
         var userStoreMock = new Mock<IUserStore<TaskManagerUser>>();
@@ -60,20 +61,24 @@ public class InviteCreationServiceTests
             InvitedUserId = "some valid invited user id"
         };
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(currentUserId);
-        _projectRepositoryMock.Setup(repo => repo.FindByIdAsync(createInviteDto.ProjectId))
+        _projectRepositoryMock
+            .Setup(repo => repo.FindByIdAsync(createInviteDto.ProjectId))
             .ReturnsAsync(new ProjectEntity());
-        _projectMemberRepositoryMock.Setup(repository =>
-                repository.IsUserProjectLeadAsync(currentUserId, createInviteDto.ProjectId))
+        _projectMemberRepositoryMock
+            .Setup(repository => repository.IsUserProjectLeadAsync(currentUserId, createInviteDto.ProjectId))
             .ReturnsAsync(true);
-        _userManagerMock.Setup(manager => manager.FindByIdAsync(createInviteDto.InvitedUserId))
+        _userManagerMock
+            .Setup(manager => manager.FindByIdAsync(createInviteDto.InvitedUserId))
             .ReturnsAsync(new TaskManagerUser());
-        _projectInviteRepositoryMock.Setup(repository =>
-                repository.InviteExistsAsync(createInviteDto.InvitedUserId, createInviteDto.ProjectId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.InviteExistsAsync(createInviteDto.InvitedUserId, createInviteDto.ProjectId))
             .ReturnsAsync(false);
-        _projectMemberRepositoryMock.Setup(repository =>
-                repository.IsUserProjectParticipantAsync(createInviteDto.InvitedUserId, createInviteDto.ProjectId))
+        _projectMemberRepositoryMock
+            .Setup(repository => repository.IsUserProjectParticipantAsync(
+                createInviteDto.InvitedUserId, createInviteDto.ProjectId))
             .ReturnsAsync(false);
 
         var result = await _inviteCreationService.CreateAsync(createInviteDto);
@@ -92,20 +97,24 @@ public class InviteCreationServiceTests
             InvitedUserId = "some valid invited user id"
         };
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(currentUserId);
-        _projectRepositoryMock.Setup(repo => repo.FindByIdAsync(createInviteDto.ProjectId))
+        _projectRepositoryMock
+            .Setup(repo => repo.FindByIdAsync(createInviteDto.ProjectId))
             .ReturnsAsync(new ProjectEntity());
-        _projectMemberRepositoryMock.Setup(repository =>
-                repository.IsUserProjectManagerAsync(currentUserId, createInviteDto.ProjectId))
+        _projectMemberRepositoryMock
+            .Setup(repository => repository.IsUserProjectManagerAsync(currentUserId, createInviteDto.ProjectId))
             .ReturnsAsync(true);
-        _userManagerMock.Setup(manager => manager.FindByIdAsync(createInviteDto.InvitedUserId))
+        _userManagerMock
+            .Setup(manager => manager.FindByIdAsync(createInviteDto.InvitedUserId))
             .ReturnsAsync(new TaskManagerUser());
-        _projectInviteRepositoryMock.Setup(repository =>
-                repository.InviteExistsAsync(createInviteDto.InvitedUserId, createInviteDto.ProjectId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.InviteExistsAsync(createInviteDto.InvitedUserId, createInviteDto.ProjectId))
             .ReturnsAsync(false);
-        _projectMemberRepositoryMock.Setup(repository =>
-                repository.IsUserProjectParticipantAsync(createInviteDto.InvitedUserId, createInviteDto.ProjectId))
+        _projectMemberRepositoryMock
+            .Setup(repository => repository.IsUserProjectParticipantAsync(
+                createInviteDto.InvitedUserId, createInviteDto.ProjectId))
             .ReturnsAsync(false);
 
         var result = await _inviteCreationService.CreateAsync(createInviteDto);
@@ -123,9 +132,11 @@ public class InviteCreationServiceTests
             InvitedUserId = "some valid invited user id"
         };
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns("");
-        _projectRepositoryMock.Setup(repo => repo.FindByIdAsync(createInviteDto.ProjectId))
+        _projectRepositoryMock
+            .Setup(repo => repo.FindByIdAsync(createInviteDto.ProjectId))
             .ReturnsAsync((ProjectEntity?)null);
 
         var result = await _inviteCreationService.CreateAsync(createInviteDto);
@@ -145,14 +156,17 @@ public class InviteCreationServiceTests
             InvitedUserId = "some valid invited user id"
         };
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(currentUserId);
-        _projectRepositoryMock.Setup(repo => repo.FindByIdAsync(createInviteDto.ProjectId))
+        _projectRepositoryMock
+            .Setup(repo => repo.FindByIdAsync(createInviteDto.ProjectId))
             .ReturnsAsync(new ProjectEntity());
-        _projectMemberRepositoryMock.Setup(repository =>
-                repository.IsUserProjectManagerAsync(currentUserId, createInviteDto.ProjectId))
+        _projectMemberRepositoryMock
+            .Setup(repository => repository.IsUserProjectManagerAsync(currentUserId, createInviteDto.ProjectId))
             .ReturnsAsync(true);
-        _userManagerMock.Setup(manager => manager.FindByIdAsync(createInviteDto.InvitedUserId))
+        _userManagerMock
+            .Setup(manager => manager.FindByIdAsync(createInviteDto.InvitedUserId))
             .ReturnsAsync((TaskManagerUser?)null);
 
         var result = await _inviteCreationService.CreateAsync(createInviteDto);
@@ -172,17 +186,20 @@ public class InviteCreationServiceTests
             InvitedUserId = "some valid invited user id"
         };
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(currentUserId);
-        _projectRepositoryMock.Setup(repo => repo.FindByIdAsync(createInviteDto.ProjectId))
+        _projectRepositoryMock
+            .Setup(repo => repo.FindByIdAsync(createInviteDto.ProjectId))
             .ReturnsAsync(new ProjectEntity());
-        _projectMemberRepositoryMock.Setup(repository =>
-                repository.IsUserProjectManagerAsync(currentUserId, createInviteDto.ProjectId))
+        _projectMemberRepositoryMock
+            .Setup(repository => repository.IsUserProjectManagerAsync(currentUserId, createInviteDto.ProjectId))
             .ReturnsAsync(true);
-        _userManagerMock.Setup(manager => manager.FindByIdAsync(createInviteDto.InvitedUserId))
+        _userManagerMock
+            .Setup(manager => manager.FindByIdAsync(createInviteDto.InvitedUserId))
             .ReturnsAsync(new TaskManagerUser());
-        _projectInviteRepositoryMock.Setup(repository =>
-                repository.InviteExistsAsync(createInviteDto.InvitedUserId, createInviteDto.ProjectId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.InviteExistsAsync(createInviteDto.InvitedUserId, createInviteDto.ProjectId))
             .ReturnsAsync(true);
 
         var result = await _inviteCreationService.CreateAsync(createInviteDto);
@@ -202,20 +219,24 @@ public class InviteCreationServiceTests
             InvitedUserId = "some valid invited user id"
         };
 
-        _currentUserServiceMock.Setup(service => service.UserId)
+        _currentUserServiceMock
+            .Setup(service => service.UserId)
             .Returns(currentUserId);
-        _projectRepositoryMock.Setup(repo => repo.FindByIdAsync(createInviteDto.ProjectId))
+        _projectRepositoryMock
+            .Setup(repo => repo.FindByIdAsync(createInviteDto.ProjectId))
             .ReturnsAsync(new ProjectEntity());
-        _projectMemberRepositoryMock.Setup(repository =>
-                repository.IsUserProjectManagerAsync(currentUserId, createInviteDto.ProjectId))
+        _projectMemberRepositoryMock
+            .Setup(repository => repository.IsUserProjectManagerAsync(currentUserId, createInviteDto.ProjectId))
             .ReturnsAsync(true);
-        _userManagerMock.Setup(manager => manager.FindByIdAsync(createInviteDto.InvitedUserId))
+        _userManagerMock
+            .Setup(manager => manager.FindByIdAsync(createInviteDto.InvitedUserId))
             .ReturnsAsync(new TaskManagerUser());
-        _projectInviteRepositoryMock.Setup(repository =>
-                repository.InviteExistsAsync(createInviteDto.InvitedUserId, createInviteDto.ProjectId))
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.InviteExistsAsync(createInviteDto.InvitedUserId, createInviteDto.ProjectId))
             .ReturnsAsync(false);
-        _projectMemberRepositoryMock.Setup(repository =>
-                repository.IsUserProjectParticipantAsync(createInviteDto.InvitedUserId, createInviteDto.ProjectId))
+        _projectMemberRepositoryMock
+            .Setup(repository => repository.IsUserProjectParticipantAsync(
+                createInviteDto.InvitedUserId, createInviteDto.ProjectId))
             .ReturnsAsync(true);
 
         var result = await _inviteCreationService.CreateAsync(createInviteDto);
