@@ -22,13 +22,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="ProfileDetails\"/>
-        <Folder Include="ProjectMembers\"/>
-        <Folder Include="Projects\"/>
-        <Folder Include="Tasks\"/>
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\src\TaskManager.Infrastructure\TaskManager.Infrastructure.csproj"/>
         <ProjectReference Include="..\..\src\TaskManager.UseCases\TaskManager.UseCases.csproj"/>
     </ItemGroup>
