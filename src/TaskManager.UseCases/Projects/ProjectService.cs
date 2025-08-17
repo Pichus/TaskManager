@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
+using TaskManager.Core.Shared;
 using TaskManager.Infrastructure;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.UseCases.Projects.Create;
@@ -55,7 +56,7 @@ public class ProjectService : IProjectService
         return Result<ProjectEntity>.Success(project);
     }
 
-    public async Task<Result<IEnumerable<ProjectEntity>>> GetAllByUserAsync(RoleDto role)
+    public async Task<Result<PagedData<ProjectEntity>>> GetAllByUserAsync(GetAllByUserDto dto)
     {
         _logger.LogInformation("Getting all projects by user");
 
@@ -64,27 +65,28 @@ public class ProjectService : IProjectService
         if (currentUserId is null)
         {
             _logger.LogWarning("Getting projects failed - user unauthenticated");
-            return Result<IEnumerable<ProjectEntity>>.Failure(UseCaseErrors.Unauthenticated);
+            return Result<PagedData<ProjectEntity>>.Failure(UseCaseErrors.Unauthenticated);
         }
 
-        var projectRole = role switch
+        var projectRole = dto.Role switch
         {
             RoleDto.Member => ProjectRole.Member,
             RoleDto.Manager => ProjectRole.Manager,
             _ => ProjectRole.Member
         };
 
-        var projects = role switch
+        var projects = dto.Role switch
         {
-            RoleDto.Any => await _projectRepository.GetAllByUserIdAsync(currentUserId),
-            RoleDto.Lead => await _projectRepository.GetAllByUserIdWhereUserIsLead(currentUserId),
+            RoleDto.Any => await _projectRepository.GetAllByUserIdAsync(currentUserId, dto.PageNumber, dto.PageSize),
+            RoleDto.Lead => await _projectRepository.GetAllByUserIdWhereUserIsLead(currentUserId, dto.PageNumber,
+                dto.PageSize),
             RoleDto.Member or RoleDto.Manager => await _projectRepository.GetAllByUserIdWhereUserHasRoleAsync(
-                currentUserId, projectRole),
-            _ => await _projectRepository.GetAllByUserIdAsync(currentUserId)
+                currentUserId, projectRole, dto.PageNumber, dto.PageSize),
+            _ => await _projectRepository.GetAllByUserIdAsync(currentUserId, dto.PageNumber, dto.PageSize)
         };
 
         _logger.LogInformation("Got projects successfully");
-        return Result<IEnumerable<ProjectEntity>>.Success(projects);
+        return Result<PagedData<ProjectEntity>>.Success(projects);
     }
 
     public async Task<Result<ProjectEntity>> GetByIdAsync(long projectId)

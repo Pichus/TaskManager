@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Core.ProjectAggregate;
+using TaskManager.Core.Shared;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Shared;
 
@@ -31,37 +32,54 @@ public class ProjectRepository : RepositoryBase<ProjectEntity, long>, IProjectRe
         ;
     }
 
-    public async Task<IEnumerable<ProjectEntity>> GetAllByUserIdAsync(string userId)
+    public async Task<PagedData<ProjectEntity>> GetAllByUserIdAsync(string userId, int pageNumber, int pageSize)
     {
-        return await Context
+        var query = Context
             .Projects
             .Where(project => project.LeadUserId == userId ||
                               Context
                                   .ProjectMembers
                                   .Any(member => member.MemberId == userId
-                                                 && member.ProjectId == project.Id))
-            .ToListAsync();
+                                                 && member.ProjectId == project.Id));
+
+        var totalRecords = await query.CountAsync();
+        var projects = await query.ToListAsync();
+
+        return new PagedData<ProjectEntity>(projects, pageNumber, pageSize, totalRecords);
+    }
+
+    public async Task<PagedData<ProjectEntity>> GetAllByUserIdWhereUserIsLead(string userId, int pageNumber,
+        int pageSize)
+    {
+        var query = Context
+            .Projects
+            .Where(project => project.LeadUserId == userId);
+
+        var totalRecords = await query.CountAsync();
+        var projects = await query.ToListAsync();
+
+        return new PagedData<ProjectEntity>(projects, pageNumber, pageSize, totalRecords);
+    }
+
+    public async Task<PagedData<ProjectEntity>> GetAllByUserIdWhereUserHasRoleAsync(string userId, ProjectRole role,
+        int pageNumber, int pageSize)
+    {
+        var query = Context
+            .Projects
+            .Where(project => Context.ProjectMembers
+                .Any(member => member.ProjectId == project.Id
+                               && member.MemberId == userId
+                               && member.ProjectRole == role));
+
+        var totalRecords = await query.CountAsync();
+        var projects = await query.ToListAsync();
+
+        return new PagedData<ProjectEntity>(projects, pageNumber, pageSize, totalRecords);
     }
 
     public async Task<bool> IsUserProjectMemberAsync(string currentUserId, long projectId)
     {
         return await Context.ProjectMembers.AnyAsync(projectMember =>
             projectMember.MemberId == currentUserId && projectMember.ProjectId == projectId);
-    }
-
-    public async Task<IEnumerable<ProjectEntity>> GetAllByUserIdWhereUserIsLead(string userId)
-    {
-        return await Context.Projects.Where(project => project.LeadUserId == userId).ToListAsync();
-    }
-
-    public async Task<IEnumerable<ProjectEntity>> GetAllByUserIdWhereUserHasRoleAsync(string userId, ProjectRole role)
-    {
-        return await Context
-            .Projects
-            .Where(project => Context.ProjectMembers
-                .Any(member => member.ProjectId == project.Id
-                               && member.MemberId == userId
-                               && member.ProjectRole == role))
-            .ToListAsync();
     }
 }

@@ -6,7 +6,9 @@ public interface IProjectRepository : IRepositoryBase<ProjectEntity, long>
 {
     Task<ProjectEntity?> FindByIdWithProjectMembersIncludedAsync(long id);
     Task<ProjectEntity?> FindByIdWithInvitesIncludedAsync(long id);
-    Task<IEnumerable<ProjectEntity>> GetAllByUserIdAsync(string userId);
-    Task<IEnumerable<ProjectEntity>> GetAllByUserIdWhereUserIsLead(string userId);
-    Task<IEnumerable<ProjectEntity>> GetAllByUserIdWhereUserHasRoleAsync(string userId, ProjectRole role);
+    Task<PagedData<ProjectEntity>> GetAllByUserIdAsync(string userId, int pageNumber, int pageSize);
+    Task<PagedData<ProjectEntity>> GetAllByUserIdWhereUserIsLead(string userId, int pageNumber, int pageSize);
+
+    Task<PagedData<ProjectEntity>> GetAllByUserIdWhereUserHasRoleAsync(string userId, ProjectRole role, int pageNumber,
+        int pageSize);
 }

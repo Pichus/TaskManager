@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManager.Core.ProjectAggregate;
+using TaskManager.Core.Shared;
 using TaskManager.Projects.Create;
 using TaskManager.Projects.Get;
 using TaskManager.Projects.Update;
+using TaskManager.Shared;
 using TaskManager.UseCases.Projects;
 using TaskManager.UseCases.Projects.Create;
 using TaskManager.UseCases.Projects.Delete;
@@ -24,12 +26,13 @@ public class ProjectsController : ControllerBase
     {
         _projectService = projectService;
     }
-    
+
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GetProjectResponse>>> GetAll(
+    public async Task<ActionResult<PagedResponse<GetProjectResponse>>> GetAll(
+        [FromQuery] PaginationQuery paginationQuery,
         [FromQuery] RoleQueryParameter? role = null)
     {
-        var result = await _projectService.GetAllByUserAsync(RoleQueryParameterToDto(role));
+        var result = await _projectService.GetAllByUserAsync(GetProjectsRequestToDto(role, paginationQuery));
 
         if (result.IsFailure)
         {
@@ -39,9 +42,9 @@ public class ProjectsController : ControllerBase
             if (errorCode == UseCaseErrors.Unauthenticated.Code) return Unauthorized();
         }
 
-        var userProjectsResponse = result.Value.Select(ProjectToGetProjectResponse);
+        var response = ProjectsToResponse(result.Value);
 
-        return Ok(userProjectsResponse);
+        return Ok(response);
     }
 
     [HttpGet("{projectId:long}")]
@@ -189,6 +192,30 @@ public class ProjectsController : ControllerBase
             RoleQueryParameter.Lead => RoleDto.Lead,
             null => RoleDto.Any,
             _ => throw new ArgumentOutOfRangeException(nameof(role), role, null)
+        };
+    }
+    
+    private GetAllByUserDto GetProjectsRequestToDto(RoleQueryParameter? role, PaginationQuery paginationQuery)
+    {
+        return new GetAllByUserDto
+        {
+            Role = RoleQueryParameterToDto(role),
+            PageNumber = paginationQuery.PageNumber,
+            PageSize = paginationQuery.PageSize
+        };
+    }
+    
+    private PagedResponse<GetProjectResponse> ProjectsToResponse(PagedData<ProjectEntity> pagedProjects)
+    {
+        var responses = pagedProjects.Data.Select(ProjectToGetProjectResponse);
+        
+        return new PagedResponse<GetProjectResponse>
+        {
+            PageNumber = pagedProjects.PageNumber,
+            PageSize = pagedProjects.PageSize,
+            TotalPages = pagedProjects.TotalPages,
+            TotalRecords = pagedProjects.TotalRecords,
+            Data = responses
         };
     }
 }
