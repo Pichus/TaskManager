@@ -1,4 +1,4 @@
-namespace TaskManager.ProjectTasks.Update;
+namespace TaskManager.Tasks.Update;
 
 public class UpdateTaskRequest
 {

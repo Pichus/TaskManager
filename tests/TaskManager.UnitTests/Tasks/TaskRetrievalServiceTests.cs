@@ -1,12 +1,16 @@
 using FluentAssertions;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.TaskAggregate;
 using TaskManager.Infrastructure;
 using TaskManager.Infrastructure.Identity.CurrentUser;
+using TaskManager.Infrastructure.Identity.User;
+using TaskManager.UseCases.Tasks.Authorization;
 using TaskManager.UseCases.Tasks.Delete;
 using TaskManager.UseCases.Tasks.Retrieve;
+using TaskManager.UseCases.Tasks.Validation;
 
 namespace TaskManager.UnitTests.Tasks;
 
@@ -19,6 +23,9 @@ public class TaskRetrievalServiceTests
     private readonly TaskRetrievalService _taskRetrievalService;
     private readonly Mock<ITaskRepository> _taskRepositoryMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
+    private readonly Mock<ITaskQueryValidatorService> _taskQueryValidatorServiceMock;
+    private readonly Mock<ITaskAuthorizationService> _taskAuthorizationServiceMock;
+    private readonly Mock<UserManager<TaskManagerUser>> _userManagerMock;
 
     public TaskRetrievalServiceTests()
     {
@@ -28,16 +35,26 @@ public class TaskRetrievalServiceTests
         _currentUserServiceMock = new Mock<ICurrentUserService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _taskRepositoryMock = new Mock<ITaskRepository>();
+        _taskAuthorizationServiceMock = new Mock<ITaskAuthorizationService>();
+        _taskQueryValidatorServiceMock = new Mock<ITaskQueryValidatorService>();
         _unitOfWorkMock
             .Setup(work => work.SaveChangesAsync(CancellationToken.None))
             .ReturnsAsync(1);
+        
+        var userStoreMock = new Mock<IUserStore<TaskManagerUser>>();
+        _userManagerMock =
+            new Mock<UserManager<TaskManagerUser>>(userStoreMock.Object, null, null, null, null, null, null, null,
+                null);
 
         _taskRetrievalService = new TaskRetrievalService(
             _loggerMock.Object,
             _currentUserServiceMock.Object,
-            _projectRepositoryMock.Object, 
+            _projectRepositoryMock.Object,
             _projectMemberRepositoryMock.Object,
-            _taskRepositoryMock.Object
+            _taskRepositoryMock.Object,
+            _userManagerMock.Object,
+            _taskQueryValidatorServiceMock.Object,
+            _taskAuthorizationServiceMock.Object
         );
     }
 

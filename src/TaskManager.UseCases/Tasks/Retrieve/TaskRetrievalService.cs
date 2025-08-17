@@ -1,8 +1,13 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
+using TaskManager.Core.Shared;
 using TaskManager.Core.TaskAggregate;
 using TaskManager.Infrastructure.Identity.CurrentUser;
+using TaskManager.Infrastructure.Identity.User;
 using TaskManager.UseCases.Shared;
+using TaskManager.UseCases.Tasks.Authorization;
+using TaskManager.UseCases.Tasks.Validation;
 
 namespace TaskManager.UseCases.Tasks.Retrieve;
 
@@ -12,17 +17,86 @@ public class TaskRetrievalService : ITaskRetrievalService
     private readonly ILogger<TaskRetrievalService> _logger;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
+    private readonly ITaskQueryValidatorService _queryValidator;
+    private readonly ITaskAuthorizationService _taskAuthorizationService;
     private readonly ITaskRepository _taskRepository;
+    private readonly UserManager<TaskManagerUser> _userManager;
 
     public TaskRetrievalService(ILogger<TaskRetrievalService> logger, ICurrentUserService currentUserService,
         IProjectRepository projectRepository, IProjectMemberRepository projectMemberRepository,
-        ITaskRepository taskRepository)
+        ITaskRepository taskRepository, UserManager<TaskManagerUser> userManager,
+        ITaskQueryValidatorService queryValidator, ITaskAuthorizationService taskAuthorizationService)
     {
         _logger = logger;
         _currentUserService = currentUserService;
         _projectRepository = projectRepository;
         _projectMemberRepository = projectMemberRepository;
         _taskRepository = taskRepository;
+        _userManager = userManager;
+        _queryValidator = queryValidator;
+        _taskAuthorizationService = taskAuthorizationService;
+    }
+
+    public async Task<Result<PagedData<TaskEntity>>> RetrieveAll(RetrieveAllTasksDto retrieveAllTasksDto)
+    {
+        _logger.LogInformation("Getting all tasks");
+
+        var currentUserId = _currentUserService.UserId;
+
+        if (currentUserId is null)
+        {
+            _logger.LogWarning("Getting all tasks failed - unauthenticated");
+            return Result<PagedData<TaskEntity>>.Failure(UseCaseErrors.Unauthenticated);
+        }
+
+        var projectValidationResult = await _queryValidator.ValidateProjectAsync(retrieveAllTasksDto.ProjectId);
+
+        if (projectValidationResult.IsFailure)
+            return Result<PagedData<TaskEntity>>.Failure(projectValidationResult.Error);
+
+        var project = projectValidationResult.Value;
+
+        var assigneeUserValidationResult =
+            await _queryValidator.ValidateAssigneeUser(retrieveAllTasksDto.AssigneeUserId);
+
+        if (assigneeUserValidationResult.IsFailure)
+            return Result<PagedData<TaskEntity>>.Failure(assigneeUserValidationResult.Error);
+
+        var assigneeUser = assigneeUserValidationResult.Value;
+
+        var isProjectSpecified = project is not null;
+
+        if (isProjectSpecified)
+        {
+            var projectAccessResult =
+                await _taskAuthorizationService.CanUserAccessProjectAsync(currentUserId, project!.Id);
+            if (projectAccessResult.IsFailure)
+                return Result<PagedData<TaskEntity>>.Failure(projectAccessResult.Error);
+        }
+
+        var isAssigneeUserSpecified = assigneeUser is not null;
+
+        if (isAssigneeUserSpecified)
+        {
+            var assigneeAccessResult =
+                await _taskAuthorizationService.CanUserViewAssigneeTasks(currentUserId, assigneeUser!.Id, project?.Id);
+            if (assigneeAccessResult.IsFailure)
+                return Result<PagedData<TaskEntity>>.Failure(assigneeAccessResult.Error);
+        }
+
+        var sortOrder = retrieveAllTasksDto.Sort + "_" + retrieveAllTasksDto.Order;
+
+        var pagedTasks = await _taskRepository.GetAll(
+            sortOrder,
+            retrieveAllTasksDto.PageNumber,
+            retrieveAllTasksDto.PageSize,
+            retrieveAllTasksDto.Status,
+            project?.Id,
+            assigneeUser?.Id
+        );
+
+        _logger.LogInformation("Successfully retrieved tasks");
+        return Result<PagedData<TaskEntity>>.Success(pagedTasks);
     }
 
     public async Task<Result<IEnumerable<TaskEntity>>> RetrieveAllByProjectIdAndStatusAsync(long projectId,

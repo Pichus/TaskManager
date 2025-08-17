@@ -11,4 +11,6 @@ public static class RetrieveTaskErrors
         "task not found");
 
     public static readonly Error AccessDenied = new("Tasks.Get.AccessDenied");
+
+    public static readonly Error AssigneeUserNotFound = new("Tasks.Get.AssigneeUserNotFound");
 }
