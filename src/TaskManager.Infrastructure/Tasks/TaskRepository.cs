@@ -51,10 +51,6 @@ public class TaskRepository : ITaskRepository
     public async Task<PagedData<TaskEntity>> GetAll(string sortOrder, int pageNumber = 1, int pageSize = 25,
         Status? status = null, long? projectId = null, string? assigneeUserId = null)
     {
-        var totalRecords = await _context
-            .Tasks
-            .CountAsync();
-        
         var query = _context
             .Tasks
             .Where(entity => true);
@@ -68,12 +64,24 @@ public class TaskRepository : ITaskRepository
         if (assigneeUserId is not null)
             query = query.Where(task => task.AssigneeUserId == assigneeUserId);
 
+        var totalRecords = await query.CountAsync();
+        
         query = sortOrder switch
         {
-            "dueDate" => query.OrderBy(task => new { task.DueDate, task.Id }),
-            "dueDate_desc" => query.OrderByDescending(task => new { task.DueDate, task.Id }),
-            "title" => query.OrderBy(task => new { task.Title, task.Id }),
-            "title_desc" => query.OrderByDescending(task => new { task.Title, task.Id }),
+            "DueDate" => query
+                .OrderBy(task => task.DueDate)
+                .ThenBy(task => task.Id),
+            "DueDate_Desc" => query
+                .OrderByDescending(task => task.DueDate)
+                .ThenByDescending(task => task.Id),
+            "Title" => query
+                .OrderBy(task => task.Title)
+                .ThenBy(task => task.Id),
+            "Title_Desc" => query
+                .OrderByDescending(task => task.Title)
+                .ThenByDescending(task => task.Id),
+            "Id_Desc" => query
+                .OrderByDescending(task => task.Id),
             _ => query.OrderBy(task => task.Id)
         };
 
