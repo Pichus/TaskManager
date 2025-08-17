@@ -57,18 +57,19 @@ public class TasksController : ControllerBase
 
     [HttpGet]
     public async Task<ActionResult<PagedResponse<GetTaskResponse>>> GetAll(
+        [FromQuery] PaginationQuery paginationQuery,
         [FromQuery] long? projectId = null,
         [FromQuery] string? assigneeUserId = null,
         [FromQuery] Status? status = null,
         [FromQuery] SortQueryParameter? sort = SortQueryParameter.Id,
-        [FromQuery] OrderQueryParameter? order = OrderQueryParameter.Asc,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 25)
+        [FromQuery] OrderQueryParameter? order = OrderQueryParameter.Asc
+    )
     {
         if (projectId is null && assigneeUserId is null)
             return BadRequest();
 
-        var dto = RetrieveAllTasksRequestToDto(projectId, assigneeUserId, status, sort, order, pageNumber, pageSize);
+        var dto = RetrieveAllTasksRequestToDto(projectId, assigneeUserId, status, sort, order,
+            paginationQuery.PageNumber, paginationQuery.PageSize);
 
         var result = await _taskRetrievalService.RetrieveAll(dto);
 
@@ -89,7 +90,7 @@ public class TasksController : ControllerBase
         }
 
         var response = PagedTasksToResponse(result.Value);
-        
+
         return Ok(response);
     }
 
@@ -224,7 +225,7 @@ public class TasksController : ControllerBase
             PageSize = pageSize
         };
     }
-    
+
     private PagedResponse<GetTaskResponse> PagedTasksToResponse(PagedData<TaskEntity> pagedTasks)
     {
         var taskResponses = pagedTasks.Data.Select(task => new GetTaskResponse

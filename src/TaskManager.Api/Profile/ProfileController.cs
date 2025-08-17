@@ -52,12 +52,11 @@ public class ProfileController : ControllerBase
     }
 
     [HttpGet("invites/pending")]
-    public async Task<ActionResult<PagedData<GetInviteResponse>>> GetPendingInvites([FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 25)
+    public async Task<ActionResult<PagedData<GetInviteResponse>>> GetPendingInvites([FromQuery] PaginationQuery paginationQuery)
     {
         var result =
             await _inviteRetrievalService.RetrievePendingInvitesForCurrentUserAsync(
-                GetPendingInvitesRequestToDto(pageNumber, pageSize));
+                GetPendingInvitesRequestToDto(paginationQuery.PageNumber, paginationQuery.PageSize));
 
         if (result.IsFailure)
         {
