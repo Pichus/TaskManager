@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManager.Core.ProjectInviteAggregate;
+using TaskManager.Core.Shared;
 using TaskManager.Infrastructure.Identity.User;
 using TaskManager.Profile.GetInvite;
 using TaskManager.Profile.GetProfileDetails;
+using TaskManager.Shared;
 using TaskManager.UseCases.Invites.Response;
 using TaskManager.UseCases.Invites.Response.Accept;
 using TaskManager.UseCases.Invites.Response.Decline;
@@ -50,9 +52,12 @@ public class ProfileController : ControllerBase
     }
 
     [HttpGet("invites/pending")]
-    public async Task<ActionResult<IEnumerable<GetInviteResponse>>> GetPendingInvites()
+    public async Task<ActionResult<PagedData<GetInviteResponse>>> GetPendingInvites([FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 25)
     {
-        var result = await _inviteRetrievalService.RetrievePendingInvitesForCurrentUserAsync();
+        var result =
+            await _inviteRetrievalService.RetrievePendingInvitesForCurrentUserAsync(
+                GetPendingInvitesRequestToDto(pageNumber, pageSize));
 
         if (result.IsFailure)
         {
@@ -66,6 +71,15 @@ public class ProfileController : ControllerBase
         var response = InvitesToGetInviteResponses(result.Value);
 
         return Ok(response);
+    }
+
+    private static RetrievePendingInvitesDto GetPendingInvitesRequestToDto(int pageNumber, int pageSize)
+    {
+        return new RetrievePendingInvitesDto
+        {
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
     }
 
     [HttpPut("invites/{inviteId:long}/accept")]
@@ -135,9 +149,9 @@ public class ProfileController : ControllerBase
         };
     }
 
-    private IEnumerable<GetInviteResponse> InvitesToGetInviteResponses(IEnumerable<ProjectInvite> invites)
+    private PagedResponse<GetInviteResponse> InvitesToGetInviteResponses(PagedData<ProjectInvite> pagedInvites)
     {
-        return invites.Select(invite => new GetInviteResponse
+        var inviteResponses = pagedInvites.Data.Select(invite => new GetInviteResponse
         {
             InviteId = invite.Id,
             ProjectId = invite.ProjectId,
@@ -145,5 +159,14 @@ public class ProfileController : ControllerBase
             InvitedByUserId = invite.InvitedByUserId,
             InviteStatus = invite.Status.ToString()
         });
+
+        return new PagedResponse<GetInviteResponse>
+        {
+            PageNumber = pagedInvites.PageNumber,
+            PageSize = pagedInvites.PageSize,
+            TotalPages = pagedInvites.TotalPages,
+            TotalRecords = pagedInvites.TotalRecords,
+            Data = inviteResponses
+        };
     }
 }

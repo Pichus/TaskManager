@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.ProjectInviteAggregate;
+using TaskManager.Core.Shared;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.UseCases.Shared;
 
@@ -25,7 +26,8 @@ public class InviteRetrievalService : IInviteRetrievalService
         _projectRepository = projectRepository;
     }
 
-    public async Task<Result<IEnumerable<ProjectInvite>>> RetrievePendingInvitesForCurrentUserAsync()
+    public async Task<Result<PagedData<ProjectInvite>>> RetrievePendingInvitesForCurrentUserAsync(
+        RetrievePendingInvitesDto dto)
     {
         _logger.LogInformation("Getting pending invites for current user");
 
@@ -34,14 +36,14 @@ public class InviteRetrievalService : IInviteRetrievalService
         if (currentUserId is null)
         {
             _logger.LogWarning("Getting pending invites for current user failed - user unauthenticated");
-            return Result<IEnumerable<ProjectInvite>>.Failure(UseCaseErrors.Unauthenticated);
+            return Result<PagedData<ProjectInvite>>.Failure(UseCaseErrors.Unauthenticated);
         }
 
         var pendingInvites = await _projectInviteRepository
-            .GetPendingInvitesByInvitedUserIdAsync(currentUserId);
+            .GetPendingInvitesByInvitedUserIdAsync(currentUserId, dto.PageNumber, dto.PageSize);
 
         _logger.LogInformation("Got pending invites for current user successfully");
-        return Result<IEnumerable<ProjectInvite>>.Success(pendingInvites);
+        return Result<PagedData<ProjectInvite>>.Success(pendingInvites);
     }
 
     public async Task<Result<IEnumerable<ProjectInvite>>> RetrievePendingProjectInvitesAsync(long projectId)

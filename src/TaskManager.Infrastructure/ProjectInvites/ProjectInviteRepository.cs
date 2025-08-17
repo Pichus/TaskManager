@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Core.ProjectInviteAggregate;
+using TaskManager.Core.Shared;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Shared;
 
@@ -11,13 +12,20 @@ public class ProjectInviteRepository : RepositoryBase<ProjectInvite, long>, IPro
     {
     }
 
-    public async Task<IEnumerable<ProjectInvite>> GetPendingInvitesByInvitedUserIdAsync(string userId)
+    public async Task<PagedData<ProjectInvite>> GetPendingInvitesByInvitedUserIdAsync(string userId, int pageNumber,
+        int pageSize)
     {
-        return await Context
+        var invitesQuery = Context
             .ProjectInvites
             .Where(invite => invite.InvitedUserId == userId
                              && invite.Status == InviteStatus.Pending)
-            .ToListAsync();
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageNumber);
+
+        var invites = await invitesQuery.ToListAsync();
+        var totalRecords = await invitesQuery.CountAsync();
+
+        return new PagedData<ProjectInvite>(invites, pageNumber, pageSize, totalRecords);
     }
 
     public async Task<bool> InviteExistsAsync(string invitedUserId, long projectId)

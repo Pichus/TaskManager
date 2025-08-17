@@ -43,11 +43,17 @@ public class InviteRetrievalServiceTests
     [Fact]
     public async Task RetrievePendingInvitesForCurrentUser_ReturnsSuccess()
     {
+        var retrievePendingInvitesDto = new RetrievePendingInvitesDto
+        {
+            PageNumber = 1,
+            PageSize = 25
+        };
+
         _currentUserServiceMock
             .Setup(service => service.UserId)
             .Returns(" ");
 
-        var result = await _inviteRetrievalService.RetrievePendingInvitesForCurrentUserAsync();
+        var result = await _inviteRetrievalService.RetrievePendingInvitesForCurrentUserAsync(retrievePendingInvitesDto);
 
         result.IsSuccess.Should().Be(true);
     }
