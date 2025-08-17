@@ -30,7 +30,7 @@ public class TasksController : ControllerBase
     }
 
     [HttpGet("{taskId:long}")]
-    public async Task<ActionResult> Get(long taskId)
+    public async Task<ActionResult<GetTaskResponse>> Get(long taskId)
     {
         var result = await _taskRetrievalService.RetrieveByProjectIdAndTaskIdAsync(0, taskId);
 
@@ -56,7 +56,7 @@ public class TasksController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult> GetAll(
+    public async Task<ActionResult<PagedResponse<GetTaskResponse>>> GetAll(
         [FromQuery] long? projectId = null,
         [FromQuery] string? assigneeUserId = null,
         [FromQuery] Status? status = null,
@@ -91,30 +91,6 @@ public class TasksController : ControllerBase
         var response = PagedTasksToResponse(result.Value);
         
         return Ok(response);
-    }
-
-    private PagedResponse<GetTaskResponse> PagedTasksToResponse(PagedData<TaskEntity> pagedTasks)
-    {
-        var taskResponses = pagedTasks.Data.Select(task => new GetTaskResponse
-        {
-            Id = task.Id,
-            Title = task.Title,
-            Description = task.Description,
-            Status = task.Status.ToString(),
-            DueDate = task.DueDate,
-            CreatedByUserId = task.CreatedByUserId,
-            AssigneeUserId = task.AssigneeUserId,
-            ProjectId = task.ProjectId
-        });
-
-        return new PagedResponse<GetTaskResponse>
-        {
-            PageNumber = pagedTasks.PageNumber,
-            PageSize = pagedTasks.PageSize,
-            TotalPages = pagedTasks.TotalPages,
-            TotalRecords = pagedTasks.TotalRecords,
-            Data = taskResponses
-        };
     }
 
     [HttpPut("{taskId:long}")]
@@ -246,6 +222,30 @@ public class TasksController : ControllerBase
             Order = orderDto,
             PageNumber = pageNumber,
             PageSize = pageSize
+        };
+    }
+    
+    private PagedResponse<GetTaskResponse> PagedTasksToResponse(PagedData<TaskEntity> pagedTasks)
+    {
+        var taskResponses = pagedTasks.Data.Select(task => new GetTaskResponse
+        {
+            Id = task.Id,
+            Title = task.Title,
+            Description = task.Description,
+            Status = task.Status.ToString(),
+            DueDate = task.DueDate,
+            CreatedByUserId = task.CreatedByUserId,
+            AssigneeUserId = task.AssigneeUserId,
+            ProjectId = task.ProjectId
+        });
+
+        return new PagedResponse<GetTaskResponse>
+        {
+            PageNumber = pagedTasks.PageNumber,
+            PageSize = pagedTasks.PageSize,
+            TotalPages = pagedTasks.TotalPages,
+            TotalRecords = pagedTasks.TotalRecords,
+            Data = taskResponses
         };
     }
 }
