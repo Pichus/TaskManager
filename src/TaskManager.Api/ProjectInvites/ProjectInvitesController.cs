@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManager.Core.ProjectInviteAggregate;
+using TaskManager.Core.Shared;
 using TaskManager.ProjectInvites.Create;
 using TaskManager.ProjectInvites.Get;
+using TaskManager.Shared;
 using TaskManager.UseCases.Invites.Create;
 using TaskManager.UseCases.Invites.Delete;
 using TaskManager.UseCases.Invites.Retrieve;
@@ -28,9 +30,12 @@ public class ProjectInvitesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GetInviteResponse>>> GetInvites([FromRoute] long projectId)
+    public async Task<ActionResult<IEnumerable<GetInviteResponse>>> GetInvites([FromRoute] long projectId,
+        [FromQuery] PaginationQuery paginationQuery)
     {
-        var result = await _inviteRetrievalService.RetrievePendingProjectInvitesAsync(projectId);
+        var result =
+            await _inviteRetrievalService.RetrievePendingProjectInvitesAsync(
+                GetProjectInvitesRequestToDto(projectId, paginationQuery));
 
         if (result.IsFailure)
         {
@@ -125,9 +130,9 @@ public class ProjectInvitesController : ControllerBase
         return response;
     }
 
-    private IEnumerable<GetInviteResponse> InvitesToInviteResponses(IEnumerable<ProjectInvite> invites)
+    private PagedResponse<GetInviteResponse> InvitesToInviteResponses(PagedData<ProjectInvite> pagedInvites)
     {
-        return invites.Select(invite => new GetInviteResponse
+        var inviteResponses = pagedInvites.Data.Select(invite => new GetInviteResponse
         {
             InviteId = invite.Id,
             ProjectId = invite.ProjectId,
@@ -135,5 +140,25 @@ public class ProjectInvitesController : ControllerBase
             InvitedByUserId = invite.InvitedByUserId,
             InviteStatus = invite.Status.ToString()
         });
+
+        return new PagedResponse<GetInviteResponse>
+        {
+            PageNumber = pagedInvites.PageNumber,
+            PageSize = pagedInvites.PageSize,
+            TotalPages = pagedInvites.TotalPages,
+            TotalRecords = pagedInvites.TotalRecords,
+            Data = inviteResponses
+        };
+    }
+
+    private RetrievePendingProjectInvitesDto GetProjectInvitesRequestToDto(long projectId,
+        PaginationQuery paginationQuery)
+    {
+        return new RetrievePendingProjectInvitesDto
+        {
+            ProjectId = projectId,
+            PageNumber = paginationQuery.PageNumber,
+            PageSize = paginationQuery.PageSize
+        };
     }
 }

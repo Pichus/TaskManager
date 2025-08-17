@@ -28,6 +28,22 @@ public class ProjectInviteRepository : RepositoryBase<ProjectInvite, long>, IPro
         return new PagedData<ProjectInvite>(invites, pageNumber, pageSize, totalRecords);
     }
 
+    public async Task<PagedData<ProjectInvite>> GetPendingInvitesByProjectIdAsync(long projectId, int pageNumber,
+        int pageSize)
+    {
+        var invitesQuery = Context
+            .ProjectInvites
+            .Where(invite => invite.ProjectId == projectId
+                             && invite.Status == InviteStatus.Pending)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageNumber);
+
+        var invites = await invitesQuery.ToListAsync();
+        var totalRecords = await invitesQuery.CountAsync();
+
+        return new PagedData<ProjectInvite>(invites, pageNumber, pageSize, totalRecords);
+    }
+
     public async Task<bool> InviteExistsAsync(string invitedUserId, long projectId)
     {
         return await Context

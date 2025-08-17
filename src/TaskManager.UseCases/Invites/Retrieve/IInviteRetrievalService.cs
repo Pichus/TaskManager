@@ -7,5 +7,5 @@ namespace TaskManager.UseCases.Invites.Retrieve;
 public interface IInviteRetrievalService
 {
     Task<Result<PagedData<ProjectInvite>>> RetrievePendingInvitesForCurrentUserAsync(RetrievePendingInvitesDto dto);
-    Task<Result<IEnumerable<ProjectInvite>>> RetrievePendingProjectInvitesAsync(long projectId);
+    Task<Result<PagedData<ProjectInvite>>> RetrievePendingProjectInvitesAsync(RetrievePendingProjectInvitesDto dto);
 }

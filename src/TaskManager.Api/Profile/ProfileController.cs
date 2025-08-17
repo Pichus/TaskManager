@@ -52,7 +52,8 @@ public class ProfileController : ControllerBase
     }
 
     [HttpGet("invites/pending")]
-    public async Task<ActionResult<PagedData<GetInviteResponse>>> GetPendingInvites([FromQuery] PaginationQuery paginationQuery)
+    public async Task<ActionResult<PagedData<GetInviteResponse>>> GetPendingInvites(
+        [FromQuery] PaginationQuery paginationQuery)
     {
         var result =
             await _inviteRetrievalService.RetrievePendingInvitesForCurrentUserAsync(
@@ -70,15 +71,6 @@ public class ProfileController : ControllerBase
         var response = InvitesToGetInviteResponses(result.Value);
 
         return Ok(response);
-    }
-
-    private static RetrievePendingInvitesDto GetPendingInvitesRequestToDto(int pageNumber, int pageSize)
-    {
-        return new RetrievePendingInvitesDto
-        {
-            PageNumber = pageNumber,
-            PageSize = pageSize
-        };
     }
 
     [HttpPut("invites/{inviteId:long}/accept")]
@@ -166,6 +158,15 @@ public class ProfileController : ControllerBase
             TotalPages = pagedInvites.TotalPages,
             TotalRecords = pagedInvites.TotalRecords,
             Data = inviteResponses
+        };
+    }
+
+    private RetrievePendingInvitesDto GetPendingInvitesRequestToDto(int pageNumber, int pageSize)
+    {
+        return new RetrievePendingInvitesDto
+        {
+            PageNumber = pageNumber,
+            PageSize = pageSize
         };
     }
 }

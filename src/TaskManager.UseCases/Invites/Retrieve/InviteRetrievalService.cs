@@ -46,40 +46,43 @@ public class InviteRetrievalService : IInviteRetrievalService
         return Result<PagedData<ProjectInvite>>.Success(pendingInvites);
     }
 
-    public async Task<Result<IEnumerable<ProjectInvite>>> RetrievePendingProjectInvitesAsync(long projectId)
+    public async Task<Result<PagedData<ProjectInvite>>> RetrievePendingProjectInvitesAsync(
+        RetrievePendingProjectInvitesDto dto)
     {
-        _logger.LogInformation("Getting pending invites for Project: {ProjectId}", projectId);
+        _logger.LogInformation("Getting pending invites for Project: {ProjectId}", dto.ProjectId);
 
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null)
         {
             _logger.LogWarning("Getting pending invites for project failed - user unauthenticated");
-            return Result<IEnumerable<ProjectInvite>>.Failure(UseCaseErrors.Unauthenticated);
+            return Result<PagedData<ProjectInvite>>.Failure(UseCaseErrors.Unauthenticated);
         }
 
-        var project = await _projectRepository.FindByIdWithInvitesIncludedAsync(projectId);
+        var project = await _projectRepository.FindByIdAsync(dto.ProjectId);
 
         if (project is null)
         {
             _logger.LogWarning("Getting pending invites for project failed - project not found");
-            return Result<IEnumerable<ProjectInvite>>.Failure(RetrieveInvitesErrors.ProjectNotFound);
+            return Result<PagedData<ProjectInvite>>.Failure(RetrieveInvitesErrors.ProjectNotFound);
         }
 
         var canCurrentUserGetPendingInvitesForProject =
-            await _projectMemberRepository.IsUserProjectLeadAsync(currentUserId, projectId) ||
-            await _projectMemberRepository.IsUserProjectManagerAsync(currentUserId, projectId);
+            await _projectMemberRepository.IsUserProjectLeadAsync(currentUserId, dto.ProjectId) ||
+            await _projectMemberRepository.IsUserProjectManagerAsync(currentUserId, dto.ProjectId);
 
 
         if (!canCurrentUserGetPendingInvitesForProject)
         {
             _logger.LogWarning("Getting pending invites for project failed - access denied");
-            return Result<IEnumerable<ProjectInvite>>.Failure(RetrieveInvitesErrors.AccessDenied);
+            return Result<PagedData<ProjectInvite>>.Failure(RetrieveInvitesErrors.AccessDenied);
         }
 
-        var invites = project.Invites;
+        var invites =
+            await _projectInviteRepository.GetPendingInvitesByProjectIdAsync(dto.ProjectId, dto.PageNumber,
+                dto.PageSize);
 
         _logger.LogWarning("Got pending invites for project successfully");
-        return Result<IEnumerable<ProjectInvite>>.Success(invites);
+        return Result<PagedData<ProjectInvite>>.Success(invites);
     }
 }

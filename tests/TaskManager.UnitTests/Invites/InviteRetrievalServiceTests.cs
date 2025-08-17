@@ -63,6 +63,12 @@ public class InviteRetrievalServiceTests
     {
         var currentUserId = "some valid id";
         long projectId = 0;
+        var retrievePendingProjectInvitesDto = new RetrievePendingProjectInvitesDto
+        {
+            ProjectId = projectId,
+            PageNumber = 1,
+            PageSize = 1
+        };
 
         _currentUserServiceMock
             .Setup(service => service.UserId)
@@ -71,7 +77,7 @@ public class InviteRetrievalServiceTests
             .Setup(repository => repository.FindByIdWithInvitesIncludedAsync(projectId))
             .ReturnsAsync((ProjectEntity?)null);
 
-        var result = await _inviteRetrievalService.RetrievePendingProjectInvitesAsync(projectId);
+        var result = await _inviteRetrievalService.RetrievePendingProjectInvitesAsync(retrievePendingProjectInvitesDto);
 
         result.IsFailure.Should().Be(true);
         result.Error.Code.Should().Be(RetrieveInvitesErrors.ProjectNotFound.Code);
@@ -82,6 +88,12 @@ public class InviteRetrievalServiceTests
     {
         var currentUserId = "some valid id";
         long projectId = 1;
+        var retrievePendingProjectInvitesDto = new RetrievePendingProjectInvitesDto
+        {
+            ProjectId = projectId,
+            PageNumber = 1,
+            PageSize = 1
+        };
 
         _currentUserServiceMock
             .Setup(service => service.UserId)
@@ -100,7 +112,7 @@ public class InviteRetrievalServiceTests
             .Setup(repository => repository.IsUserProjectManagerAsync(currentUserId, projectId))
             .ReturnsAsync(false);
 
-        var result = await _inviteRetrievalService.RetrievePendingProjectInvitesAsync(projectId);
+        var result = await _inviteRetrievalService.RetrievePendingProjectInvitesAsync(retrievePendingProjectInvitesDto);
 
         result.IsFailure.Should().Be(true);
         result.Error.Code.Should().Be(RetrieveInvitesErrors.AccessDenied.Code);
@@ -111,6 +123,12 @@ public class InviteRetrievalServiceTests
     {
         var currentUserId = "some valid id";
         long projectId = 1;
+        var retrievePendingProjectInvitesDto = new RetrievePendingProjectInvitesDto
+        {
+            ProjectId = projectId,
+            PageNumber = 1,
+            PageSize = 1
+        };
 
         _currentUserServiceMock
             .Setup(service => service.UserId)
@@ -129,7 +147,7 @@ public class InviteRetrievalServiceTests
             .Setup(repository => repository.IsUserProjectManagerAsync(currentUserId, projectId))
             .ReturnsAsync(true);
 
-        var result = await _inviteRetrievalService.RetrievePendingProjectInvitesAsync(projectId);
+        var result = await _inviteRetrievalService.RetrievePendingProjectInvitesAsync(retrievePendingProjectInvitesDto);
 
         result.IsSuccess.Should().Be(true);
     }
@@ -139,6 +157,12 @@ public class InviteRetrievalServiceTests
     {
         var currentUserId = "some valid id";
         long projectId = 1;
+        var retrievePendingProjectInvitesDto = new RetrievePendingProjectInvitesDto
+        {
+            ProjectId = projectId,
+            PageNumber = 1,
+            PageSize = 1
+        };
 
         _currentUserServiceMock
             .Setup(service => service.UserId)
@@ -157,7 +181,7 @@ public class InviteRetrievalServiceTests
             .Setup(repository => repository.IsUserProjectManagerAsync(currentUserId, projectId))
             .ReturnsAsync(false);
 
-        var result = await _inviteRetrievalService.RetrievePendingProjectInvitesAsync(projectId);
+        var result = await _inviteRetrievalService.RetrievePendingProjectInvitesAsync(retrievePendingProjectInvitesDto);
 
         result.IsSuccess.Should().Be(true);
     }
