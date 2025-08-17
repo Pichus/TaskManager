@@ -9,5 +9,6 @@ public interface IProjectMemberRepository : IRepositoryBase<ProjectMember, long>
     Task<bool> IsUserProjectManagerAsync(string userId, long projectId);
     Task<bool> IsUserProjectLeadAsync(string userId, long projectId);
     Task<bool> IsUserProjectParticipantAsync(string userId, long projectId);
-    Task<IEnumerable<ProjectMemberWithUser>> GetProjectMembersWithUsersAsync(long projectId);
+    Task<PagedData<ProjectMemberWithUser>> GetProjectMembersWithUsersAsync(long projectId, int pageNumber,
+        int pageSize);
 }

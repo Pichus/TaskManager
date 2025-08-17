@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
+using TaskManager.Core.Shared;
 using TaskManager.Infrastructure;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.Infrastructure.Identity.User;
@@ -32,40 +33,40 @@ public class ProjectMemberService : IProjectMemberService
         _logger = logger;
     }
 
-    public async Task<Result<IEnumerable<ProjectMemberWithUser>>> GetProjectMembersAsync(long projectId)
+    public async Task<Result<PagedData<ProjectMemberWithUser>>> GetProjectMembersAsync(GetProjectMembersDto dto)
     {
-        _logger.LogInformation("Getting Project: {ProjectId} members", projectId);
+        _logger.LogInformation("Getting Project: {ProjectId} members", dto.ProjectId);
 
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null)
         {
             _logger.LogInformation("Getting project members failed - user unauthenticated");
-            return Result<IEnumerable<ProjectMemberWithUser>>.Failure(UseCaseErrors.Unauthenticated);
+            return Result<PagedData<ProjectMemberWithUser>>.Failure(UseCaseErrors.Unauthenticated);
         }
 
-        var project = await _projectRepository.FindByIdAsync(projectId);
+        var project = await _projectRepository.FindByIdAsync(dto.ProjectId);
 
         if (project is null)
         {
             _logger.LogInformation("Getting project members failed - project not found");
-            return Result<IEnumerable<ProjectMemberWithUser>>.Failure(GetProjectMembersErrors.ProjectNotFound);
+            return Result<PagedData<ProjectMemberWithUser>>.Failure(GetProjectMembersErrors.ProjectNotFound);
         }
 
         var canGetProjectMembers =
-            await _projectMemberRepository.IsUserProjectParticipantAsync(currentUserId, projectId);
+            await _projectMemberRepository.IsUserProjectParticipantAsync(currentUserId, dto.ProjectId);
 
         if (!canGetProjectMembers)
         {
             _logger.LogInformation("Getting project members failed - access denied");
-            return Result<IEnumerable<ProjectMemberWithUser>>.Failure(GetProjectMembersErrors.AccessDenied);
+            return Result<PagedData<ProjectMemberWithUser>>.Failure(GetProjectMembersErrors.AccessDenied);
         }
 
         var projectMembers =
-            await _projectMemberRepository.GetProjectMembersWithUsersAsync(projectId);
+            await _projectMemberRepository.GetProjectMembersWithUsersAsync(dto.ProjectId, dto.PageNumber, dto.PageSize);
 
         _logger.LogInformation("Got project members successfully");
-        return Result<IEnumerable<ProjectMemberWithUser>>.Success(projectMembers);
+        return Result<PagedData<ProjectMemberWithUser>>.Success(projectMembers);
     }
 
     public async Task<Result> UpdateProjectMemberAsync(long projectId, string memberId, ProjectRole projectRole)

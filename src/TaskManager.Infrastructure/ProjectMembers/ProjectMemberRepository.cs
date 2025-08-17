@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TaskManager.Core.ProjectAggregate;
+using TaskManager.Core.Shared;
 using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Shared;
 
@@ -37,23 +38,6 @@ public class ProjectMemberRepository : RepositoryBase<ProjectMember, long>, IPro
                                 && member.ProjectRole == ProjectRole.Manager);
     }
 
-    public async Task<IEnumerable<ProjectMemberWithUser>> GetProjectMembersWithUsersAsync(long projectId)
-    {
-        return await Context
-            .ProjectMembers
-            .Where(member => member.ProjectId == projectId)
-            .Join(Context.Users, member => member.MemberId, user => user.Id, (member, user) =>
-                new ProjectMemberWithUser
-                {
-                    UserId = user.Id,
-                    UserName = user.UserName,
-                    Email = user.Email,
-                    ProjectRole = member.ProjectRole
-                }
-            )
-            .ToListAsync();
-    }
-
     public async Task<bool> IsUserProjectParticipantAsync(string userId, long projectId)
     {
         var isExplicitMember = await Context
@@ -72,5 +56,29 @@ public class ProjectMemberRepository : RepositoryBase<ProjectMember, long>, IPro
             .Projects
             .AnyAsync(project => project.Id == projectId
                                  && project.LeadUserId == userId);
+    }
+
+    public async Task<PagedData<ProjectMemberWithUser>> GetProjectMembersWithUsersAsync(long projectId, int pageNumber,
+        int pageSize)
+    {
+        var projectMembersQuery = Context
+            .ProjectMembers
+            .Where(member => member.ProjectId == projectId)
+            .Join(Context.Users, member => member.MemberId, user => user.Id, (member, user) =>
+                new ProjectMemberWithUser
+                {
+                    UserId = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    ProjectRole = member.ProjectRole
+                }
+            )
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize);
+
+        var projectMembers = await projectMembersQuery.ToListAsync();
+        var totalRecords = await projectMembersQuery.CountAsync();
+
+        return new PagedData<ProjectMemberWithUser>(projectMembers, pageNumber, pageSize, totalRecords);
     }
 }

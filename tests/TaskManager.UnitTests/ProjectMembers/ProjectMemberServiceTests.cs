@@ -53,13 +53,19 @@ public class ProjectMemberServiceTests
     {
         var currentUserId = "some valid id";
         long projectId = 0;
+        var getProjectMembersDto = new GetProjectMembersDto
+        {
+            ProjectId = projectId,
+            PageNumber = 1,
+            PageSize = 1
+        };
 
         _currentUserServiceMock.Setup(service => service.UserId)
             .Returns(currentUserId);
         _projectRepositoryMock.Setup(repository => repository.FindByIdAsync(projectId))
             .ReturnsAsync((ProjectEntity?)null);
 
-        var result = await _projectMemberService.GetProjectMembersAsync(projectId);
+        var result = await _projectMemberService.GetProjectMembersAsync(getProjectMembersDto);
 
         result.IsFailure.Should().Be(true);
         result.Error.Code.Should().Be(GetProjectMembersErrors.ProjectNotFound.Code);
@@ -70,6 +76,12 @@ public class ProjectMemberServiceTests
     {
         var currentUserId = "some valid id";
         long projectId = 1;
+        var getProjectMembersDto = new GetProjectMembersDto
+        {
+            ProjectId = projectId,
+            PageNumber = 1,
+            PageSize = 1
+        };
 
         _currentUserServiceMock
             .Setup(service => service.UserId)
@@ -81,7 +93,7 @@ public class ProjectMemberServiceTests
             .Setup(repository => repository.IsUserProjectParticipantAsync(currentUserId, projectId))
             .ReturnsAsync(false);
 
-        var result = await _projectMemberService.GetProjectMembersAsync(projectId);
+        var result = await _projectMemberService.GetProjectMembersAsync(getProjectMembersDto);
 
         result.IsFailure.Should().Be(true);
         result.Error.Code.Should().Be(GetProjectMembersErrors.AccessDenied.Code);
@@ -92,7 +104,13 @@ public class ProjectMemberServiceTests
     {
         var currentUserId = "some valid id";
         long projectId = 1;
-
+        var getProjectMembersDto = new GetProjectMembersDto
+        {
+            ProjectId = projectId,
+            PageNumber = 1,
+            PageSize = 1
+        };
+        
         _currentUserServiceMock
             .Setup(service => service.UserId)
             .Returns(currentUserId);
@@ -103,7 +121,7 @@ public class ProjectMemberServiceTests
             .Setup(repository => repository.IsUserProjectParticipantAsync(currentUserId, projectId))
             .ReturnsAsync(true);
 
-        var result = await _projectMemberService.GetProjectMembersAsync(projectId);
+        var result = await _projectMemberService.GetProjectMembersAsync(getProjectMembersDto);
 
         result.IsSuccess.Should().Be(true);
     }

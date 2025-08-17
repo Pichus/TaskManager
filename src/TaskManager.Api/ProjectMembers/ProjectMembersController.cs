@@ -1,8 +1,9 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskManager.Core.ProjectAggregate;
+using TaskManager.Core.Shared;
 using TaskManager.ProjectMembers.Get;
 using TaskManager.ProjectMembers.Update;
+using TaskManager.Shared;
 using TaskManager.UseCases.ProjectMembers;
 using TaskManager.UseCases.ProjectMembers.Delete;
 using TaskManager.UseCases.ProjectMembers.Get;
@@ -23,9 +24,12 @@ public class ProjectMembersController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<GetProjectMemberResponse>>> GetAll([FromRoute] long projectId)
+    public async Task<ActionResult<PagedResponse<GetProjectMemberResponse>>> GetAll([FromRoute] long projectId,
+        [FromQuery] PaginationQuery paginationQuery)
     {
-        var result = await _projectMemberService.GetProjectMembersAsync(projectId);
+        var result =
+            await _projectMemberService.GetProjectMembersAsync(
+                GetProjectMembersRequestToDto(projectId, paginationQuery));
 
         if (result.IsFailure)
         {
@@ -39,31 +43,12 @@ public class ProjectMembersController : ControllerBase
             if (errorCode == GetProjectMembersErrors.AccessDenied.Code) return Forbid();
         }
 
-        var response = 
-            ProjectMembersWithUsersToGetProjectMembersResponses(result.Value);
+        var response =
+            ProjectMembersWithUsersToResponse(result.Value);
 
         return Ok(response);
     }
 
-    private IEnumerable<GetProjectMemberResponse> ProjectMembersWithUsersToGetProjectMembersResponses(
-        IEnumerable<ProjectMemberWithUser> projectMembersWithUsers)
-    {
-        return projectMembersWithUsers.Select(ProjectMemberWithUserToGetProjectMemberResponse);
-    }
-
-    private GetProjectMemberResponse ProjectMemberWithUserToGetProjectMemberResponse(
-        ProjectMemberWithUser projectMemberWithUser)
-    {
-        return new GetProjectMemberResponse
-        {
-            UserId = projectMemberWithUser.UserId,
-            UserName = projectMemberWithUser.UserName,
-            Email = projectMemberWithUser.Email,
-            ProjectRole = projectMemberWithUser.ProjectRole.ToString()
-        };
-    }
-
-    [AllowAnonymous]
     [HttpPut("{memberId:guid}")]
     public async Task<ActionResult> Update([FromRoute] long projectId, [FromRoute] string memberId,
         [FromBody] UpdateProjectMemberRequest request)
@@ -111,5 +96,43 @@ public class ProjectMembersController : ControllerBase
         }
 
         return Ok();
+    }
+
+    private GetProjectMembersDto GetProjectMembersRequestToDto(long projectId, PaginationQuery paginationQuery)
+    {
+        return new GetProjectMembersDto
+        {
+            ProjectId = projectId,
+            PageNumber = paginationQuery.PageNumber,
+            PageSize = paginationQuery.PageSize
+        };
+    }
+
+    private PagedResponse<GetProjectMemberResponse> ProjectMembersWithUsersToResponse(
+        PagedData<ProjectMemberWithUser> pagedProjectMembersWithUsers)
+    {
+        var data = pagedProjectMembersWithUsers.Data
+            .Select(ProjectMemberWithUserToGetProjectMemberResponse);
+
+        return new PagedResponse<GetProjectMemberResponse>
+        {
+            PageNumber = pagedProjectMembersWithUsers.PageNumber,
+            PageSize = pagedProjectMembersWithUsers.PageSize,
+            TotalPages = pagedProjectMembersWithUsers.TotalPages,
+            TotalRecords = pagedProjectMembersWithUsers.TotalRecords,
+            Data = data
+        };
+    }
+
+    private GetProjectMemberResponse ProjectMemberWithUserToGetProjectMemberResponse(
+        ProjectMemberWithUser projectMemberWithUser)
+    {
+        return new GetProjectMemberResponse
+        {
+            UserId = projectMemberWithUser.UserId,
+            UserName = projectMemberWithUser.UserName,
+            Email = projectMemberWithUser.Email,
+            ProjectRole = projectMemberWithUser.ProjectRole.ToString()
+        };
     }
 }
