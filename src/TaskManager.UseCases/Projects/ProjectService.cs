@@ -13,13 +13,14 @@ namespace TaskManager.UseCases.Projects;
 public class ProjectService : IProjectService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly ILogger _logger;
+    private readonly ILogger<ProjectService> _logger;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public ProjectService(IProjectRepository projectRepository, IUnitOfWork unitOfWork,
-        ICurrentUserService currentUserService, ILogger logger, IProjectMemberRepository projectMemberRepository)
+        ICurrentUserService currentUserService, ILogger<ProjectService> logger,
+        IProjectMemberRepository projectMemberRepository)
     {
         _projectRepository = projectRepository;
         _unitOfWork = unitOfWork;
@@ -137,7 +138,7 @@ public class ProjectService : IProjectService
 
         var isCurrentUserProjectLead = project.LeadUserId == currentUserId;
         var canCurrentUserUpdateProject = isCurrentUserProjectLead;
-        
+
         if (!canCurrentUserUpdateProject)
         {
             _logger.LogWarning("Updating project failed - access denied");

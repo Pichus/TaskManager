@@ -2,7 +2,6 @@ using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.ProjectInviteAggregate;
 using TaskManager.Infrastructure;
-using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.UseCases.Invites.Response.Accept;
 using TaskManager.UseCases.Invites.Response.Decline;
@@ -13,13 +12,13 @@ namespace TaskManager.UseCases.Invites.Response;
 public class InviteResponseService : IInviteResponseService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger _logger;
+    private readonly ILogger<InviteResponseService> _logger;
     private readonly IProjectInviteRepository _projectInviteRepository;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public InviteResponseService(ILogger logger, ICurrentUserService currentUserService,
+    public InviteResponseService(ILogger<InviteResponseService> logger, ICurrentUserService currentUserService,
         IProjectInviteRepository projectInviteRepository, IProjectRepository projectRepository, IUnitOfWork unitOfWork,
         IProjectMemberRepository projectMemberRepository)
     {
@@ -87,16 +86,16 @@ public class InviteResponseService : IInviteResponseService
         }
 
         var defaultProjectRole = ProjectRole.Member;
-        
+
         var member = new ProjectMember
         {
             ProjectId = project.Id,
             MemberId = currentUserId,
-            ProjectRole = defaultProjectRole,
+            ProjectRole = defaultProjectRole
         };
 
         _projectMemberRepository.Create(member);
-        
+
         invite.Status = InviteStatus.Accepted;
         _projectInviteRepository.Update(invite);
         await _unitOfWork.SaveChangesAsync();

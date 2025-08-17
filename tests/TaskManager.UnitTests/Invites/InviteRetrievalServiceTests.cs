@@ -14,7 +14,7 @@ public class InviteRetrievalServiceTests
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
 
     private readonly InviteRetrievalService _inviteRetrievalService;
-    private readonly Mock<ILogger> _loggerMock;
+    private readonly Mock<ILogger<InviteRetrievalService>> _loggerMock;
     private readonly Mock<IProjectInviteRepository> _projectInviteRepositoryMock;
     private readonly Mock<IProjectMemberRepository> _projectMemberRepositoryMock;
     private readonly Mock<IProjectRepository> _projectRepositoryMock;
@@ -25,7 +25,7 @@ public class InviteRetrievalServiceTests
         _projectInviteRepositoryMock = new Mock<IProjectInviteRepository>();
         _projectMemberRepositoryMock = new Mock<IProjectMemberRepository>();
         _projectRepositoryMock = new Mock<IProjectRepository>();
-        _loggerMock = new Mock<ILogger>();
+        _loggerMock = new Mock<ILogger<InviteRetrievalService>>();
         _currentUserServiceMock = new Mock<ICurrentUserService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _unitOfWorkMock.Setup(work => work.SaveChangesAsync(CancellationToken.None))

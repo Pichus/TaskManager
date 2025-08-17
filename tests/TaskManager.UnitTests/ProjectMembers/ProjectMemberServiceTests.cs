@@ -16,7 +16,7 @@ namespace TaskManager.UnitTests.ProjectMembers;
 public class ProjectMemberServiceTests
 {
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
-    private readonly Mock<ILogger> _loggerMock;
+    private readonly Mock<ILogger<ProjectMemberService>> _loggerMock;
     private readonly Mock<IProjectMemberRepository> _projectMemberRepositoryMock;
     private readonly ProjectMemberService _projectMemberService;
     private readonly Mock<IProjectRepository> _projectRepositoryMock;
@@ -27,7 +27,7 @@ public class ProjectMemberServiceTests
     {
         _projectMemberRepositoryMock = new Mock<IProjectMemberRepository>();
         _projectRepositoryMock = new Mock<IProjectRepository>();
-        _loggerMock = new Mock<ILogger>();
+        _loggerMock = new Mock<ILogger<ProjectMemberService>>();
         _currentUserServiceMock = new Mock<ICurrentUserService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _unitOfWorkMock.Setup(work => work.SaveChangesAsync(CancellationToken.None))

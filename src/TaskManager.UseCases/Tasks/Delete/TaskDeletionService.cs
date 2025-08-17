@@ -12,12 +12,12 @@ public class TaskDeletionService : ITaskDeletionService
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger _logger;
+    private readonly ILogger<TaskDeletionService> _logger;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly ITaskRepository _taskRepository;
 
-    public TaskDeletionService(ILogger logger, ICurrentUserService currentUserService,
+    public TaskDeletionService(ILogger<TaskDeletionService> logger, ICurrentUserService currentUserService,
         IProjectRepository projectRepository, ITaskRepository taskRepository,
         IProjectMemberRepository projectMemberRepository, IUnitOfWork unitOfWork)
     {

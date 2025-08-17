@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Infrastructure;
-using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.Infrastructure.Identity.User;
 using TaskManager.UseCases.ProjectMembers.Delete;
@@ -15,15 +14,15 @@ namespace TaskManager.UseCases.ProjectMembers;
 public class ProjectMemberService : IProjectMemberService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger _logger;
+    private readonly ILogger<ProjectMemberService> _logger;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly UserManager<TaskManagerUser> _userManager;
 
     public ProjectMemberService(ICurrentUserService currentUserService, IProjectRepository projectRepository,
         IProjectMemberRepository projectMemberRepository, UserManager<TaskManagerUser> userManager,
-        IUnitOfWork unitOfWork, ILogger logger)
+        IUnitOfWork unitOfWork, ILogger<ProjectMemberService> logger)
     {
         _currentUserService = currentUserService;
         _projectRepository = projectRepository;
@@ -36,7 +35,7 @@ public class ProjectMemberService : IProjectMemberService
     public async Task<Result<IEnumerable<ProjectMemberWithUser>>> GetProjectMembersAsync(long projectId)
     {
         _logger.LogInformation("Getting Project: {ProjectId} members", projectId);
-        
+
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null)
@@ -49,15 +48,16 @@ public class ProjectMemberService : IProjectMemberService
 
         if (project is null)
         {
-            _logger.LogInformation("Getting project members failed - project not found");            
+            _logger.LogInformation("Getting project members failed - project not found");
             return Result<IEnumerable<ProjectMemberWithUser>>.Failure(GetProjectMembersErrors.ProjectNotFound);
         }
 
-        var canGetProjectMembers = await _projectMemberRepository.IsUserProjectParticipantAsync(currentUserId, projectId);
+        var canGetProjectMembers =
+            await _projectMemberRepository.IsUserProjectParticipantAsync(currentUserId, projectId);
 
         if (!canGetProjectMembers)
         {
-            _logger.LogInformation("Getting project members failed - access denied");   
+            _logger.LogInformation("Getting project members failed - access denied");
             return Result<IEnumerable<ProjectMemberWithUser>>.Failure(GetProjectMembersErrors.AccessDenied);
         }
 
@@ -71,7 +71,7 @@ public class ProjectMemberService : IProjectMemberService
     public async Task<Result> UpdateProjectMemberAsync(long projectId, string memberId, ProjectRole projectRole)
     {
         _logger.LogInformation("Updating Project: {ProjectId} Member: {MemberId}", projectId, memberId);
-        
+
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null)
@@ -130,7 +130,7 @@ public class ProjectMemberService : IProjectMemberService
     public async Task<Result> DeleteAsync(long projectId, string memberId)
     {
         _logger.LogInformation("Deleting Project: {ProjectId} Member: {MemberId}", projectId, memberId);
-        
+
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null)
@@ -151,7 +151,7 @@ public class ProjectMemberService : IProjectMemberService
 
         if (!isCurrentUserProjectLead)
         {
-            _logger.LogInformation("Deleting project member failed - access denied");   
+            _logger.LogInformation("Deleting project member failed - access denied");
             return Result.Failure(DeleteProjectMemberErrors.AccessDenied);
         }
 

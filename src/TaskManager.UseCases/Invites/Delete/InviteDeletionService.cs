@@ -1,7 +1,6 @@
 using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectInviteAggregate;
 using TaskManager.Infrastructure;
-using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.UseCases.Shared;
 
@@ -10,11 +9,11 @@ namespace TaskManager.UseCases.Invites.Delete;
 public class InviteDeletionService : IInviteDeletionService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger _logger;
+    private readonly ILogger<InviteDeletionService> _logger;
     private readonly IProjectInviteRepository _projectInviteRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public InviteDeletionService(ILogger logger, ICurrentUserService currentUserService,
+    public InviteDeletionService(ILogger<InviteDeletionService> logger, ICurrentUserService currentUserService,
         IProjectInviteRepository projectInviteRepository, IUnitOfWork unitOfWork)
     {
         _logger = logger;

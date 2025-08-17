@@ -7,10 +7,10 @@ namespace TaskManager.UseCases.Identity.Register;
 
 public class RegisterService : IRegisterService
 {
-    private readonly ILogger _logger;
+    private readonly ILogger<RegisterService> _logger;
     private readonly UserManager<TaskManagerUser> _userManager;
 
-    public RegisterService(UserManager<TaskManagerUser> userManager, ILogger logger)
+    public RegisterService(UserManager<TaskManagerUser> userManager, ILogger<RegisterService> logger)
     {
         _userManager = userManager;
         _logger = logger;
@@ -19,7 +19,7 @@ public class RegisterService : IRegisterService
     public async Task<Result<TaskManagerUser>> RegisterAsync(RegisterDto dto)
     {
         _logger.LogInformation("Registering User: {Email}", dto.Email);
-        
+
         var newUser = new TaskManagerUser
         {
             UserName = dto.UserName,

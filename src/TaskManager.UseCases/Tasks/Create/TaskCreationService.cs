@@ -12,12 +12,12 @@ public class TaskCreationService : ITaskCreationService
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger _logger;
+    private readonly ILogger<TaskCreationService> _logger;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly ITaskRepository _taskRepository;
 
-    public TaskCreationService(ILogger logger, ICurrentUserService currentUserService,
+    public TaskCreationService(ILogger<TaskCreationService> logger, ICurrentUserService currentUserService,
         IProjectMemberRepository projectMemberRepository, IProjectRepository projectRepository,
         ITaskRepository taskRepository, IUnitOfWork unitOfWork)
     {

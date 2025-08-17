@@ -2,7 +2,6 @@ using Microsoft.Extensions.Logging;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.TaskAggregate;
 using TaskManager.Infrastructure;
-using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.UseCases.Shared;
 
@@ -11,13 +10,14 @@ namespace TaskManager.UseCases.Tasks.Update;
 public class TaskUpdateService : ITaskUpdateService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger _logger;
+    private readonly ILogger<TaskUpdateService> _logger;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly ITaskRepository _taskRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
-    public TaskUpdateService(ICurrentUserService currentUserService, IUnitOfWork unitOfWork, ILogger logger,
+    public TaskUpdateService(ICurrentUserService currentUserService, IUnitOfWork unitOfWork,
+        ILogger<TaskUpdateService> logger,
         IProjectMemberRepository projectMemberRepository, IProjectRepository projectRepository,
         ITaskRepository taskRepository)
     {

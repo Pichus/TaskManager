@@ -9,12 +9,12 @@ namespace TaskManager.UseCases.Invites.Retrieve;
 public class InviteRetrievalService : IInviteRetrievalService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly ILogger _logger;
+    private readonly ILogger<InviteRetrievalService> _logger;
     private readonly IProjectInviteRepository _projectInviteRepository;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
 
-    public InviteRetrievalService(ILogger logger, ICurrentUserService currentUserService,
+    public InviteRetrievalService(ILogger<InviteRetrievalService> logger, ICurrentUserService currentUserService,
         IProjectInviteRepository projectInviteRepository, IProjectMemberRepository projectMemberRepository,
         IProjectRepository projectRepository)
     {

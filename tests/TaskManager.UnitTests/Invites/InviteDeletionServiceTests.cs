@@ -13,14 +13,14 @@ public class InviteDeletionServiceTests
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
 
     private readonly InviteDeletionService _inviteDeletionService;
-    private readonly Mock<ILogger> _loggerMock;
+    private readonly Mock<ILogger<InviteDeletionService>> _loggerMock;
     private readonly Mock<IProjectInviteRepository> _projectInviteRepositoryMock;
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
 
     public InviteDeletionServiceTests()
     {
         _projectInviteRepositoryMock = new Mock<IProjectInviteRepository>();
-        _loggerMock = new Mock<ILogger>();
+        _loggerMock = new Mock<ILogger<InviteDeletionService>>();
         _currentUserServiceMock = new Mock<ICurrentUserService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _unitOfWorkMock.Setup(work => work.SaveChangesAsync(CancellationToken.None))

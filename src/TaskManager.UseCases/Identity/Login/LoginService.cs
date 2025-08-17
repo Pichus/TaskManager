@@ -14,7 +14,7 @@ public class LoginService : ILoginService
 {
     private readonly IAccessTokenProvider _accessTokenProvider;
     private readonly IConfiguration _configuration;
-    private readonly ILogger _logger;
+    private readonly ILogger<LoginService> _logger;
     private readonly IRefreshTokenGenerator _refreshTokenGenerator;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IUnitOfWork _unitOfWork;
@@ -22,7 +22,7 @@ public class LoginService : ILoginService
 
     public LoginService(UserManager<TaskManagerUser> userManager, IRefreshTokenRepository refreshTokenRepository,
         IAccessTokenProvider accessTokenProvider, IRefreshTokenGenerator refreshTokenGenerator,
-        IConfiguration configuration, IUnitOfWork unitOfWork, ILogger logger)
+        IConfiguration configuration, IUnitOfWork unitOfWork, ILogger<LoginService> logger)
     {
         _userManager = userManager;
         _refreshTokenRepository = refreshTokenRepository;

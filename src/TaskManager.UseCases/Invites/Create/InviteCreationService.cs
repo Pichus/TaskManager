@@ -12,14 +12,14 @@ namespace TaskManager.UseCases.Invites.Create;
 public class InviteCreationService : IInviteCreationService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly ILogger _logger;
+    private readonly ILogger<InviteCreationService> _logger;
     private readonly IProjectInviteRepository _projectInviteRepository;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly UserManager<TaskManagerUser> _userManager;
 
-    public InviteCreationService(ILogger logger, ICurrentUserService currentUserService,
+    public InviteCreationService(ILogger<InviteCreationService> logger, ICurrentUserService currentUserService,
         IProjectRepository projectRepository, UserManager<TaskManagerUser> userManager,
         IProjectInviteRepository projectInviteRepository, IUnitOfWork unitOfWork,
         IProjectMemberRepository projectMemberRepository)

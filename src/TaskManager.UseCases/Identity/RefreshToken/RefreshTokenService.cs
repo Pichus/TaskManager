@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using TaskManager.Infrastructure;
-using TaskManager.Infrastructure.Data;
 using TaskManager.Infrastructure.Identity.AccessToken;
 using TaskManager.Infrastructure.Identity.RefreshToken;
 using TaskManager.Infrastructure.Identity.User;
@@ -15,15 +14,16 @@ public class RefreshTokenService : IRefreshTokenService
 {
     private readonly IAccessTokenProvider _accessTokenProvider;
     private readonly IConfiguration _configuration;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly ILogger _logger;
+    private readonly ILogger<RefreshTokenService> _logger;
     private readonly IRefreshTokenGenerator _refreshTokenGenerator;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly UserManager<TaskManagerUser> _userManager;
 
     public RefreshTokenService(IRefreshTokenRepository refreshTokenRepository,
         IRefreshTokenGenerator refreshTokenGenerator, IAccessTokenProvider accessTokenProvider,
-        UserManager<TaskManagerUser> userManager, IUnitOfWork unitOfWork, IConfiguration configuration, ILogger logger)
+        UserManager<TaskManagerUser> userManager, IUnitOfWork unitOfWork, IConfiguration configuration,
+        ILogger<RefreshTokenService> logger)
     {
         _refreshTokenRepository = refreshTokenRepository;
         _refreshTokenGenerator = refreshTokenGenerator;
@@ -37,12 +37,12 @@ public class RefreshTokenService : IRefreshTokenService
     public async Task<Result<AccessAndRefreshTokenPair>> RefreshTokenAsync(string refreshTokenString)
     {
         _logger.LogInformation("Refreshing Token");
-        
+
         var oldRefreshToken = await _refreshTokenRepository.GetRefreshTokenByTokenStringAsync(refreshTokenString);
 
         if (oldRefreshToken is null)
         {
-            _logger.LogWarning("Refreshing token failed - refresh token not found");   
+            _logger.LogWarning("Refreshing token failed - refresh token not found");
             return Result<AccessAndRefreshTokenPair>.Failure(RefreshTokenErrors.RefreshTokenNotFound);
         }
 

@@ -14,7 +14,7 @@ namespace TaskManager.UnitTests.Projects;
 public class ProjectServiceTests
 {
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
-    private readonly Mock<ILogger> _loggerMock;
+    private readonly Mock<ILogger<ProjectService>> _loggerMock;
     private readonly Mock<IProjectMemberRepository> _projectMemberRepositoryMock;
     private readonly Mock<IProjectRepository> _projectRepositoryMock;
     private readonly ProjectService _projectService;
@@ -23,7 +23,7 @@ public class ProjectServiceTests
     public ProjectServiceTests()
     {
         _projectRepositoryMock = new Mock<IProjectRepository>();
-        _loggerMock = new Mock<ILogger>();
+        _loggerMock = new Mock<ILogger<ProjectService>>();
         _currentUserServiceMock = new Mock<ICurrentUserService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _projectMemberRepositoryMock = new Mock<IProjectMemberRepository>();

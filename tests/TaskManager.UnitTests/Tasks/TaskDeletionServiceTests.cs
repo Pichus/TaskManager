@@ -12,7 +12,7 @@ namespace TaskManager.UnitTests.Tasks;
 public class TaskDeletionServiceTests
 {
     private readonly Mock<ICurrentUserService> _currentUserServiceMock;
-    private readonly Mock<ILogger> _loggerMock;
+    private readonly Mock<ILogger<TaskDeletionService>> _loggerMock;
     private readonly Mock<IProjectMemberRepository> _projectMemberRepositoryMock;
     private readonly Mock<IProjectRepository> _projectRepositoryMock;
     private readonly TaskDeletionService _taskDeletionService;
@@ -23,7 +23,7 @@ public class TaskDeletionServiceTests
     {
         _projectMemberRepositoryMock = new Mock<IProjectMemberRepository>();
         _projectRepositoryMock = new Mock<IProjectRepository>();
-        _loggerMock = new Mock<ILogger>();
+        _loggerMock = new Mock<ILogger<TaskDeletionService>>();
         _currentUserServiceMock = new Mock<ICurrentUserService>();
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _taskRepositoryMock = new Mock<ITaskRepository>();

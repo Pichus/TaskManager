@@ -9,12 +9,12 @@ namespace TaskManager.UseCases.Tasks.Retrieve;
 public class TaskRetrievalService : ITaskRetrievalService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly ILogger _logger;
+    private readonly ILogger<TaskRetrievalService> _logger;
     private readonly IProjectMemberRepository _projectMemberRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly ITaskRepository _taskRepository;
 
-    public TaskRetrievalService(ILogger logger, ICurrentUserService currentUserService,
+    public TaskRetrievalService(ILogger<TaskRetrievalService> logger, ICurrentUserService currentUserService,
         IProjectRepository projectRepository, IProjectMemberRepository projectMemberRepository,
         ITaskRepository taskRepository)
     {

@@ -9,11 +9,11 @@ namespace TaskManager.UseCases.ProfileDetails;
 public class ProfileDetailsService : IProfileDetailsService
 {
     private readonly ICurrentUserService _currentUserService;
-    private readonly ILogger _logger;
+    private readonly ILogger<ProfileDetailsService> _logger;
     private readonly UserManager<TaskManagerUser> _userManager;
 
     public ProfileDetailsService(UserManager<TaskManagerUser> userManager, ICurrentUserService currentUserService,
-        ILogger logger)
+        ILogger<ProfileDetailsService> logger)
     {
         _userManager = userManager;
         _currentUserService = currentUserService;
@@ -23,7 +23,7 @@ public class ProfileDetailsService : IProfileDetailsService
     public async Task<Result<TaskManagerUser>> GetCurrentUserProfileDetailsAsync()
     {
         _logger.LogInformation("Getting current user profile details");
-        
+
         var currentUserId = _currentUserService.UserId;
 
         if (currentUserId is null)
