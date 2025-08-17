@@ -8,6 +8,6 @@ public class CreateTaskResponse
     public string AssigneeUserId { get; set; }
     public string Title { get; set; }
     public string Description { get; set; }
-    public TaskStatus Status { get; set; }
+    public string Status { get; set; }
     public DateTime DueDate { get; set; }
 }
