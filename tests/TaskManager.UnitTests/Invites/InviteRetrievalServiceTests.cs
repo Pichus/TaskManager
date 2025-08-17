@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using TaskManager.Core.ProjectAggregate;
 using TaskManager.Core.ProjectInviteAggregate;
+using TaskManager.Core.Shared;
 using TaskManager.Infrastructure;
 using TaskManager.Infrastructure.Identity.CurrentUser;
 using TaskManager.UseCases.Invites.Retrieve;
@@ -99,7 +100,7 @@ public class InviteRetrievalServiceTests
             .Setup(service => service.UserId)
             .Returns(currentUserId);
         _projectRepositoryMock
-            .Setup(repository => repository.FindByIdWithInvitesIncludedAsync(projectId))
+            .Setup(repository => repository.FindByIdAsync(projectId))
             .ReturnsAsync(new ProjectEntity
             {
                 Id = projectId,
@@ -134,7 +135,7 @@ public class InviteRetrievalServiceTests
             .Setup(service => service.UserId)
             .Returns(currentUserId);
         _projectRepositoryMock
-            .Setup(repository => repository.FindByIdWithInvitesIncludedAsync(projectId))
+            .Setup(repository => repository.FindByIdAsync(projectId))
             .ReturnsAsync(new ProjectEntity
             {
                 Id = projectId,
@@ -168,7 +169,7 @@ public class InviteRetrievalServiceTests
             .Setup(service => service.UserId)
             .Returns(currentUserId);
         _projectRepositoryMock
-            .Setup(repository => repository.FindByIdWithInvitesIncludedAsync(projectId))
+            .Setup(repository => repository.FindByIdAsync(projectId))
             .ReturnsAsync(new ProjectEntity
             {
                 Id = projectId,
@@ -180,6 +181,10 @@ public class InviteRetrievalServiceTests
         _projectMemberRepositoryMock
             .Setup(repository => repository.IsUserProjectManagerAsync(currentUserId, projectId))
             .ReturnsAsync(false);
+        _projectInviteRepositoryMock
+            .Setup(repository => repository.GetPendingInvitesByProjectIdAsync(projectId,
+                retrievePendingProjectInvitesDto.PageNumber, retrievePendingProjectInvitesDto.PageSize))
+            .ReturnsAsync(new PagedData<ProjectInvite>(new List<ProjectInvite>(), 1, 1, 1));
 
         var result = await _inviteRetrievalService.RetrievePendingProjectInvitesAsync(retrievePendingProjectInvitesDto);
 
