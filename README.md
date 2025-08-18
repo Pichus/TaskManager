@@ -1,7 +1,7 @@
 
 # Task Manager
 
-Small Jira clone pet project
+A simplified task management system inspired by Jira
 
 
 ## Run Locally
@@ -41,9 +41,24 @@ To run unit tests, run the following command
   dotnet test tests/TaskManager.UnitTests
 ```
 
-To run integration tests, run the following command. Ensure you have docker installed and running
+To run integration tests, run the following command. Ensure you have docker installed and running.
+(In progress)
 
 ```bash
   dotnet test tests/TaskManager.IntegrationTests
 ```
+
+## Roadmap
+
+- Add integration tests
+
+- Improve code quality and maintainability
+
+- Refine Domain-Driven Design practices:
+    - Strengthen layer isolation (remove unnecessary references from use cases to infrastructure)
+    - Implement domain events
+
+- Introduce MediatR and adopt the CQRS pattern
+
+- Introduce AutoMapper to reduce mapping boilerplate
 

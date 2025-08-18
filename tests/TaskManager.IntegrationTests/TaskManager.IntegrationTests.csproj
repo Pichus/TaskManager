@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.2"/>
+        <PackageReference Include="FluentAssertions" Version="8.6.0" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="9.0.8"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0"/>
         <PackageReference Include="Respawn" Version="6.2.1"/>
@@ -24,6 +25,10 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\TaskManager.Api\TaskManager.Api.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Projects\" />
     </ItemGroup>
 
 </Project>
